@@ -1,0 +1,8 @@
+#regtable td {
+    padding-left: 10px;
+}
+
+#errorbox {
+    background-color: orange;
+    width: 400px;
+}

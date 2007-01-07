@@ -1,0 +1,18 @@
+<decorators defaultdir="/decorators">
+             <decorator name="maindecorator" page="main_decorator.jsp">
+                <pattern>/download</pattern>
+                <pattern>/upload</pattern>
+                <pattern>/index.jsp</pattern>
+                <pattern>/register</pattern>
+             </decorator>
+             <!--
+            <decorator name="genericdecorator" page="generic_decorator.jsp">
+                <pattern>/**</pattern>
+            </decorator>
+                 -->
+        
+	<decorator name="errordecorator" page="ErrorDecorator.jsp" />
+
+
+
+</decorators>

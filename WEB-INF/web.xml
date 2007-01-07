@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+
+    <filter>
+        <filter-name>sitemesh</filter-name>
+        <filter-class>com.opensymphony.module.sitemesh.filter.PageFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>login</filter-name>
+        <filter-class>filters.LoginFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+            <filter-name>sitemesh</filter-name>
+            <url-pattern>/index.jsp</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/download**</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/upload**</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/register**</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/upload**</url-pattern>
+    </filter-mapping>
+
+    
+    <servlet>
+        <servlet-name>Generic</servlet-name>
+        <servlet-class>generic.MainServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/upload**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/download**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/register**</url-pattern>
+    </servlet-mapping>
+</web-app>
