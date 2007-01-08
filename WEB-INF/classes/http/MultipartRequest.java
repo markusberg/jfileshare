@@ -77,7 +77,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     }
 
 
-    public File getFile(String fieldname){
+    public UploadedFile getFile(String fieldname){
 	if ( ! getFileMap().isEmpty()){
 		Map filemap = getFileMap();
 		UploadedFile[] file = (UploadedFile[]) filemap.get(fieldname);
@@ -85,7 +85,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 		if ( file.length != 0 ){
 		    UploadedFile file1 = file[0];
 		    if ( file1.getFile().length() > 0 ){
-			return file1.getFile();
+			return file1;
 		    }  else return null;
 		}
 	    }

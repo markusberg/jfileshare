@@ -1,6 +1,6 @@
 <decorators defaultdir="/decorators">
              <decorator name="maindecorator" page="main_decorator.jsp">
-                <pattern>/download</pattern>
+                <pattern>/download**</pattern>
                 <pattern>/upload</pattern>
                 <pattern>/index.jsp</pattern>
                 <pattern>/register</pattern>

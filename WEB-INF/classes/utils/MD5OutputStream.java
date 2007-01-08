@@ -79,6 +79,7 @@ public class MD5OutputStream extends FilterOutputStream {
      * Returns array of bytes representing hash of the stream as finalized
      * for the current state.
      * @see MD5#Final
+     * @return byte;
      */
 
     public byte[] hash () {
@@ -89,27 +90,28 @@ public class MD5OutputStream extends FilterOutputStream {
     return md5;
   }
 
-  /**
-   * This method is here for testing purposes only - do not rely
-   * on it being here.
-   **/
-  public static void main(String[] arg) {
-    try {
-      MD5OutputStream out = new MD5OutputStream(new utils.io.NullOutputStream());
-      InputStream in = new BufferedInputStream(new FileInputStream(arg[0]));
-      byte[] buf = new byte[65536];
-      int num_read;
-      long total_read = 0;
-      while ((num_read = in.read(buf)) != -1) {
-	total_read += num_read;
-	out.write(buf, 0, num_read);
+
+  public static String getMD5(String arg) {
+      String retval = "not initialized";
+
+      try {
+          MD5OutputStream out = new MD5OutputStream(new utils.io.NullOutputStream());
+          InputStream in = new BufferedInputStream(new FileInputStream(arg));
+          byte[] buf = new byte[65536];
+          int num_read;
+          long total_read = 0;
+          while ((num_read = in.read(buf)) != -1) {
+            total_read += num_read;
+            out.write(buf, 0, num_read);
+          }
+          retval =  MD5.asHex(out.hash());
+          in.close();
+          out.close();
+      } catch (IOException e) {
+          CustomLogger.logme("utils.MD5OutputStream", e.toString(), true);
       }
-      System.out.println(MD5.asHex(out.hash())+"  "+arg[0]);
-      in.close();
-      out.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+
+      return retval;
   }
 
 

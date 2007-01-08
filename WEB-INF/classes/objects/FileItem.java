@@ -4,10 +4,11 @@ import utils.CustomLogger;
 
 import java.io.File;
 import java.util.Date;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.sql.SQLException;
+import java.sql.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import config.Config;
 
 /**
  * SECTRA.
@@ -20,15 +21,17 @@ public class FileItem {
     private File file;
     private String name;
     private String type;
-    private Float size;
+    private Float size = 0.0f;
     private String md5sum;
 
 
-    private boolean permanent;
-    private int downloads;
+    private boolean permanent = true;
+    private int downloads = -1;
     private String password;
     private Date ddate;
     private Date expiration;
+
+    private UserItem owner;
 
 
     public int getFid() {
@@ -119,24 +122,50 @@ public class FileItem {
         this.expiration = expiration;
     }
 
+
+    public UserItem getOwner() {
+        return owner;
+    }
+
+    public void setOwner(UserItem owner) {
+        this.owner = owner;
+    }
+
+
+    
+
     public boolean save(Connection conn){
         PreparedStatement st = null;
         if ( this.fid == -1 ){
             try {
-                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?)");
+                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1,this.name);
                 st.setString(2,this.type);
                 st.setFloat(3,this.size);
                 st.setString(4,this.md5sum);
                 st.setBoolean(5,this.permanent);
-                st.setInt(6,this.downloads);
-                st.setTimestamp(7,new Timestamp(this.ddate.getTime()));
-                if ( this.expiration == null ){
-                    st.setNull(8,java.sql.Types.TIMESTAMP);
+                if ( this.downloads == -1 ){
+                    st.setNull(6,java.sql.Types.INTEGER);
                 } else {
-                    st.setTimestamp(8,new Timestamp(this.expiration.getTime()));
+                    st.setInt(6,this.downloads);
                 }
+                if ( this.password != null){
+                    st.setString(7,this.password);
+                } else {
+                    st.setNull(7,java.sql.Types.VARCHAR);
+                }
+                st.setTimestamp(8,new Timestamp(this.ddate.getTime()));
+                if ( this.expiration == null ){
+                    st.setNull(9,java.sql.Types.TIMESTAMP);
+                } else {
+                    st.setTimestamp(9,new Timestamp(this.expiration.getTime()));
+                }
+                st.setInt(10,this.owner.getUid());
                 st.executeUpdate();
+                ResultSet rs = st.getGeneratedKeys();
+                while (rs.next()){
+                    this.fid = rs.getInt(1);
+                }
                 st.close();
                 return true;
             } catch (SQLException e) {
@@ -162,5 +191,40 @@ public class FileItem {
                 return false;
             }
         }
+    }
+
+    public boolean search(Connection conn, String md5hash){
+        try {
+            PreparedStatement st = conn.prepareStatement("select * from FileItems,UserItems where FileItems.owner=UserItems.uid and md5sum=?");
+            st.setString(1,md5hash);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                this.fid = rs.getInt("fid");
+                this.name = rs.getString("name");
+                this.type = rs.getString("type");
+                this.size = rs.getFloat("size");
+                this.md5sum = rs.getString("md5sum");
+                this.permanent = rs.getBoolean("permanent");
+                if ( rs.wasNull() ) this.permanent = false;
+                this.downloads = rs.getInt("downloads");
+                if ( rs.wasNull() ) this.downloads = -1;
+                if ( rs.getString("FileItems.password") != null ) this.password = rs.getString("FileItems.password");
+                this.ddate = rs.getTimestamp("ddate");
+                if ( rs.getTimestamp("expiration") != null ) this.expiration = rs.getTimestamp("expiration");
+                UserItem owner = new UserItem();
+                owner.setUid(rs.getInt("uid"));
+                owner.setUsername(rs.getString("username"));
+                owner.setPassword(rs.getString("UserItems.password"));
+                owner.setEmail(rs.getString("email"));
+                this.owner = owner;
+                File file = new File(Config.getFilestore() + "/" + this.fid );
+                this.file = file;
+                return true;
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return false;
     }
 }

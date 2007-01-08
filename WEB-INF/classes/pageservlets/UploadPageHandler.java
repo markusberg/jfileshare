@@ -8,14 +8,20 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import utils.CustomLogger;
+import utils.MD5OutputStream;
 
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.regex.Pattern;
+import java.util.Date;
 import java.io.File;
 
 import http.MultipartRequest;
+import http.UploadedFile;
 import http.Exceptions.MultipartRequestException;
+import objects.FileItem;
+import objects.UserItem;
+import config.Config;
 
 /**
  * Created by Zoran Pucar zoran@medorian.com.
@@ -65,10 +71,26 @@ public class UploadPageHandler implements ServletPageRequestHandler {
 
             if ( req.isMultipart()){
                 if (req.getFile("file") != null ){
-                    File file = req.getFile("file");
+                    UploadedFile file = req.getFile("file");
+                    FileItem savedfile = new FileItem();
+                    CustomLogger.logme(this.getClass().getName(),"Name: " + file.getName());
+                    CustomLogger.logme(this.getClass().getName(),"Type: " + file.getType());
+                    CustomLogger.logme(this.getClass().getName(),"MD5: " + MD5OutputStream.getMD5(file.getFile().getPath()) );
+                    savedfile.setDdate(new Date());
+                    savedfile.setName(file.getName());
+                    savedfile.setType(file.getType());
+                    savedfile.setSize(new Float(file.getFile().length()/1024));
+                    savedfile.setMd5sum(MD5OutputStream.getMD5(file.getFile().getPath()));
+                    UserItem owner = new UserItem();
+                    owner.setUid(1);
+                    savedfile.setOwner(owner);
+                    savedfile.save(conn);
+                    File destfile = new File(Config.getFilestore() + "/" +  savedfile.getFid());
+                    file.getFile().renameTo(destfile);
+                    CustomLogger.logme(this.getClass().getName(),"File " + destfile.getAbsolutePath() + " saved");
                     CustomLogger.logme(this.getClass().getName(), file.getName());
-                    CustomLogger.logme(this.getClass().getName(), file.getPath());
-                    CustomLogger.logme(this.getClass().getName(), file.getAbsolutePath());
+                    CustomLogger.logme(this.getClass().getName(), file.getFile().getPath());
+                    CustomLogger.logme(this.getClass().getName(), file.getFile().getAbsolutePath());
                 }
             }
 

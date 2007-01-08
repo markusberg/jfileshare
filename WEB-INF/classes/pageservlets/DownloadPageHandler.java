@@ -9,8 +9,13 @@ import javax.servlet.ServletException;
 import java.util.regex.Pattern;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.FileReader;
+import java.nio.CharBuffer;
 
 import utils.CustomLogger;
+import objects.FileItem;
 
 /**
  * Created by Zoran Pucar zoran@medorian.com.
@@ -48,6 +53,37 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
                 String[] pathparts = request.getServletPath().split("/");
                 String lastpart = pathparts[pathparts.length - 1 ];
                 CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
+                //Lastpart is md5sum
+
+                FileItem file = new FileItem();
+                if ( file.search(conn,lastpart)){
+                     request.setAttribute("file",file);
+                } else {
+                    request.setAttribute("error", "File is not found");
+                }
+
+                if ( pathparts[pathparts.length - 2].equals("get") ){
+                    //Serve the file;
+
+                    response.setContentType(file.getType());
+                    response.setContentLength(file.getSize().intValue()*1024*1024);
+                    PrintWriter writer = null;
+                    try {
+                        writer = response.getWriter();
+                        CustomLogger.logme(this.getClass().getName(),"Trying to read " + file.getFile());
+                        FileReader freader = new FileReader(file.getFile());
+
+                        writer.write(freader.read());
+                    } catch (IOException e) {
+                        CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+                    }
+
+
+                    writer.flush();
+                    writer.close();
+
+                }
+
 
 
                 return "/templates/DownloaderPage.jsp";
