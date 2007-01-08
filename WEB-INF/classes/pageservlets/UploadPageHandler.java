@@ -79,7 +79,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     savedfile.setDdate(new Date());
                     savedfile.setName(file.getName());
                     savedfile.setType(file.getType());
-                    savedfile.setSize(new Double(file.getFile().length()/1024));
+                    savedfile.setSize(new Double(file.getFile().length()));
                     savedfile.setMd5sum(MD5OutputStream.getMD5(file.getFile().getPath()));
                     UserItem owner = new UserItem();
                     owner.setUid(1);

@@ -66,10 +66,11 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
                     //Serve the file;
 
                     response.setContentType(file.getType());
-                    response.setContentLength(file.getSize().intValue()*1024*1024);
+                    response.setContentLength(file.getSize().intValue());
                     PrintWriter writer = null;
                     try {
                         writer = response.getWriter();
+                        response.setBufferSize(file.getSize().intValue());
                         CustomLogger.logme(this.getClass().getName(),"Trying to read " + file.getFile());
                         FileReader freader = new FileReader(file.getFile());
 

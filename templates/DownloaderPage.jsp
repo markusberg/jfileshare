@@ -27,7 +27,7 @@
 
       </tr>
       <tr>
-          <td>Size: </td><td><%=file.getSize()%> k</td>
+          <td>Size: </td><td><%=file.getSize().intValue()%> k</td>
       </tr>
       <tr>
           <td>Type: </td><td><%=file.getType()%></td>
