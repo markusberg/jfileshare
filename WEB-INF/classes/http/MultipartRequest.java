@@ -340,7 +340,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 		fieldname = disposition_info[0];
 		filename = disposition_info[1];
 	    }
-	    else if (headerline.toLowerCase().startsWith(CONTENT_TYPE_HEADER))
+	    else if (headerline.toLowerCase().startsWith(CONTENT_TYPE_HEADER.toLowerCase()))
 	    {
 		// Get the content type, or null if none specified
 		String type = extractContentType(headerline);
@@ -378,7 +378,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 		// empty filename, probably an "empty" file param
 		filename = null;
 	    }
-
+        CustomLogger.logme(this.getClass().getName(),"Creating file with content type " + content_type);
 	    UploadedFile	new_file = new UploadedFile(filename, content_type);
 	    readAndSaveFile(new_file, fieldname);
 	    UploadedFile[]	files = mFiles.get(fieldname);
