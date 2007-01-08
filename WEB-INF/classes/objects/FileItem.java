@@ -21,7 +21,7 @@ public class FileItem {
     private File file;
     private String name;
     private String type;
-    private Float size = 0.0f;
+    private Double size = 0d;
     private String md5sum;
 
 
@@ -66,11 +66,11 @@ public class FileItem {
         this.type = type;
     }
 
-    public Float getSize() {
+    public Double getSize() {
         return size;
     }
 
-    public void setSize(Float size) {
+    public void setSize(Double size) {
         this.size = size;
     }
 
@@ -141,7 +141,7 @@ public class FileItem {
                 st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1,this.name);
                 st.setString(2,this.type);
-                st.setFloat(3,this.size);
+                st.setDouble(3,this.size);
                 st.setString(4,this.md5sum);
                 st.setBoolean(5,this.permanent);
                 if ( this.downloads == -1 ){
@@ -202,7 +202,7 @@ public class FileItem {
                 this.fid = rs.getInt("fid");
                 this.name = rs.getString("name");
                 this.type = rs.getString("type");
-                this.size = rs.getFloat("size");
+                this.size = rs.getDouble("size");
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
                 if ( rs.wasNull() ) this.permanent = false;
