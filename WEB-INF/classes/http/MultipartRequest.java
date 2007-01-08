@@ -18,7 +18,7 @@ import utils.CustomLogger;
 
 public class MultipartRequest extends HttpServletRequestWrapper implements HttpServletRequest
 {
-    private static final String	CONTENT_TYPE_HEADER = "Content-Type:";
+    private static final String	CONTENT_TYPE_HEADER = "Content-Type";
     private static final String	MULTIPART_CONTENT_TYPE = "multipart/form-data";
     private static final String	BOUNDARY_PREFIX = "boundary=";
     private static final int	BOUNDARY_PREFIX_LENGTH = BOUNDARY_PREFIX.length();
@@ -118,205 +118,157 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	mEncoding = encoding;
     }
 
-    private void checkUploadDirectory()
-    throws MultipartRequestException
-    {
-	mUploadDirectory = new File(Config.getUdir());
-	mUploadDirectory.mkdirs();
+    private void checkUploadDirectory() throws MultipartRequestException {
+        mUploadDirectory = new File(Config.getUdir());
+        mUploadDirectory.mkdirs();
 
-	if(!mUploadDirectory.exists() ||
-	   !mUploadDirectory.isDirectory() ||
-	   !mUploadDirectory.canWrite())
-	{
-	    throw new UploadDirectoryException(mUploadDirectory);
-	}
+        if(!mUploadDirectory.exists() || !mUploadDirectory.isDirectory() || !mUploadDirectory.canWrite()) {
+            throw new UploadDirectoryException(mUploadDirectory);
+        }
     }
 
 
     public boolean isMultipart(){
-	String type_header = mRequest.getHeader(CONTENT_TYPE_HEADER);
-	String type_method = mRequest.getContentType();
-	String type = null;
-	if (type_header == null &&
-	    type_method != null)
-	{
-	    type = type_method;
-	}
-	else if (type_method == null &&
-		 type_header != null)
-	{
-	    type = type_header;
-	}
-	// If neither value is null, choose the longer value
-	else if (type_header != null &&
-		 type_method != null)
-	{
-	    type = (type_header.length() > type_method.length() ? type_header : type_method);
-	}
-	return isValidContentType(type);
+        String type_header = mRequest.getHeader(CONTENT_TYPE_HEADER);
+        String type_method = mRequest.getContentType();
+        String type = null;
+        if (type_header == null && type_method != null) {
+            type = type_method;
+        } else if (type_method == null && type_header != null) {
+            type = type_header;
+        }
+        // If neither value is null, choose the longer value
+        else if (type_header != null && type_method != null) {
+            type = (type_header.length() > type_method.length() ? type_header : type_method);
+        }
+        return isValidContentType(type);
     }
 
 
-    private void initialize()
-    throws MultipartRequestException
-    {
-	// Check the content type to is correct to support a multipart request
-	// Access header two ways to work around WebSphere oddities
-	String type = null;
-	String type_header = mRequest.getHeader(CONTENT_TYPE_HEADER);
-	String type_method = mRequest.getContentType();
+    private void initialize() throws MultipartRequestException {
+        // Check the content type to is correct to support a multipart request
+        // Access header two ways to work around WebSphere oddities
+        String type = null;
+        String type_header = mRequest.getHeader(CONTENT_TYPE_HEADER);
+        String type_method = mRequest.getContentType();
 
-	// If one value is null, choose the other value
-	if (type_header == null &&
-	    type_method != null)
-	{
-	    type = type_method;
-	}
-	else if (type_method == null &&
-		 type_header != null)
-	{
-	    type = type_header;
-	}
+        // If one value is null, choose the other value
+        if (type_header == null && type_method != null) {
+            type = type_method;
+        } else if (type_method == null && type_header != null) {
+            type = type_header;
+        }
 	// If neither value is null, choose the longer value
-	else if (type_header != null &&
-		 type_method != null)
-	{
-	    type = (type_header.length() > type_method.length() ? type_header : type_method);
-	}
+	    else if (type_header != null && type_method != null) {
+	        type = (type_header.length() > type_method.length() ? type_header : type_method);
+	    }
 
-	// ensure that the content-type is correct
-	if (!isValidContentType(type))
-	{
-	    throw new InvalidContentTypeException(type);
-	}
+        // ensure that the content-type is correct
+        if (!isValidContentType(type)) {
+            throw new InvalidContentTypeException(type);
+        }
 
-	// extract the boundary seperator that is used by this request
-	mBoundary = extractBoundary(type);
-	if (null == mBoundary)
-	{
-	    throw new MissingBoundaryException("Missing boundary ");
-	}
+        // extract the boundary seperator that is used by this request
+        mBoundary = extractBoundary(type);
+        if (null == mBoundary) {
+            throw new MissingBoundaryException("Missing boundary ");
+        }
 
 	// obtain the input stream
-	try
-	{
-	    mInput = mRequest.getInputStream();
-	}
-	catch (IOException e)
-	{
-	    throw new MultipartInputErrorException(e.toString());
-	}
+        try {
+            mInput = mRequest.getInputStream();
+        } catch (IOException e){
+            throw new MultipartInputErrorException(e.toString());
+        }
+
     }
 
-    private void checkInputStart()
-    throws MultipartRequestException
-    {
-	// Read the first line, should be the first boundary
-	String line = readLine();
-	if (null == line)
-	{
-	    throw new MUnexpectedEndingException("Line is null ");
-	}
+    private void checkInputStart() throws MultipartRequestException {
+        // Read the first line, should be the first boundary
+        String line = readLine();
+        if (null == line)
+        {
+            throw new MUnexpectedEndingException("Line is null ");
+        }
 
-	// Verify that the line is the boundary
-	if (!line.startsWith(mBoundary))
-	{
-	    throw new MInvalidBoundaryException("Invalid boundary : no " + mBoundary + " on line " + line);
-	}
+        // Verify that the line is the boundary
+        if (!line.startsWith(mBoundary))
+        {
+            throw new MInvalidBoundaryException("Invalid boundary : no " + mBoundary + " on line " + line);
+        }
     }
 
-    private void readParts()
-    throws MultipartRequestException
-    {
-	boolean more_parts = true;
+    private void readParts() throws MultipartRequestException {
+	    boolean more_parts = true;
 
-	while (more_parts)
-	{
-	    more_parts = readNextPart();
-	}
+        while (more_parts) {
+            more_parts = readNextPart();
+        }
     }
 
-    private String extractBoundary(String line)
-    {
-	// Use lastIndexOf() because IE 4.01 on Win98 has been known to send the
-	// "boundary=" string multiple times.
-	int index = line.lastIndexOf(BOUNDARY_PREFIX);
+    private String extractBoundary(String line) {
+        // Use lastIndexOf() because IE 4.01 on Win98 has been known to send the
+        // "boundary=" string multiple times.
+        int index = line.lastIndexOf(BOUNDARY_PREFIX);
 
-	if (-1 == index)
-	{
-	    return null;
-	}
+        if (-1 == index) {
+            return null;
+        }
 
-	// start from after the boundary prefix
-	String boundary = line.substring(index+BOUNDARY_PREFIX_LENGTH);
-	if ('"' == boundary.charAt(0))
-	{
-	    // The boundary is enclosed in quotes, strip them
-	    index = boundary.lastIndexOf('"');
-	    boundary = boundary.substring(1, index);
-	}
+        // start from after the boundary prefix
+        String boundary = line.substring(index+BOUNDARY_PREFIX_LENGTH);
+        if ('"' == boundary.charAt(0)) {
+            // The boundary is enclosed in quotes, strip them
+            index = boundary.lastIndexOf('"');
+            boundary = boundary.substring(1, index);
+        }
 
-	// The real boundary is always preceeded by an extra "--"
-	boundary = "--"+boundary;
+        // The real boundary is always preceeded by an extra "--"
+        boundary = "--"+boundary;
 
-	return boundary;
+        return boundary;
     }
 
-    private String readLine()
-    throws MultipartRequestException
-    {
-	StringBuffer line_buffer = new StringBuffer();
+    private String readLine() throws MultipartRequestException {
+        StringBuffer line_buffer = new StringBuffer();
 
-	int result = 0;
-	do
-	{
-	    try
-	    {
-		result = mInput.readLine(mParameterBuffer, 0, mParameterBuffer.length);
-	    }
-	    catch (IOException e)
-	    {
-		throw new MultipartInputErrorException(e.toString());
-	    }
+        int result = 0;
+        do
+        {
+            try {
+             result = mInput.readLine(mParameterBuffer, 0, mParameterBuffer.length);
+            } catch (IOException e) {
+                throw new MultipartInputErrorException(e.toString());
+            }
 
-	    if (result != -1)
-	    {
-		try
-		{
-		    line_buffer.append(new String(mParameterBuffer, 0, result, mEncoding));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-		    throw new MultipartInputErrorException(e.toString());
-		}
-	    }
-	}
-	// if the buffer wasn't completely filled, the end of the input has been reached
-	while (result == mParameterBuffer.length);
+            if (result != -1) {
+                try {
+                    line_buffer.append(new String(mParameterBuffer, 0, result, mEncoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new MultipartInputErrorException(e.toString());
+                }
+            }
+        }
+        // if the buffer wasn't completely filled, the end of the input has been reached
+        while (result == mParameterBuffer.length);
 
-	// if nothing was read, the end of the stream must have been reached
-	if (line_buffer.length() == 0)
-	{
-	    return null;
-	}
+        // if nothing was read, the end of the stream must have been reached
+        if (line_buffer.length() == 0) {
+            return null;
+        }
 
-	// Cut off the trailing \n or \r\n
-	// It should always be \r\n but IE5 sometimes does just \n
-	int line_length = line_buffer.length();
-	if (line_length >= 2 &&
-	    '\r' == line_buffer.charAt(line_length-2))
-	{
-	    // remove the trailing \r\n
-	    line_buffer.setLength(line_length-2);
-	}
-	else if (line_length >= 1 &&
-	    '\n' == line_buffer.charAt(line_length-1))
-	{
-	    // remove the trailing \n
-	    line_buffer.setLength(line_length-1);
-	}
+        // Cut off the trailing \n or \r\n
+        // It should always be \r\n but IE5 sometimes does just \n
+        int line_length = line_buffer.length();
+        if (line_length >= 2 && '\r' == line_buffer.charAt(line_length-2)) {
+            // remove the trailing \r\n
+            line_buffer.setLength(line_length-2);
+        } else if (line_length >= 1 && '\n' == line_buffer.charAt(line_length-1)) {
+            // remove the trailing \n
+            line_buffer.setLength(line_length-1);
+        }
 
-	return line_buffer.toString();
+	    return line_buffer.toString();
     }
 
     private boolean readNextPart()
