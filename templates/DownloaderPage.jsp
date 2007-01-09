@@ -23,26 +23,29 @@
   %>
   <table cellpadding="0" cellspacing="0" id="filet">
       <tr>
-          <td>Filename: </td><td><%=file.getName()%></td>
+          <td class="label">Filename: </td><td><%=file.getName()%></td>
 
       </tr>
       <tr>
-          <td>Size: </td><td><%=file.getSize().intValue()%> k</td>
+          <td class="label">Size: </td><td><%=file.getSize().intValue()%> k</td>
       </tr>
       <tr>
-          <td>Type: </td><td><%=file.getType()%></td>
+          <td class="label">Type: </td><td><%=file.getType()%></td>
       </tr>
       <tr>
-          <td>Uploader: </td><td><%=file.getOwner().getUsername()%></td>
+          <td class="label">MD5: </td><td><%=file.getMd5sum()%></td>
       </tr>
       <tr>
-          <td>Uploader email:</td><td><%=file.getOwner().getEmail()%></td>
+          <td class="label">Uploader: </td><td><%=file.getOwner().getUsername()%></td>
       </tr>
       <tr>
-          <td>Date: </td><td><%=file.getDdate()%></td>
+          <td class="label">Uploader email:</td><td><%=file.getOwner().getEmail()%></td>
       </tr>
       <tr>
-          <td colspan="2"><a href="/download/get/<%=file.getMd5sum()%>/">Download file</a></td>
+          <td class="label">Date: </td><td><%=file.getDdate()%></td>
+      </tr>
+      <tr>
+          <td id="download" colspan="2"><a href="/download/get/<%=file.getMd5sum()%>/">Download file</a></td>
       </tr>
 
   </table>

@@ -17,7 +17,63 @@ body {
     margin: 0 auto;
     text-align: left;
     border: 1px solid black;
-    padding: 20px;
+    padding: 10px;
 
 
+}
+
+#header {
+    height: 60px;
+    width: 100%;
+    text-align: right;
+    background-image: url(/images/banner_bg.gif);
+    border: 1px solid #cccccc;
+}
+
+#header img {
+    margin-top: 10px;
+    margin-right: 5px;
+}
+
+#content {
+    background: #eeeeee;
+    border: 1px solid #cccccc;
+    width: 580px;
+    margin-top: 10px;
+    height: 600px;
+    padding: 10px;
+}
+
+
+#filet td {
+    border: 1px solid #cccccc;
+        padding-right: 10px;
+    padding-left: 5px;
+
+}
+
+#filet td.label {
+    border-right: 0px;
+    font-weight: bold;
+
+}
+
+#download {
+    border-top: 0px;
+
+}
+
+#download a {
+    display: block;
+    width: 200px;
+    background: #ccccbb;
+    color: #777777;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#download a:hover {
+    color: blue;
 }

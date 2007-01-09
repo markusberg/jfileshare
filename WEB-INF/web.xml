@@ -31,16 +31,25 @@
         <url-pattern>/register**</url-pattern>
     </filter-mapping>
 
-    <!--<filter-mapping>
+    <filter-mapping>
         <filter-name>login</filter-name>
         <url-pattern>/upload**</url-pattern>
-    </filter-mapping>-->
+    </filter-mapping>
 
     
+    <!-- Servlet definitions -->
     <servlet>
         <servlet-name>Generic</servlet-name>
         <servlet-class>generic.MainServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>Streamer</servlet-name>
+        <servlet-class>generic.Streamer</servlet-class>
+    </servlet>
+
+
+    <!-- Servlet mappings -->
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/upload**</url-pattern>
@@ -52,5 +61,10 @@
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/register**</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Streamer</servlet-name>
+        <url-pattern>/download/get/*/*</url-pattern>
     </servlet-mapping>
 </web-app>

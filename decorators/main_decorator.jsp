@@ -9,7 +9,12 @@
   <div id="maincontainer">
 
       <div id="container">
-          <decorator:body />
+          <div id="header">
+              <img src="/images/sectralogo.gif" alt="sectralogo" /> 
+              </div>
+          <div id="content">
+            <decorator:body />
+          </div>
       </div>
 
   </div>
