@@ -11,7 +11,8 @@ package config;
  */
 public class Config {
     private static final String _DB = "uploader";
-    private static final String _UDIR = "c:\\tmp";
+    private static final String _UDIR = "/tmp/jfileshare";
+    private static final String _FILESTORE = "/tmp/store";
 
     private static final boolean _USIZE_CHECK = false;
 
@@ -28,6 +29,10 @@ public class Config {
         return _UDIR;
     }
 
+
+    public static String getFilestore() {
+        return _FILESTORE;
+    }
 
     public static boolean usizeCheck() {
         return _USIZE_CHECK;
