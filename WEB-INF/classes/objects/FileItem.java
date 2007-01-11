@@ -183,6 +183,7 @@ public class FileItem {
                 } else {
                     st.setTimestamp(3,new Timestamp(this.expiration.getTime()));
                 }
+                st.setInt(4,this.fid);
                 st.executeUpdate();
                 st.close();
                 return true;
@@ -206,8 +207,8 @@ public class FileItem {
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
                 if ( rs.wasNull() ) this.permanent = false;
-                this.downloads = rs.getInt("downloads");
-                if ( rs.wasNull() ) this.downloads = -1;
+                rs.getInt("downloads");
+                if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
                 if ( rs.getString("FileItems.password") != null ) this.password = rs.getString("FileItems.password");
                 this.ddate = rs.getTimestamp("ddate");
                 if ( rs.getTimestamp("expiration") != null ) this.expiration = rs.getTimestamp("expiration");
@@ -226,5 +227,27 @@ public class FileItem {
         }
 
         return false;
+    }
+
+    public boolean delete(Connection conn){
+        //First load the file in order to remove the actual file from the disk;
+
+        FileItem me = new FileItem();
+        me.search(conn,this.md5sum);
+        File file = me.getFile();
+        file.delete();
+
+
+        try {
+            PreparedStatement st = conn.prepareStatement("delete from FileItems where fid=?");
+            st.setInt(1,this.fid);
+            st.executeUpdate();
+            st.close();
+
+        } catch (SQLException e){
+            CustomLogger.logme(this.getClass().getName(),e.toString(),true);
+            return false;
+        }
+        return true;
     }
 }

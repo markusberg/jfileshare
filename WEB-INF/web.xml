@@ -30,10 +30,19 @@
         <filter-name>sitemesh</filter-name>
         <url-pattern>/register**</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/admin**</url-pattern>
+    </filter-mapping>
 
     <filter-mapping>
         <filter-name>login</filter-name>
         <url-pattern>/upload**</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/admin**</url-pattern>
     </filter-mapping>
 
     
@@ -66,5 +75,10 @@
     <servlet-mapping>
         <servlet-name>Streamer</servlet-name>
         <url-pattern>/download/get/*/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/admin**</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -9,7 +9,7 @@
 <html>
   <head><title>Simple jsp page</title></head>
   <body>
-  <form action="/upload/" method="post">
+  <form action="<%=request.getAttribute("urlPattern")%>/" method="post">
   <table cellpadding="0" cellspacing="0">
       <tr>
           <td>Username</td><td><input type="text" name="username" /></td>

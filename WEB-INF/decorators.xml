@@ -4,6 +4,7 @@
                 <pattern>/upload</pattern>
                 <pattern>/index.jsp</pattern>
                 <pattern>/register</pattern>
+                <pattern>/admin</pattern>
              </decorator>
              <!--
             <decorator name="genericdecorator" page="generic_decorator.jsp">

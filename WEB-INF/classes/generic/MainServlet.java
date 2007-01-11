@@ -21,6 +21,7 @@ import utils.CustomLogger;
 import pageservlets.UploadPageHandler;
 import pageservlets.DownloadPageHandler;
 import pageservlets.RegistrationPageHandler;
+import pageservlets.AdminPageHandler;
 
 /**
  * User: zoran@sectra.se
@@ -37,6 +38,7 @@ public class MainServlet extends HttpServlet {
 	    handlers.put("0",new UploadPageHandler());
         handlers.put("1",new DownloadPageHandler());
         handlers.put("2",new RegistrationPageHandler());
+        handlers.put("3",new AdminPageHandler());
 
     }
 

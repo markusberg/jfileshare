@@ -1,0 +1,42 @@
+#files {
+    width: 500px;
+}
+tr.filedata td {
+    background-color: #cccccc;
+    color: green;
+}
+
+tr.filename td {
+    background-color: white;
+    color: black;
+}
+
+td.delete {
+    width: 50px;
+    font-size: 10px;
+    text-align: right;
+}
+
+td.delete a {
+    display: block;
+    width: 50px;
+    background-color: #444444;
+    color: white;
+    float: right;
+    margin-right: 10px;
+    text-decoration: none;
+    padding-left: 2px;
+    padding-right: 2px;
+    text-align: center;
+    font-family: Helvetica,Arial,sans-serif;
+
+
+}
+
+#userinfo td {
+    padding-right: 10px;
+}
+
+#userinfo {
+    margin-bottom: 10px;
+}
