@@ -47,7 +47,7 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
 
         CustomLogger.logme(this.getClass().getName(),"RegistrationPageHandler");
 
-        if ( request.getParameter("submit") != null && ! request.getParameter("submit").equals("")){
+        if ( request.getParameter("submit") != null && ! request.getParameter("submit").equals("") && request.getParameter("action") != null && request.getParameter("action").equals("register")){
             CustomLogger.logme(this.getClass().getName(), "Request is post");
             if ( ! request.getParameter("password").equals(request.getParameter("password2"))){
                 request.setAttribute("message","Passwords must match");

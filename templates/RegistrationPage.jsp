@@ -39,7 +39,7 @@
                     <td>Email</td><td><input type="text" name="email" /></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><input type="submit" name="submit" value="Register" /></td>
+                    <td colspan="2"><input type="hidden" name="action" value="register" /><input type="submit" name="submit" value="Register" /></td>
                 </tr>
             </table>
         </form>
