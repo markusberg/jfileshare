@@ -70,6 +70,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             }
 
             if ( req.isMultipart()){
+                CustomLogger.logme(this.getClass().getName(),"Expecting " + req.getContentLength() + " bytes");
                 if (req.getFile("file") != null ){
                     UploadedFile file = req.getFile("file");
                     FileItem savedfile = new FileItem();

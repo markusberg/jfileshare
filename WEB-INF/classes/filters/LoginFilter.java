@@ -97,6 +97,7 @@ public class LoginFilter implements Filter {
 
 			String dbuser = null;
 			String dbpass = null;
+            String email = null;
             UserItem user = new UserItem();
             ResultSet result = null;
 			if ( username != null && password != null ){
@@ -111,6 +112,7 @@ public class LoginFilter implements Filter {
                         user.setUsername(dbuser);
                         user.setPassword(dbpass);
                         user.setUid(result.getInt("uid"));
+                        user.setEmail(result.getString("email"));
                     }
                 }
                 result.close();

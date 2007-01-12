@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.AddressException;
 import java.util.regex.Pattern;
 import java.util.Map;
 import java.sql.Connection;
@@ -13,7 +15,9 @@ import java.sql.SQLException;
 
 import objects.UserItem;
 import objects.FileItem;
+import objects.EmailItem;
 import views.UserItemView;
+import utils.CustomLogger;
 
 /**
  * SECTRA.
@@ -66,6 +70,21 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 file.setDownloads(Integer.parseInt(request.getParameter("downloads")));
                 file.save(conn);
                 useritemview = new UserItemView(conn,loginuser.getUsername());
+            } else if ( request.getParameter("action").equals("notify")){
+                EmailItem email = new EmailItem();
+                try {
+                    email.addRcpt(new InternetAddress(request.getParameter("email")));
+                    email.addBcpt(new InternetAddress("zoran@sectra.se"));
+                    if ( loginuser.getEmail() != null ){
+                        email.setSender(loginuser.getEmail());
+                    }
+                } catch (AddressException e){
+                    CustomLogger.logme(this.getClass().getName(),"INVALID ADDRESS " + e.toString(),true);
+                }
+                
+                email.setUrl(useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid"))).getMd5sum());
+                email.sendHTMLMail();
+                request.setAttribute("message","Email is sent to " + request.getParameter("email"));
             }
 
         }
