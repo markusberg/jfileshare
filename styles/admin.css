@@ -6,6 +6,12 @@ tr.filedata td {
     color: green;
 }
 
+tr.filedatal td {
+    background-color: #cccccc;
+    color: green;
+    padding-bottom: 5px;
+}
+
 tr.filename td {
     background-color: white;
     color: black;
@@ -33,6 +39,24 @@ td.delete a {
 
 }
 
+input.notify {
+    width: 50px;
+    background-color: #444444;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    font-family: Helvetica,Arial,sans-serif;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+
+    font-size: 10px;
+}
+
+input {
+    margin: 0px;
+    padding: 0px;
+}
 #userinfo td {
     padding-right: 10px;
 }

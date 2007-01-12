@@ -24,7 +24,7 @@ import objects.UserItem;
 import config.Config;
 
 /**
- * Created by Zoran Pucar zoran@medorian.com.
+ * Created by Zoran Pucar zoran@sectra.se.
  * User: zoran
  * Date: 2007-jan-06
  * Time: 01:16:57
