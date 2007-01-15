@@ -271,7 +271,7 @@ public class FileItem {
 
             }
 
-            st2.close();
+            
             st2 = conn.prepareStatement("UPDATE FileItems SET downloads=? where fid=?");
             if ( downloads == -1 ){
                 st2.setNull(1, Types.INTEGER);

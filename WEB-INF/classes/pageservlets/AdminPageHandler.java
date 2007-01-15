@@ -80,6 +80,8 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                     if ( loginuser.getEmail() != null ){
                         email.setSender(loginuser.getEmail());
                     }
+
+                    email.setSubject("File " + useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid"))).getName() + " is available for download");
                 } catch (AddressException e){
                     CustomLogger.logme(this.getClass().getName(),"INVALID ADDRESS " + e.toString(),true);
                 }

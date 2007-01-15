@@ -93,6 +93,7 @@ public class Streamer extends HttpServlet {
                 }
 
             }
+            CustomLogger.logme(this.getClass().getName(),"Reducing download");
             file.reduceDownload(conn);
             
 
