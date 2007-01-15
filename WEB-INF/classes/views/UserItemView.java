@@ -115,7 +115,11 @@ public class UserItemView {
                 file.setMd5sum(rs.getString("FileItems.md5sum"));
                 file.setPermanent(rs.getBoolean("FileItems.permanent"));
                 file.setDownloads(rs.getInt("FileItems.downloads"));
+                if ( rs.wasNull()){
+                    file.setDownloads(-1);
+                }
                 file.setPassword(rs.getString("FileItems.password"));
+                if ( rs.wasNull()) file.setPassword(null);
                 file.setDdate(rs.getTimestamp("FileItems.ddate"));
                 file.setExpiration(rs.getTimestamp("FileItems.expiration"));
                 file.setOwner(this.user);

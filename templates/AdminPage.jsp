@@ -53,7 +53,7 @@
                                 <td>&nbsp;</td><td>Permanent</td><td><%=file.isPermanent()?"yes":"no"%></td>
                             </tr>
                             <tr class="filedata">
-                                <td>&nbsp;</td><td>Downloads</td><td><%=file.getDownloads()%></td>
+                                <td>&nbsp;</td><td>Downloads</td><td><%=file.getDownloads()==-1?"unlimited":file.getDownloads()%></td>
                             </tr>
                             <tr class="filedata">
                                 <td>&nbsp;</td><td>Url</td><td><a href="http://<%=request.getServerName()%>/download/view/<%=file.getMd5sum()%>">url</a></td>

@@ -249,4 +249,48 @@ public class FileItem {
         }
         return true;
     }
+
+    public int reduceDownload(Connection conn){
+        int dvalue = -2;
+        try {
+            Statement st = conn.createStatement();
+            CustomLogger.logme(this.getClass().getName(),"Locking FileItems table for upgrade");
+            st.execute("LOCK TABLES FileItems");
+            PreparedStatement st2 = conn.prepareStatement("SELECT downloads FROM FileItems WHERE fid=?");
+            st2.setInt(1,this.fid);
+            ResultSet rs = st2.executeQuery();
+            int downloads = -1;
+            while ( rs.next() ){
+                downloads = rs.getInt("downloads");
+                if ( rs.wasNull()) {
+                    //If downloads is null, set it to -1 otherwise decrease one
+                    downloads = -1;
+                } else {
+                    downloads = downloads - 1;
+                }
+
+            }
+
+            st2.close();
+            st2 = conn.prepareStatement("UPDATE FileItems SET downloads=? where fid=?");
+            if ( downloads == -1 ){
+                st2.setNull(1, Types.INTEGER);
+            } else {
+                st2.setInt(1,downloads);
+            }
+
+            st2.setInt(2,this.fid);
+            st2.executeUpdate();
+            st2.close();
+            rs.close();
+            CustomLogger.logme(this.getClass().getName(),"Unlocking tables");
+            st.execute("UNLOCK TABLES");
+            st.close();
+            dvalue = downloads;
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return dvalue;
+    }
 }

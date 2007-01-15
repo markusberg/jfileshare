@@ -61,7 +61,7 @@ public class Streamer extends HttpServlet {
         }
 
 
-        if ( file.search(conn,lastpart)){
+        if ( file.search(conn,lastpart) && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
             if ( pathparts[pathparts.length - 2].equals("get") ){
                 response.setContentType(file.getType());
                 response.setHeader("Content-disposition", "filename=" + file.getName());
@@ -93,6 +93,8 @@ public class Streamer extends HttpServlet {
                 }
 
             }
+            file.reduceDownload(conn);
+            
 
 
         } else {
