@@ -20,6 +20,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 {
     private static final String	CONTENT_TYPE_HEADER = "Content-Type";
     private static final String	MULTIPART_CONTENT_TYPE = "multipart/form-data";
+    private static final String APPLICATION_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String	BOUNDARY_PREFIX = "boundary=";
     private static final int	BOUNDARY_PREFIX_LENGTH = BOUNDARY_PREFIX.length();
     private static final String	CONTENT_DISPOSITION_PREFIX = "content-disposition: ";
@@ -44,31 +45,62 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     private HashMap<String, String[]>		mParameters = null;
     private HashMap<String, UploadedFile[]>	mFiles = null;
 
+    public static int DELAY_FILEREAD = 0;
+
 
     public MultipartRequest(HttpServletRequest request)
     throws MultipartRequestException
-    {
-	super(request);
-	if (null == request)	throw new IllegalArgumentException("request can't be null");
+        {
+        super(request);
+        if (null == request)	throw new IllegalArgumentException("request can't be null");
 
-	mRequest = request;
-	mParameters = new HashMap<String, String[]>();
-	mFiles = new HashMap<String, UploadedFile[]>();
-	mParameterBuffer = new byte[8*1024];
-	mFileBuffer = new byte[100*1024];
-	if ( this.isMultipart()){
-	    CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
-	    checkUploadDirectory();
-	    initialize();
-	    checkInputStart();
-	    readParts();
-	 }
+        mRequest = request;
+        mParameters = new HashMap<String, String[]>();
+        mFiles = new HashMap<String, UploadedFile[]>();
+        mParameterBuffer = new byte[8*1024];
+        mFileBuffer = new byte[100*1024];
+        if ( this.isMultipart()){
+            CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
+            checkUploadDirectory();
+            initialize();
+            checkInputStart();
+            readParts();
+         }
+    }
+
+
+    public MultipartRequest(HttpServletRequest request, int DELAY_FILEREAD )
+    throws MultipartRequestException
+        {
+        super(request);
+        if (null == request)	throw new IllegalArgumentException("request can't be null");
+
+        mRequest = request;
+        mParameters = new HashMap<String, String[]>();
+        mFiles = new HashMap<String, UploadedFile[]>();
+        mParameterBuffer = new byte[8*1024];
+        mFileBuffer = new byte[100*1024];
+        if ( this.isMultipart()){
+            CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
+            checkUploadDirectory();
+            initialize();
+            checkInputStart();
+            readTextParts();
+         }
+    }
+
+    public void readFilePart(){
+        try {
+            readNextPart();
+        } catch (MultipartRequestException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
     }
 
     static boolean isValidContentType(String type)
     {
 	if (null == type ||
-	   !type.toLowerCase().startsWith(MULTIPART_CONTENT_TYPE))
+	   ( !type.toLowerCase().startsWith(MULTIPART_CONTENT_TYPE) ))
 	{
 	    return false;
 	}
@@ -206,6 +238,14 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         }
     }
 
+    private void readTextParts() throws MultipartRequestException {
+	    boolean more_parts = true;
+
+        while (more_parts) {
+            more_parts = readNextTextPart();
+        }
+    }
+
     private String extractBoundary(String line) {
         // Use lastIndexOf() because IE 4.01 on Win98 has been known to send the
         // "boundary=" string multiple times.
@@ -269,6 +309,138 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         }
 
 	    return line_buffer.toString();
+    }
+
+
+    private boolean readNextTextPart() throws MultipartRequestException {
+        // Read the headers; they look like this (not all may be present):
+	// Content-Disposition: form-data; name="field1"; filename="file1.txt"
+	// Content-Type: type/subtype
+	// Content-Transfer-Encoding: binary
+	ArrayList<String> headers = new ArrayList<String>();
+
+	String line = readLine();
+	// When no next line could be read, the end was reached.
+	// IE4 on Mac sends an empty line at the end; treat that as the ending too.
+	if (null == line ||
+	    0 == line.length())
+	{
+	    // No parts left, we're done
+	    return false;
+	}
+
+	// Read the following header lines we hit an empty line
+	// A line starting with whitespace is considered a continuation;
+	// that requires a little special logic.
+	while (null != line &&
+	       line.length() > 0)
+	{
+	    String	next_line = null;
+	    boolean	obtain_next_line = true;
+	    while (obtain_next_line)
+	    {
+		next_line = readLine();
+
+		if (next_line != null &&
+		    (next_line.startsWith(" ") ||
+		     next_line.startsWith("\t")))
+		{
+		    line = line + next_line;
+		}
+		else
+		{
+		    obtain_next_line = false;
+		}
+	    }
+	    // Add the line to the header list
+	    headers.add(line);
+	    line = next_line;
+	}
+
+	// If we got a null above, it's the end
+	if (line == null)
+	{
+	    return false;
+	}
+
+	String fieldname = null;
+	String filename = null;
+	String content_type = "text/plain";  // rfc1867 says this is the default
+
+	String[]	disposition_info = null;
+
+	for (String headerline : headers)
+    {
+        CustomLogger.logme(this.getClass().getName(),"Reading header " + headerline);
+        if (headerline.toLowerCase().startsWith(CONTENT_DISPOSITION_PREFIX))
+	    {
+		// Parse the content-disposition line
+		disposition_info = extractDispositionInfo(headerline);
+
+		fieldname = disposition_info[0];
+		filename = disposition_info[1];
+	    }
+	    else if (headerline.toLowerCase().startsWith(CONTENT_TYPE_HEADER.toLowerCase()))
+	    {
+		// Get the content type, or null if none specified
+		String type = extractContentType(headerline);
+		if (type != null)
+		{
+		    content_type = type;
+		}
+	    }
+	}
+
+	if (null == filename)
+	{
+	    // This is a parameter
+	    String		new_value = readParameter();
+	    String[]	values = mParameters.get(fieldname);
+	    String[]	new_values = null;
+	    if (null == values)
+	    {
+		new_values = new String[1];
+	    }
+	    else
+	    {
+		new_values = new String[values.length+1];
+		System.arraycopy(values, 0, new_values, 0, values.length);
+	    }
+	    new_values[new_values.length-1] = new_value;
+	    mParameters.put(fieldname, new_values);
+	}
+	else
+	{
+
+        //Dont read file here
+        /*CustomLogger.logme(this.getClass().getName(),"Saving file " + filename);
+	    // This is a file
+	    if (filename.equals(""))
+	    {
+		// empty filename, probably an "empty" file param
+		filename = null;
+	    }
+        CustomLogger.logme(this.getClass().getName(),"Creating file with content type " + content_type);
+	    UploadedFile	new_file = new UploadedFile(filename, content_type);
+	    readAndSaveFile(new_file, fieldname);
+	    UploadedFile[]	files = mFiles.get(fieldname);
+	    UploadedFile[]	new_files = null;
+	    if (null == files)
+	    {
+		new_files = new UploadedFile[1];
+	    }
+	    else
+	    {
+		new_files = new UploadedFile[files.length+1];
+		System.arraycopy(files, 0, new_files, 0, files.length);
+	    }
+	    new_files[new_files.length-1] = new_file;
+	    mFiles.put(fieldname, new_files); */
+
+    }
+
+	return true;
+
     }
 
     private boolean readNextPart()

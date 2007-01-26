@@ -63,14 +63,27 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
             MultipartRequest req = null;
 
+            CustomLogger.logme(this.getClass().getName(),"EXPECTING: " + request.getContentLength());
+            String tmp_file = null;
+            if ( request.getParameter("upid") != null ){
+            CustomLogger.logme(this.getClass().getName(),"Request has unique id " + request.getParameter("upid"));
+            } else {
+                CustomLogger.logme(this.getClass().getName(),"No request unique id");
+            }
             try {
-                req = new MultipartRequest(request);
+                req = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
+                if ( req.getParameter("upid") != null ){
+                    CustomLogger.logme(this.getClass().getName(),"Unique uid try 2 is " + req.getParameter("upid"));
+                }
+
             } catch (MultipartRequestException e) {
                 CustomLogger.logme(this.getClass().getName(), e.toString(),true);
             }
 
             if ( req.isMultipart()){
+                req.readFilePart();
                 CustomLogger.logme(this.getClass().getName(),"Expecting " + req.getContentLength() + " bytes");
+
                 if (req.getFile("file") != null ){
                     UploadedFile file = req.getFile("file");
                     FileItem savedfile = new FileItem();

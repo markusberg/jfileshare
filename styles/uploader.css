@@ -1,0 +1,12 @@
+#p {
+    width: 400px;
+    height: 20px;
+    background: black;
+    vertical-align: middle;
+}
+
+#b {
+    width: 100px;
+    height: 10px;
+    background: green;
+}
