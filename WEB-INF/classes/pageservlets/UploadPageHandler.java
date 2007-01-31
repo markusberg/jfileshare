@@ -4,6 +4,7 @@ import generic.ServletPageRequestHandler;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -57,6 +58,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             throws SQLException, ServletException {
             String urlPattern = request.getServletPath();
 
+            HttpSession session = request.getSession();
             CustomLogger.logme(this.getClass().getName(),"UploadPageHandler");
             String[] pathparts = request.getServletPath().split("/");
             String lastpart = pathparts[pathparts.length - 1 ];
@@ -74,6 +76,8 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                 req = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
                 if ( req.getParameter("upid") != null ){
                     CustomLogger.logme(this.getClass().getName(),"Unique uid try 2 is " + req.getParameter("upid"));
+
+                    session.setAttribute(request.getParameter("upid"),req);
                 }
 
             } catch (MultipartRequestException e) {
@@ -81,6 +85,8 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             }
 
             if ( req.isMultipart()){
+                CustomLogger.logme(this.getClass().getName(),"Prior to reading file Expecting " + req.getContentLength() + " bytes");
+
                 req.readFilePart();
                 CustomLogger.logme(this.getClass().getName(),"Expecting " + req.getContentLength() + " bytes");
 

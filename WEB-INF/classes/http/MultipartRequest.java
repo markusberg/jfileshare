@@ -46,6 +46,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     private HashMap<String, UploadedFile[]>	mFiles = null;
 
     public static int DELAY_FILEREAD = 0;
+    private File tmp_file = null;
 
 
     public MultipartRequest(HttpServletRequest request)
@@ -86,7 +87,14 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
             initialize();
             checkInputStart();
             readTextParts();
-         }
+            try {
+                this.tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
+            } catch (IOException e) {
+                CustomLogger.logme(this.getClass().getName(),e.toString(),true);
+
+                e.printStackTrace();
+            }
+        }
     }
 
     public void readFilePart(){
@@ -371,7 +379,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
 	for (String headerline : headers)
     {
-        CustomLogger.logme(this.getClass().getName(),"Reading header " + headerline);
+        //CustomLogger.logme(this.getClass().getName(),"Reading header " + headerline);
         if (headerline.toLowerCase().startsWith(CONTENT_DISPOSITION_PREFIX))
 	    {
 		// Parse the content-disposition line
@@ -695,18 +703,18 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         CustomLogger.logme(this.getClass().getName(), "The type is " + file.getType());
     assert file != null;
 
-	File					tmp_file = null;
+	//File					tmp_file = null;
 	FileOutputStream		output_stream = null;
 	BufferedOutputStream	output = null;
-
+    /*
 	try
 	{
-	    tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
+	    //tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
 	}
 	catch (IOException e)
 	{
 	    throw new MultipartFileErrorException("File " + name + " caused " + e.toString());
-	}
+	} */
 	try
 	{
 	    output_stream = new FileOutputStream(tmp_file);
