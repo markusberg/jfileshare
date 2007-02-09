@@ -10,20 +10,49 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
 import java.sql.Connection;
 import java.io.StringWriter;
+import java.io.File;
+import java.io.IOException;
 
 import utils.CustomLogger;
+import http.Exceptions.MultipartRequestException;
+import http.Exceptions.UploadDirectoryException;
+import config.Config;
 
 /**
- * Created by IntelliJ IDEA.
  * User: zoran
  * Date: Jan 31, 2007
  * Time: 9:41:02 AM
- * To change this template use File | Settings | File Templates.
  */
 public class AjaxUploadIdNegotiator implements AjaxSubHandler {
 
+    private File mUploadDirectory = null;
+    private File tmp_file = null;
+
+    private void checkUploadDirectory(){
+        mUploadDirectory = new File(Config.getUdir());
+        mUploadDirectory.mkdirs();
+
+        if(!mUploadDirectory.exists() || !mUploadDirectory.isDirectory() || !mUploadDirectory.canWrite()) {
+            CustomLogger.logme(this.getClass().getName(),"DIRECTORY NOT EXISTENT!!!! ", true);
+        }
+    }
+
+
+    private String createTmpFile(){
+        try {
+            tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
+        } catch (IOException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return tmp_file.getAbsolutePath();
+    }
+
+
     public void handle(Connection conn, HttpServletRequest request) {
-            String ajaxresponse = "";
+        checkUploadDirectory();
+        String filename = createTmpFile();
+        String ajaxresponse = "";
 		StringWriter sw = new StringWriter();
 		try {
 			StreamResult streamResult = new StreamResult(sw);
@@ -41,7 +70,7 @@ public class AjaxUploadIdNegotiator implements AjaxSubHandler {
             String unid = null;
             if ( request.getParameter("unid") != null && ! request.getParameter("unid").equals("")){
                 unid = request.getParameter("unid");
-                request.getSession().setAttribute(unid,new String(""));
+                request.getSession().setAttribute(unid,filename);
                 hd.characters("OK".toCharArray(),0,"OK".length());
                 statusset = true;
             } else {
@@ -52,6 +81,9 @@ public class AjaxUploadIdNegotiator implements AjaxSubHandler {
                 hd.startElement("","","unid",atts);
                 hd.characters(unid.toCharArray(),0,unid.length());
                 hd.endElement("","","unid");
+                hd.startElement("","","filename",atts);
+                hd.characters(filename.toCharArray(),0,filename.length());
+                hd.endElement("","","filename");
             }
             hd.endElement("","","ajaxresponse");
 			hd.endDocument();

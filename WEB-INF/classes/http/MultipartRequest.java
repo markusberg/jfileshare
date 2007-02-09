@@ -727,15 +727,17 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	//File					tmp_file = null;
 	FileOutputStream		output_stream = null;
 	BufferedOutputStream	output = null;
-    /*
-	try
-	{
-	    //tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
-	}
-	catch (IOException e)
-	{
-	    throw new MultipartFileErrorException("File " + name + " caused " + e.toString());
-	} */
+    if ( tmp_file == null ){
+        try
+        {
+            CustomLogger.logme(this.getClass().getName(),"No tmp_file... creating one:");
+            tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
+        }
+        catch (IOException e)
+        {
+            throw new MultipartFileErrorException("File " + name + " caused " + e.toString());
+        }
+    }
 	try
 	{
 	    output_stream = new FileOutputStream(tmp_file);

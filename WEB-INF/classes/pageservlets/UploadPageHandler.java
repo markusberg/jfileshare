@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.regex.Pattern;
 import java.util.Date;
+import java.util.Enumeration;
 import java.io.File;
 
 import http.MultipartRequest;
@@ -59,6 +60,12 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             String urlPattern = request.getServletPath();
 
             HttpSession session = request.getSession();
+            Enumeration attrs = session.getAttributeNames();
+            while (attrs.hasMoreElements()) {
+                String attr =  (String) attrs.nextElement();
+                CustomLogger.logme(this.getClass().getName(),"SESSION VAR " + attr + " = " + session.getAttribute(attr));
+
+            }
             CustomLogger.logme(this.getClass().getName(),"UploadPageHandler");
             String[] pathparts = request.getServletPath().split("/");
             String lastpart = pathparts[pathparts.length - 1 ];

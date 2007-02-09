@@ -48,6 +48,8 @@
             var o = 0;
             var m = 0;
 
+            var ran_number;
+
             function changecolor(newcolor){if(p=="r"&& document.getElementById){document.getElementById('r').style.backgroundColor = newcolor; return;}
               if(document.layers){ // browser="NN4";
                document.layers["q"].bgColor = newcolor;
@@ -71,19 +73,67 @@
 
 
             function getRand(){
-                var ran_number = Math.floor(Math.random()*1000);
+                ran_number = Math.floor(Math.random()*1000);
                 document.getElementById("upid").value=ran_number;
                 alert(document.getElementById("upid").value);
 
                 return ran_number;
             }
 
-          
+
+          function upidNegotiate(){
+              var ran_number = Math.floor(Math.random()*1000);
+              document.getElementById("upid").value=ran_number;
+              ajaxRequest("setunid","unid",ran_number);
+
+          }
+
+          function triggered() {
+              var response;
+              var status;
+              var unid;
+              if ((xmlhttp.readyState == 4) && (xmlhttp.status == 200)) {
+				  response = xmlhttp.responseXML;
+				  status =  response.getElementsByTagName('status')[0].firstChild.data;
+				  unid = response.getElementsByTagName('unid')[0].firstChild.data;
+                  var form = document.getElementById("uploadform");
+                  var upiddive = document.getElementById("upiddiv");
+                  upiddive.innerHTML="Negotiated upid: " + unid;
+                  form.submit();
+                  
+              }
+
+
+
+          }
+
+         function ajaxRequest(action, param,value){
+            if (param == null ){
+                url = "/ajax/?action=" + action;
+                } else {
+                url = "/ajax/?action=" + action + "&" + param + "=" + value;
+                }
+
+            try {
+
+               xmlhttp = window.XMLHttpRequest?new XMLHttpRequest():
+                    new ActiveXObject("Microsoft.XMLHTTP");
+
+             }
+             catch (e) {
+                    alert(e);
+             }
+
+             xmlhttp.onreadystatechange = triggered;
+             xmlhttp.open("GET", url);
+             xmlhttp.send(null);
+
+        }
 
       </script>
   </head>
   <body>Please upload file<br />
-  <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="getRand();">
+  <form id="uploadform" action="/upload" method="post" enctype="multipart/form-data" onsubmit="upidNegotiate(); return false;">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
       <input type="file" name="file" />
@@ -97,7 +147,7 @@
       <div id="b" style="width: 1px;"></div>
       </div>
 
-  <div style="width:100px; height: 100px; border: 1px solid black;" onclick="alert(getRand())">Foo</div>
+  <div style="width:100px; height: 100px; border: 1px solid black;" id="upiddiv">Foo</div>
   </body>
 <script type="text/javascript">
     progress();
