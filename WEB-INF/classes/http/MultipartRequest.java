@@ -69,6 +69,27 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
          }
     }
 
+    public MultipartRequest(HttpServletRequest request, File tmp_file)
+    throws MultipartRequestException
+        {
+        super(request);
+        if (null == request)	throw new IllegalArgumentException("request can't be null");
+
+        mRequest = request;
+        mParameters = new HashMap<String, String[]>();
+        mFiles = new HashMap<String, UploadedFile[]>();
+        mParameterBuffer = new byte[8*1024];
+        mFileBuffer = new byte[100*1024];
+        this.tmp_file = tmp_file;
+        if ( this.isMultipart()){
+            CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
+            checkUploadDirectory();
+            initialize();
+            checkInputStart();
+            readParts();
+         }
+    }
+
 
     public MultipartRequest(HttpServletRequest request, int DELAY_FILEREAD )
     throws MultipartRequestException
@@ -831,5 +852,9 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	{
 	    file.setTempFile(tmp_file);
 	}
+    }
+
+    public String getTmpFile(){
+        return this.tmp_file.getAbsolutePath();
     }
 }

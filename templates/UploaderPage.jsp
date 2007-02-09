@@ -4,6 +4,8 @@
      <link rel="stylesheet" href="/styles/uploader.css" type="text/css" /> 
 
       <script type="text/javascript">
+           
+
           /*var bar;
           var progressdiv;
           var maxwidth = 5;
@@ -82,10 +84,11 @@
   </head>
   <body>Please upload file<br />
   <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="getRand();">
-      <input type="file" name="file" />
-      <br />
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
+      <input type="file" name="file" />
+      <br />
+
       <input type="submit" name="submit" value="Send" />
 
   </form>

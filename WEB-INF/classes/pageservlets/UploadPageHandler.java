@@ -64,27 +64,41 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             String lastpart = pathparts[pathparts.length - 1 ];
             CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
             MultipartRequest req = null;
+            MultipartRequest req2 = null;
 
             CustomLogger.logme(this.getClass().getName(),"EXPECTING: " + request.getContentLength());
             String tmp_file = null;
+            String upid = null;
+            if ( request.getParameter("action") == null || ! request.getParameter("action").equals("login")){
             if ( request.getParameter("upid") != null ){
             CustomLogger.logme(this.getClass().getName(),"Request has unique id " + request.getParameter("upid"));
             } else {
                 CustomLogger.logme(this.getClass().getName(),"No request unique id");
             }
             try {
-                req = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
-                if ( req.getParameter("upid") != null ){
-                    CustomLogger.logme(this.getClass().getName(),"Unique uid try 2 is " + req.getParameter("upid"));
+                req2 = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
+                if ( req2 != null && req2.isMultipart()){
+                    String filename = req2.getTmpFile();
+                    if ( req2 != null && req2.getTmpFile() != null && req2.getTmpFile() != null ){
+                        CustomLogger.logme(this.getClass().getName(),"Created TMPfile " + filename);
+                    }
+                    if ( req2.getParameter("upid") != null ){
+                        CustomLogger.logme(this.getClass().getName(),"Unique uid try 2 is " + req2.getParameter("upid"));
+                        upid = req2.getParameter("upid");
+                        if (req2 == null ) CustomLogger.logme(this.getClass().getName(),"req2 is null");
+                        CustomLogger.logme(this.getClass().getName(),req2.getTmpFile()==null?"getTmpFile() returns null":"req2 isn't null");
+                        CustomLogger.logme(this.getClass().getName(),req2.getTmpFile()==null?"getTmpFile().getAbsoluthePath() returns null":"Abpath = " + req2.getTmpFile());
+                        session.setAttribute(upid,filename);
+                        File tmpfile = new File(filename);
+                        req = new MultipartRequest(request,tmpfile);
+                    }
 
-                    session.setAttribute(request.getParameter("upid"),req);
                 }
-
             } catch (MultipartRequestException e) {
                 CustomLogger.logme(this.getClass().getName(), e.toString(),true);
             }
 
-            if ( req.isMultipart()){
+            if ( req != null && req.isMultipart()){
                 CustomLogger.logme(this.getClass().getName(),"Prior to reading file Expecting " + req.getContentLength() + " bytes");
 
                 req.readFilePart();
@@ -111,8 +125,9 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     CustomLogger.logme(this.getClass().getName(), file.getFile().getPath());
                     CustomLogger.logme(this.getClass().getName(), file.getFile().getAbsolutePath());
                 }
-            }
 
+            }
+            }
 
             return "/templates/UploaderPage.jsp";
 

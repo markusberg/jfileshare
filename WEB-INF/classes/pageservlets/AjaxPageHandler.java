@@ -27,6 +27,7 @@ public class AjaxPageHandler implements ServletPageRequestHandler{
 
     public AjaxPageHandler(){
 	    handlers.put("getstatus",new AjaxStatusHandler());
+        handlers.put("setunid", new AjaxUploadIdNegotiator());
     }
 
 
