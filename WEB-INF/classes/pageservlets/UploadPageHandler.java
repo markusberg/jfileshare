@@ -74,6 +74,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             MultipartRequest req = null;
             MultipartRequest req2 = null;
 
+            if (request.getParameter("action") != null ) CustomLogger.logme(this.getClass().getName(),request.getParameter("action"));
             CustomLogger.logme(this.getClass().getName(),"EXPECTING: " + request.getContentLength());
             File tmp_file = null;
             String upid = null;

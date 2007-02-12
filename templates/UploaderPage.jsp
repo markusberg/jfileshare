@@ -5,36 +5,7 @@
 
       <script type="text/javascript">
            
-
-          /*var bar;
-          var progressdiv;
-          var maxwidth = 5;
-          var curwidth = 1;
-          function progress(){
-              progressdiv = document.getElementById("p");
-              bar = document.getElementById("b");
-              //maxwidth = progressdiv.style.width.split("px")[0];
-              curwidth = bar.style.width.split("px")[0];
-              alert(curwidth);
-              alert(maxwidth);
-              alert(progressdiv.style.width.split("px")[0]);
-              if ( curwidth < maxwidth ){
-                  var nextwidth = curwidth + 1;
-                  alert(nextwidth);
-                  nextwidth += "px";
-                  alert(nextwidth);
-                  bar.style.width = curwidth + 1 + "px";
-
-              } else {
-                  return;
-              }
-              t=setTimeout("progress();",0);
-
-
-          } */
-
-
-            var w = 20;
+  var w = 20;
             var t;
             var p = "q";
             var x = 0;
@@ -97,13 +68,20 @@
 				  response = xmlhttp.responseXML;
 				  status =  response.getElementsByTagName('status')[0].firstChild.data;
 				  unid = response.getElementsByTagName('unid')[0].firstChild.data;
-                  var formav = document.getElementById("uploadform");
+
                   var upiddive = document.getElementById("upiddiv");
                   upiddive.innerHTML="Negotiated upid: " + unid;
-                  document.forms[0].submit();
+                  var theform = document.getElementById("uploadform");
+                  alert(theform);
+                  try {
+                     theform.submit();
+                      } catch (e){
+                      
+                      alert(e);
+                  }
                   
               } else {
-                  alert("Something nasty happened");
+                  //alert("Something nasty happened");
               }
 
 
@@ -136,11 +114,11 @@
       </script>
   </head>
   <body>Please upload file<br />
-  <form id="uploadform" action="/upload/" method="post" enctype="multipart/form-data" onsubmit="return upidNegotiate();">
+  <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();"><input type="hidden" name="action" value="bar" /></form>-->
+  <form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
       <input type="file" name="file" />
-      <br />
 
       <input type="submit" name="submit" value="Send"/>
 
