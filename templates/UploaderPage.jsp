@@ -85,6 +85,7 @@
               var ran_number = Math.floor(Math.random()*1000);
               document.getElementById("upid").value=ran_number;
               ajaxRequest("setunid","unid",ran_number);
+              return false;
 
           }
 
@@ -96,11 +97,13 @@
 				  response = xmlhttp.responseXML;
 				  status =  response.getElementsByTagName('status')[0].firstChild.data;
 				  unid = response.getElementsByTagName('unid')[0].firstChild.data;
-                  var form = document.getElementById("uploadform");
+                  var formav = document.getElementById("uploadform");
                   var upiddive = document.getElementById("upiddiv");
                   upiddive.innerHTML="Negotiated upid: " + unid;
-                  form.submit();
+                  document.forms[0].submit();
                   
+              } else {
+                  alert("Something nasty happened");
               }
 
 
@@ -133,13 +136,13 @@
       </script>
   </head>
   <body>Please upload file<br />
-  <form id="uploadform" action="/upload" method="post" enctype="multipart/form-data" onsubmit="upidNegotiate(); return false;">
+  <form id="uploadform" action="/upload/" method="post" enctype="multipart/form-data" onsubmit="return upidNegotiate();">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
       <input type="file" name="file" />
       <br />
 
-      <input type="submit" name="submit" value="Send" />
+      <input type="submit" name="submit" value="Send"/>
 
   </form>
 

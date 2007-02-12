@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.Date;
 import java.util.Enumeration;
 import java.io.File;
+import java.io.IOException;
 
 import http.MultipartRequest;
 import http.UploadedFile;
@@ -74,7 +75,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             MultipartRequest req2 = null;
 
             CustomLogger.logme(this.getClass().getName(),"EXPECTING: " + request.getContentLength());
-            String tmp_file = null;
+            File tmp_file = null;
             String upid = null;
             if ( request.getParameter("action") == null || ! request.getParameter("action").equals("login")){
             if ( request.getParameter("upid") != null ){
@@ -85,20 +86,20 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             try {
                 req2 = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
                 if ( req2 != null && req2.isMultipart()){
-                    String filename = req2.getTmpFile();
-                    if ( req2 != null && req2.getTmpFile() != null && req2.getTmpFile() != null ){
-                        CustomLogger.logme(this.getClass().getName(),"Created TMPfile " + filename);
+                    String tmp_filename = (String) session.getAttribute(req2.getParameter("upid"));
+                    CustomLogger.logme(this.getClass().getName(),tmp_filename!=null?tmp_filename:"tmp_filename appears to be null");
+                    CustomLogger.logme(this.getClass().getName(),"UNIQUE id = " + req2.getParameter("upid"));
+
+
+                    try {
+                        if ( ! tmp_file.exists() ) tmp_file.createNewFile();
+                    } catch (IOException e) {
+                        CustomLogger.logme(this.getClass().getName(),"Failed to create tmp_file" + e.toString());
                     }
-                    if ( req2.getParameter("upid") != null ){
-                        CustomLogger.logme(this.getClass().getName(),"Unique uid try 2 is " + req2.getParameter("upid"));
-                        upid = req2.getParameter("upid");
-                        if (req2 == null ) CustomLogger.logme(this.getClass().getName(),"req2 is null");
-                        CustomLogger.logme(this.getClass().getName(),req2.getTmpFile()==null?"getTmpFile() returns null":"req2 isn't null");
-                        CustomLogger.logme(this.getClass().getName(),req2.getTmpFile()==null?"getTmpFile().getAbsoluthePath() returns null":"Abpath = " + req2.getTmpFile());
-                        session.setAttribute(upid,filename);
-                        File tmpfile = new File(filename);
-                        req = new MultipartRequest(request,tmpfile);
-                    }
+                    CustomLogger.logme(this.getClass().getName(),"Reading complete request");
+                    req = new MultipartRequest(request,tmp_file);
+
+
 
                 }
             } catch (MultipartRequestException e) {

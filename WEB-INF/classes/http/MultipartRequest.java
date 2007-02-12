@@ -103,18 +103,11 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         mParameterBuffer = new byte[8*1024];
         mFileBuffer = new byte[100*1024];
         if ( this.isMultipart()){
-            CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
+            CustomLogger.logme(this.getClass().getName(),"Request detected as multipart DELAY_FILEREAD");
             checkUploadDirectory();
             initialize();
             checkInputStart();
             readTextParts();
-            try {
-                this.tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
-            } catch (IOException e) {
-                CustomLogger.logme(this.getClass().getName(),e.toString(),true);
-
-                e.printStackTrace();
-            }
         }
     }
 
@@ -440,6 +433,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	}
 	else
 	{
+        return false;
 
         //Dont read file here
         /*CustomLogger.logme(this.getClass().getName(),"Saving file " + filename);
