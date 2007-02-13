@@ -59,6 +59,11 @@ public class AjaxStatusHandler implements AjaxSubHandler  {
             String remains = Integer.toString(remain);
             hd.characters(remains.toCharArray(),0,remains.length());
             hd.endElement("","","remain");
+            hd.startElement("","","status",atts);
+            String status = data.getStatus();
+            CustomLogger.logme(this.getClass().getName(),"Status: " + status);
+            hd.characters(status.toCharArray(),0,status.length());
+            hd.endElement("","","status");
             hd.endElement("","","ajaxresponse");
 			hd.endDocument();
 

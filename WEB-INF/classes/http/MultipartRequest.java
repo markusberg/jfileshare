@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpSession;
 
 import config.Config;
 import utils.CustomLogger;
@@ -751,6 +752,10 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     {
 	CustomLogger.logme(this.getClass().getName(),"Will save file " + file.getName() + " " + name);
         CustomLogger.logme(this.getClass().getName(), "The type is " + file.getType());
+        HttpSession session = mRequest.getSession();
+        SessionData data = (SessionData) session.getAttribute(mParameters.get("upid")[0]);
+        data.setStatus("Uploading file");
+        session.setAttribute(mParameters.get("upid")[0],data);
     assert file != null;
 
 	//File					tmp_file = null;
@@ -883,6 +888,8 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	{
 	    file.setTempFile(tmp_file);
 	}
+        data.setStatus("File uploaded");
+        session.setAttribute(mParameters.get("upid")[0],data);
     }
 
     public String getTmpFile(){
@@ -896,6 +903,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         private String tmp_filename;
         private Hashtable<String,String> params = new Hashtable<String,String>();
         private int contentLength = -1;
+        private String status = "unknown";
 
         public int getUpid() {
             return upid;
@@ -944,6 +952,15 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
         public void setContentLength(int contentLength) {
             this.contentLength = contentLength;
+        }
+
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
         }
     }
 }
