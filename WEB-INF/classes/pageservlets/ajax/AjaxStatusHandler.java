@@ -8,10 +8,12 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
 import java.io.StringWriter;
+import java.io.File;
 import java.sql.Connection;
 
 import org.xml.sax.helpers.AttributesImpl;
 import utils.CustomLogger;
+import http.MultipartRequest;
 
 /**
  * User: zoran
@@ -22,7 +24,15 @@ public class AjaxStatusHandler implements AjaxSubHandler  {
 
 	public void handle(Connection conn, HttpServletRequest request){
 		String ajaxresponse = "";
-		StringWriter sw = new StringWriter();
+        String unid = request.getParameter("unid");
+        MultipartRequest.SessionData data = (MultipartRequest.SessionData) request.getSession().getAttribute(unid);
+        String tmp_filename = data.getTmp_filename();
+        int contentlength = data.getContentLength();
+        File file = new File(tmp_filename);
+        long length = file.length();
+
+        int remain = contentlength - Integer.parseInt(Long.toString(length));
+        StringWriter sw = new StringWriter();
 		try {
 			StreamResult streamResult = new StreamResult(sw);
 			 SAXTransformerFactory tf = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
@@ -34,7 +44,21 @@ public class AjaxStatusHandler implements AjaxSubHandler  {
 			hd.startDocument();
 			AttributesImpl atts = new AttributesImpl();
 			hd.startElement("","","ajaxresponse",atts);
-            
+            hd.startElement("","","unid",atts);
+            hd.characters(unid.toCharArray(),0,unid.length());
+            hd.endElement("","","unid");
+            hd.startElement("","","length",atts);
+            String lengthstr = Long.toString(length);
+            hd.characters(lengthstr.toCharArray(),0,lengthstr.length());
+            hd.endElement("","","length");
+            hd.startElement("","","total",atts);
+            String total = Integer.toString(contentlength);
+            hd.characters(total.toCharArray(),0,total.length());
+            hd.endElement("","","total");
+            hd.startElement("","","remain",atts);
+            String remains = Integer.toString(remain);
+            hd.characters(remains.toCharArray(),0,remains.length());
+            hd.endElement("","","remain");
             hd.endElement("","","ajaxresponse");
 			hd.endDocument();
 

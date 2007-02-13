@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Hashtable;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -64,6 +65,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
             CustomLogger.logme(this.getClass().getName(),"Request detected as multipart");
             checkUploadDirectory();
             initialize();
+            createTmpFile();
             checkInputStart();
             readParts();
          }
@@ -104,8 +106,12 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         mFileBuffer = new byte[100*1024];
         if ( this.isMultipart()){
             CustomLogger.logme(this.getClass().getName(),"Request detected as multipart DELAY_FILEREAD");
+
             checkUploadDirectory();
             initialize();
+            CustomLogger.logme(this.getClass().getName(),"Creating tmp-file");
+            createTmpFile();
+            CustomLogger.logme(this.getClass().getName(),"Created " + tmp_file.getAbsolutePath());
             checkInputStart();
             readTextParts();
         }
@@ -173,6 +179,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     }
 
     private void checkUploadDirectory() throws MultipartRequestException {
+        CustomLogger.logme(this.getClass().getName(),"Checking upload dir");
         mUploadDirectory = new File(Config.getUdir());
         mUploadDirectory.mkdirs();
 
@@ -200,6 +207,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
 
     private void initialize() throws MultipartRequestException {
+        CustomLogger.logme(this.getClass().getName(),"Initializing");
         // Check the content type to is correct to support a multipart request
         // Access header two ways to work around WebSphere oddities
         String type = null;
@@ -238,6 +246,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     }
 
     private void checkInputStart() throws MultipartRequestException {
+        CustomLogger.logme(this.getClass().getName(),"Checking input start");
         // Read the first line, should be the first boundary
         String line = readLine();
         if (null == line)
@@ -253,7 +262,8 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     }
 
     private void readParts() throws MultipartRequestException {
-	    boolean more_parts = true;
+        CustomLogger.logme(this.getClass().getName(),"Reading parts");
+        boolean more_parts = true;
 
         while (more_parts) {
             more_parts = readNextPart();
@@ -548,7 +558,8 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
 	if (null == filename)
 	{
-	    // This is a parameter
+        CustomLogger.logme(this.getClass().getName(),"Parameter detected:");
+        // This is a parameter
 	    String		new_value = readParameter();
 	    String[]	values = mParameters.get(fieldname);
 	    String[]	new_values = null;
@@ -563,7 +574,21 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 	    }
 	    new_values[new_values.length-1] = new_value;
 	    mParameters.put(fieldname, new_values);
-	}
+        String upid = mParameters.get("upid")[0];
+        //Store parameters in SessionData object in session...
+        if ( upid != null && mRequest.getSession().getAttribute(upid) == null ){
+            SessionData sdata = new SessionData();
+            sdata.setContentLength(mRequest.getContentLength());
+            sdata.addParam(fieldname,new_value);
+            sdata.setTmp_filename(tmp_file.getAbsolutePath());
+            mRequest.getSession().setAttribute(upid,sdata);
+
+        } else if ( upid != null) {
+            SessionData sdata = (SessionData) mRequest.getSession().getAttribute(upid);
+            sdata.addParam(fieldname,new_value);
+            mRequest.getSession().setAttribute(upid,sdata);
+        }
+    }
 	else
 	{
 	    CustomLogger.logme(this.getClass().getName(),"Saving file " + filename);
@@ -683,7 +708,8 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
     private String readParameter()
     throws MultipartRequestException
     {
-	StringBuffer	result = new StringBuffer();
+        CustomLogger.logme(this.getClass().getName(),"readParameter(): Reading parameter");
+    StringBuffer	result = new StringBuffer();
 	String			line = null;
 
 	synchronized (result) // speed increase by thread lock pre-allocation
@@ -709,6 +735,15 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
 	    return result.toString();
 	}
+    }
+
+
+    private void createTmpFile(){
+        try {
+            tmp_file = File.createTempFile("upl", ".tmp", mUploadDirectory);
+        } catch (IOException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
     }
 
     private void readAndSaveFile(UploadedFile file, String name)
@@ -852,5 +887,63 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
     public String getTmpFile(){
         return this.tmp_file.getAbsolutePath();
+    }
+
+
+    public class SessionData{
+
+        private int upid = -1;
+        private String tmp_filename;
+        private Hashtable<String,String> params = new Hashtable<String,String>();
+        private int contentLength = -1;
+
+        public int getUpid() {
+            return upid;
+        }
+
+        public void setUpid(int upid) {
+            this.upid = upid;
+        }
+
+        public String getTmp_filename() {
+            return tmp_filename;
+        }
+
+        public void setTmp_filename(String tmp_filename) {
+            this.tmp_filename = tmp_filename;
+        }
+
+        public Hashtable<String, String> getParams() {
+            return params;
+        }
+
+        public void setParams(Hashtable<String, String> params) {
+            this.params = params;
+        }
+
+        public void addParam(String param, String value){
+            this.params.put(param,value);
+        }
+
+        public String toString(){
+            StringBuffer sb = new StringBuffer();
+            for ( String key : params.keySet() ){
+                sb.append(key + ": " + params.get(key) + "\n");
+            }
+
+            if ( tmp_filename != null ) sb.append("TMP_FILENAME: " + tmp_filename);
+            return sb.toString();
+
+
+        }
+
+
+        public int getContentLength() {
+            return contentLength;
+        }
+
+        public void setContentLength(int contentLength) {
+            this.contentLength = contentLength;
+        }
     }
 }

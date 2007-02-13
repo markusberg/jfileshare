@@ -55,8 +55,10 @@
           function upidNegotiate(){
               var ran_number = Math.floor(Math.random()*1000);
               document.getElementById("upid").value=ran_number;
-              ajaxRequest("setunid","unid",ran_number);
-              return false;
+              var upiddive = document.getElementById("upiddiv");
+              upiddive.innerHTML="Negotiated upid: " + ran_number;
+              //ajaxRequest("setunid","unid",ran_number);
+              return true;
 
           }
 
@@ -115,7 +117,8 @@
   </head>
   <body>Please upload file<br />
   <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();"><input type="hidden" name="action" value="bar" /></form>-->
-  <form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">
+  <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">-->
+      <form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
       <input type="file" name="file" />

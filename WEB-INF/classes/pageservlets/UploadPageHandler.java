@@ -72,7 +72,6 @@ public class UploadPageHandler implements ServletPageRequestHandler {
             String lastpart = pathparts[pathparts.length - 1 ];
             CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
             MultipartRequest req = null;
-            MultipartRequest req2 = null;
 
             if (request.getParameter("action") != null ) CustomLogger.logme(this.getClass().getName(),request.getParameter("action"));
             CustomLogger.logme(this.getClass().getName(),"EXPECTING: " + request.getContentLength());
@@ -85,21 +84,43 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                 CustomLogger.logme(this.getClass().getName(),"No request unique id");
             }
             try {
-                req2 = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
-                if ( req2 != null && req2.isMultipart()){
-                    String tmp_filename = (String) session.getAttribute(req2.getParameter("upid"));
+                //req2 = new MultipartRequest(request, MultipartRequest.DELAY_FILEREAD);
+                req = new MultipartRequest(request);
+                if ( req != null && req.isMultipart()){
+                    String tmp_filename = req.getTmpFile();
                     CustomLogger.logme(this.getClass().getName(),tmp_filename!=null?tmp_filename:"tmp_filename appears to be null");
-                    CustomLogger.logme(this.getClass().getName(),"UNIQUE id = " + req2.getParameter("upid"));
-
+                    CustomLogger.logme(this.getClass().getName(),"UNIQUE id = " + req.getParameter("upid"));
+                    tmp_file = new File(tmp_filename);
 
                     try {
                         if ( ! tmp_file.exists() ) tmp_file.createNewFile();
                     } catch (IOException e) {
                         CustomLogger.logme(this.getClass().getName(),"Failed to create tmp_file" + e.toString());
                     }
-                    CustomLogger.logme(this.getClass().getName(),"Reading complete request");
-                    req = new MultipartRequest(request,tmp_file);
-
+                    //CustomLogger.logme(this.getClass().getName(),"Reading complete request");
+                    //req = new MultipartRequest(request,tmp_file);
+                    //req = new MultipartRequest(request);
+                   if (req.getFile("file") != null ){
+                    UploadedFile file = req.getFile("file");
+                    FileItem savedfile = new FileItem();
+                    CustomLogger.logme(this.getClass().getName(),"Name: " + file.getName());
+                    CustomLogger.logme(this.getClass().getName(),"Type: " + file.getType());
+                    CustomLogger.logme(this.getClass().getName(),"MD5: " + MD5OutputStream.getMD5(file.getFile().getPath()) );
+                    savedfile.setDdate(new Date());
+                    savedfile.setName(file.getName());
+                    savedfile.setType(file.getType());
+                    savedfile.setSize(new Double(file.getFile().length()));
+                    savedfile.setMd5sum(MD5OutputStream.getMD5(file.getFile().getPath()));
+                    UserItem owner = (UserItem) request.getSession().getAttribute("user");
+                    savedfile.setOwner(owner);
+                    savedfile.save(conn);
+                    File destfile = new File(Config.getFilestore() + "/" +  savedfile.getFid());
+                    file.getFile().renameTo(destfile);
+                    CustomLogger.logme(this.getClass().getName(),"File " + destfile.getAbsolutePath() + " saved");
+                    CustomLogger.logme(this.getClass().getName(), file.getName());
+                    CustomLogger.logme(this.getClass().getName(), file.getFile().getPath());
+                    CustomLogger.logme(this.getClass().getName(), file.getFile().getAbsolutePath());
+                }
 
 
                 }
@@ -107,7 +128,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                 CustomLogger.logme(this.getClass().getName(), e.toString(),true);
             }
 
-            if ( req != null && req.isMultipart()){
+            /*if ( req != null && req.isMultipart()){
                 CustomLogger.logme(this.getClass().getName(),"Prior to reading file Expecting " + req.getContentLength() + " bytes");
 
                 req.readFilePart();
@@ -135,7 +156,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     CustomLogger.logme(this.getClass().getName(), file.getFile().getAbsolutePath());
                 }
 
-            }
+            } */
             }
 
             return "/templates/UploaderPage.jsp";
