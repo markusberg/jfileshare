@@ -21,6 +21,7 @@
 
             var ran_number;
           var unid = -1;
+          var uploadstatus;
 
             function changecolor(newcolor){if(p=="r"&& document.getElementById){document.getElementById('r').style.backgroundColor = newcolor; return;}
               if(document.layers){ // browser="NN4";
@@ -50,7 +51,9 @@
           function check_Status(){
               if ( unid == -1 ) unid = document.getElementById("upid");
                 ajaxRequest("getstatus","unid",unid);
-              timer=setTimeout("check_Status();",300); 
+              if ( uploadstatus != "Done"){
+                    timer=setTimeout("check_Status();",1500);
+                  }
               
           }
 
@@ -61,15 +64,17 @@
               if ((xmlhttp.readyState == 4) && (xmlhttp.status == 200)) {
 				  response = xmlhttp.responseXML;
 				  status =  response.getElementsByTagName('status')[0].firstChild.data;
-				  unid = response.getElementsByTagName('unid')[0].firstChild.data;
+                  uploadstatus = status;
+                  unid = response.getElementsByTagName('unid')[0].firstChild.data;
 
-                  var upiddive = document.getElementById("upiddiv");
-                  upiddive.innerHTML="Negotiated upid: " + unid;
+
                   var statusdive = document.getElementById("statusdiv");
                   var total = response.getElementsByTagName("total")[0].firstChild.data;
                   var length = response.getElementsByTagName("length")[0].firstChild.data;
-                  total = total/1024/1024 + "M";
-                  length = length/1024/1024 + "M";
+                  total = total/1024/1024;
+                  length = length/1024/1024;
+                  total = Math.round(10*total)/10 + "M";
+                  length = Math.round(10*length)/10 + "M";
                   statusdive.innerHTML="Status: " + status + "<br />" + length + " / " + total;
                   var procent = response.getElementsByTagName('procent')[0].firstChild.data;
                   changewidth_procent(procent);
@@ -109,8 +114,7 @@
               var ran_number = Math.floor(Math.random()*1000);
               document.getElementById("upid").value=ran_number;
               unid = ran_number;
-              var upiddive = document.getElementById("upiddiv");
-              upiddive.innerHTML="Negotiated upid: " + ran_number;
+              
               //ajaxRequest("setunid","unid",ran_number);
               
 
@@ -180,13 +184,11 @@
       <input type="submit" name="submit" value="Send"/>
 
   </form>
-
   <div id="p" style="width: 400px;" onclick="changewidth_procent(100)">
-      <div id="b" style="width: 1px;"></div>
+      <div id="b" style="width: 1px; background-image: url(/images/progress.jpg);"></div>
       </div>
 
-  <div style="width:100px; height: 100px; border: 1px solid black;" id="upiddiv"></div>
-  <div style="width:300px; height: 50px; border: 1px solid green;" id="statusdiv">Status: </div>
+  <div id="statusdiv">Status: </div>
   </body>
 <script type="text/javascript">
     progress();

@@ -128,6 +128,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     CustomLogger.logme(this.getClass().getName(), file.getName());
                     CustomLogger.logme(this.getClass().getName(), file.getFile().getPath());
                     CustomLogger.logme(this.getClass().getName(), file.getFile().getAbsolutePath());
+                       return "/templates/ThankYou.jsp";
                 }
 
 

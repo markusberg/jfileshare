@@ -3,10 +3,25 @@
     height: 20px;
     background: black;
     vertical-align: middle;
+    margin-top: 10px;
 }
 
 #b {
     width: 100px;
-    height: 10px;
+    height: 20px;
     background: green;
+}
+
+#statusdiv {
+     width:398px;
+    height: 50px;
+    border: 1px solid green;
+    margin-top: 10px;
+}
+
+form {
+    border: 1px solid black;
+    width: 388px;
+    height: 50px;
+    padding: 5px;
 }
