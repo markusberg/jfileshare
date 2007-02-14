@@ -904,6 +904,8 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         private Hashtable<String,String> params = new Hashtable<String,String>();
         private int contentLength = -1;
         private String status = "unknown";
+        private File tmp_file;
+
 
         public int getUpid() {
             return upid;
@@ -919,6 +921,7 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
 
         public void setTmp_filename(String tmp_filename) {
             this.tmp_filename = tmp_filename;
+            if ( tmp_filename != null ) this.tmp_file = new File(tmp_filename);
         }
 
         public Hashtable<String, String> getParams() {
@@ -962,5 +965,15 @@ public class MultipartRequest extends HttpServletRequestWrapper implements HttpS
         public void setStatus(String status) {
             this.status = status;
         }
+
+        public File getFile(){
+            return this.tmp_file;
+        }
+
+        public long getFileSize(){
+            return this.tmp_file.length();
+        }
+
+
     }
 }

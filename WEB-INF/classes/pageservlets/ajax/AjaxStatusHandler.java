@@ -26,10 +26,13 @@ public class AjaxStatusHandler implements AjaxSubHandler  {
 		String ajaxresponse = "";
         String unid = request.getParameter("unid");
         MultipartRequest.SessionData data = (MultipartRequest.SessionData) request.getSession().getAttribute(unid);
-        String tmp_filename = data.getTmp_filename();
-        int contentlength = data.getContentLength();
-        File file = new File(tmp_filename);
+        int contentlength = data.getContentLength()-585;
+        File file = data.getFile();
         long length = file.length();
+
+        Float result = Float.parseFloat(Long.toString(length))/contentlength*100;
+
+        int procent = result.intValue();
 
         int remain = contentlength - Integer.parseInt(Long.toString(length));
         StringWriter sw = new StringWriter();
@@ -64,6 +67,10 @@ public class AjaxStatusHandler implements AjaxSubHandler  {
             CustomLogger.logme(this.getClass().getName(),"Status: " + status);
             hd.characters(status.toCharArray(),0,status.length());
             hd.endElement("","","status");
+            hd.startElement("","","procent",atts);
+            String procents = Integer.toString(procent);
+            hd.characters(procents.toCharArray(),0,procents.length());
+            hd.endElement("","","procent");
             hd.endElement("","","ajaxresponse");
 			hd.endDocument();
 

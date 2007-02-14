@@ -20,6 +20,7 @@
             var m = 0;
 
             var ran_number;
+          var unid = -1;
 
             function changecolor(newcolor){if(p=="r"&& document.getElementById){document.getElementById('r').style.backgroundColor = newcolor; return;}
               if(document.layers){ // browser="NN4";
@@ -39,7 +40,59 @@
              if(f)q=-5;if(!f)q=5;x=x+q;
              e=document.getElementById("b");
              e.style.width = x + 'px';
-              t=setTimeout("changewidth();",0);
+             var main = document.getElementById("p");
+             var mainwidth = main.style.width.split("px")[0];
+             alert("Mainwidth is " + mainwidth);
+              //t=setTimeout("changewidth();",0);
+            }
+
+
+          function check_Status(){
+              if ( unid == -1 ) unid = document.getElementById("upid");
+                ajaxRequest("getstatus","unid",unid);
+              timer=setTimeout("check_Status();",300); 
+              
+          }
+
+          function triggered() {
+              var response;
+              var status;
+              var unid;
+              if ((xmlhttp.readyState == 4) && (xmlhttp.status == 200)) {
+				  response = xmlhttp.responseXML;
+				  status =  response.getElementsByTagName('status')[0].firstChild.data;
+				  unid = response.getElementsByTagName('unid')[0].firstChild.data;
+
+                  var upiddive = document.getElementById("upiddiv");
+                  upiddive.innerHTML="Negotiated upid: " + unid;
+                  var statusdive = document.getElementById("statusdiv");
+                  var total = response.getElementsByTagName("total")[0].firstChild.data;
+                  var length = response.getElementsByTagName("length")[0].firstChild.data;
+                  total = total/1024/1024 + "M";
+                  length = length/1024/1024 + "M";
+                  statusdive.innerHTML="Status: " + status + "<br />" + length + " / " + total;
+                  var procent = response.getElementsByTagName('procent')[0].firstChild.data;
+                  changewidth_procent(procent);
+
+              } else {
+                  //alert("Something nasty happened");
+              }
+
+
+
+          } 
+
+          function changewidth_procent(procent){
+             var main = document.getElementById("p");
+             var mainwidth = main.style.width.split("px")[0];
+             var end = ((procent/100)*mainwidth)-4;
+             if(x>end&&f==0){f=0;return;}
+             if(x<101&&f==1){f=0;return;}
+             if(f)q=-5;if(!f)q=5;x=x+q;
+             e=document.getElementById("b");
+             e.style.width = x + 'px';
+
+              t=setTimeout("changewidth_procent(" + procent + ");",0);
             }
 
 
@@ -55,13 +108,14 @@
           function upidNegotiate(){
               var ran_number = Math.floor(Math.random()*1000);
               document.getElementById("upid").value=ran_number;
+              unid = ran_number;
               var upiddive = document.getElementById("upiddiv");
               upiddive.innerHTML="Negotiated upid: " + ran_number;
               //ajaxRequest("setunid","unid",ran_number);
-              return true;
+              
 
           }
-
+            /*
           function triggered() {
               var response;
               var status;
@@ -88,7 +142,7 @@
 
 
 
-          }
+          } */
 
          function ajaxRequest(action, param,value){
             if (param == null ){
@@ -118,7 +172,7 @@
   <body>Please upload file<br />
   <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();"><input type="hidden" name="action" value="bar" /></form>-->
   <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">-->
-      <form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();" enctype="multipart/form-data">
+      <form action="/upload/" method="post" id="uploadform" onsubmit="upidNegotiate();check_Status();" enctype="multipart/form-data">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
       <input type="file" name="file" />
@@ -127,11 +181,12 @@
 
   </form>
 
-  <div id="p" style="width: 400px;" onclick="changewidth()">
+  <div id="p" style="width: 400px;" onclick="changewidth_procent(100)">
       <div id="b" style="width: 1px;"></div>
       </div>
 
-  <div style="width:100px; height: 100px; border: 1px solid black;" id="upiddiv">Foo</div>
+  <div style="width:100px; height: 100px; border: 1px solid black;" id="upiddiv"></div>
+  <div style="width:300px; height: 50px; border: 1px solid green;" id="statusdiv">Status: </div>
   </body>
 <script type="text/javascript">
     progress();
