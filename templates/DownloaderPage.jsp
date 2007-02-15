@@ -27,7 +27,7 @@
 
       </tr>
       <tr>
-          <td class="label">Size: </td><td><%=file.getSize().intValue()%> k</td>
+          <td class="label">Size: </td><td><%=new Double(file.getSize()/1024).intValue()%> k</td>
       </tr>
       <tr>
           <td class="label">Type: </td><td><%=file.getType()%></td>

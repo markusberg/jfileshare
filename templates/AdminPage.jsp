@@ -47,7 +47,7 @@
                                 <td>Filename: </td><td><%=file.getName()%></td><td class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
                             </tr>
                             <tr class="filedata">
-                                <td>&nbsp;</td><td>Size:</td><td><%=file.getSize()/1024%> Kb</td>
+                                <td>&nbsp;</td><td>Size:</td><td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>
                             </tr>
                             <tr class="filedata">
                                 <td>&nbsp;</td><td>Md5sum</td><td><%=file.getMd5sum()%></td>
