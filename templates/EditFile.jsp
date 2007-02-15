@@ -1,4 +1,5 @@
 <%@ page import="objects.FileItem" %>
+<%@ page import="config.Config" %>
 <%--
   Created by IntelliJ IDEA.
   User: zoran
@@ -36,7 +37,7 @@
           <td>Permanent</td><td><select name="permanent">
           <option value="yes"<%=file.isPermanent()?" selected=\"selected\"":""%>>yes</option>
           <option value="no"<%=file.isPermanent()?"":" selected=\"selected\""%>>no</option>
-          </select><i style="font-size: 11px;">Non permanent files will be automatically removed after 14 days</i></td>
+          </select><i style="font-size: 11px;">Non permanent files will be automatically removed after <%=Config.getKeepForDays()%> days</i></td>
       </tr>
       <tr>
           <td>Downloads allowed</td><td><input type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"></td>

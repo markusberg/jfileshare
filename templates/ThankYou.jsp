@@ -20,7 +20,7 @@
   <br />
   <div id="note">
   Note: Your file will be removed in <%=Config.getKeepForDays()%> days unless you change this parameter
-  in the administration area
+  in the administration area. Also, use the administration area to limit the count of allowed downloads.
   </div>
   </body>
 </html>

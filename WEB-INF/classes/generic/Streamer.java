@@ -64,7 +64,7 @@ public class Streamer extends HttpServlet {
         if ( file.search(conn,lastpart) && file.isEnabled() && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
             if ( pathparts[pathparts.length - 2].equals("get") ){
                 response.setContentType(file.getType());
-                response.setHeader("Content-disposition", "filename=" + file.getName());
+                response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
                 ServletOutputStream sos = response.getOutputStream();
                 FileInputStream fis = new FileInputStream(file.getFile());
                 BufferedInputStream bis = new BufferedInputStream(fis);

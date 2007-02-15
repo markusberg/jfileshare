@@ -12,6 +12,7 @@ import javax.naming.Context;
 import javax.sql.DataSource;
 
 import utils.CustomLogger;
+import utils.Jcrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -57,8 +58,12 @@ public class LoginFilter implements Filter {
 		      filterChain.doFilter(servletRequest,servletResponse);
 
 	    }  else {
-		    HttpServletResponse response = (HttpServletResponse) servletResponse;
+            HttpServletResponse response = (HttpServletResponse) servletResponse;
             HttpServletRequest request = (HttpServletRequest)servletRequest;
+            if ( ! request.isSecure() ){
+                request.setAttribute("address","https://" + request.getServerName() + request.getServletPath());
+                filterconfig.getServletContext().getRequestDispatcher("/templates/Forward.jsp").forward(servletRequest,servletResponse);
+            }
             response.setHeader("Pragma", "no-cache");
 		    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
 		    response.setDateHeader("Expires", -1);
@@ -120,15 +125,19 @@ public class LoginFilter implements Filter {
                 } catch (java.sql.SQLException e){
 				    CustomLogger.logme(this.getClass().getName(),e.toString(),true);
 			    }
-				CustomLogger.logme(this.getClass().getName(),"Got password " + password );
-				if ( password.equals(dbpass)){
-					session.setAttribute("user",user);
+				CustomLogger.logme(this.getClass().getName(),"Got password *******");
+                //Jcrypt.crypt(dbpass,password).equals(dbpass)
+                //if ( password.equals(dbpass)){
+                String encrypted = Jcrypt.crypt(dbpass,password);
+                if ( encrypted.equals(dbpass) ){
+                    session.setAttribute("user",user);
                     //Save lastlogin-date
                     
                     return true;
 
 				}  else {
-					return false;
+                    CustomLogger.logme(this.getClass().getName(),"DB pass " + dbpass + " doesn't macth " + encrypted);
+                    return false;
 				}
 
 		}
