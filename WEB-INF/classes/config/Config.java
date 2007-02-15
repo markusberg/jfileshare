@@ -20,6 +20,8 @@ public class Config {
 
     private static final int _KEEP_FOR_DAYS = 14;
 
+    private static final boolean _LOGIN_REQUIRES_HTTPS = false;
+
 
     public static String getDb() {
         return _DB;
@@ -46,5 +48,10 @@ public class Config {
 
     public static int getKeepForDays(){
         return _KEEP_FOR_DAYS;
+    }
+
+
+    public static boolean loginRequiresHttps() {
+        return _LOGIN_REQUIRES_HTTPS;
     }
 }

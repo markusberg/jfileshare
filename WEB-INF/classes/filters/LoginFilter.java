@@ -60,7 +60,7 @@ public class LoginFilter implements Filter {
 	    }  else {
             HttpServletResponse response = (HttpServletResponse) servletResponse;
             HttpServletRequest request = (HttpServletRequest)servletRequest;
-            if ( ! request.isSecure() ){
+            if ( ! request.isSecure() && Config.loginRequiresHttps() ){
                 request.setAttribute("address","https://" + request.getServerName() + request.getServletPath());
                 filterconfig.getServletContext().getRequestDispatcher("/templates/Forward.jsp").forward(servletRequest,servletResponse);
             }
