@@ -40,7 +40,7 @@
           </select><i style="font-size: 11px;">Non permanent files will be automatically removed after <%=Config.getKeepForDays()%> days</i></td>
       </tr>
       <tr>
-          <td>Downloads allowed</td><td><input type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"></td>
+          <td>Downloads allowed</td><td><input style="width: 90px;" type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"><i style="font-size:11px;">Integer to specify max. allowed downloads or "unlimited" for no limit</i></td>
       </tr>
       <tr>
           <td colspan="2">
