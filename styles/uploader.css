@@ -25,3 +25,10 @@ form {
     height: 50px;
     padding: 5px;
 }
+
+#note {
+    width: 300px;
+    padding: 10px;
+    background-color: orange;
+    
+}

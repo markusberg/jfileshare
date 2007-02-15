@@ -27,10 +27,16 @@
           </td>
        </tr>
       <tr>
+          <td>Enabled</td><td><select name="enabled">
+          <option value="yes"<%=file.isEnabled()?" selected=\"selected\"":""%>>yes</option>
+          <option value="no"<%=file.isEnabled()?"":" selected=\"selected\""%>>no</option>
+          </select></td>
+      </tr>
+      <tr>
           <td>Permanent</td><td><select name="permanent">
           <option value="yes"<%=file.isPermanent()?" selected=\"selected\"":""%>>yes</option>
           <option value="no"<%=file.isPermanent()?"":" selected=\"selected\""%>>no</option>
-          </select></td>
+          </select><i style="font-size: 11px;">Non permanent files will be automatically removed after 14 days</i></td>
       </tr>
       <tr>
           <td>Downloads allowed</td><td><input type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"></td>

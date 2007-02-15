@@ -47,15 +47,20 @@
       <tr>
           <td id="download" colspan="2">
               <%
-                  if ( file.getDownloads() == -1 || file.getDownloads() > 0 ){
-              %>
-              <a href="/download/get/<%=file.getMd5sum()%>/">Download file</a>
-              <%
+                  if ( file.isEnabled() ){
+                      if ( file.getDownloads() == -1 || file.getDownloads() > 0 ){
+                  %>
+                  <a href="/download/get/<%=file.getMd5sum()%>/">Download file</a>
+                  <%
+                      } else {
+                          %>
+                  The file you are viewing has exceeded it's allowed downloads. Please contact the uploader to enable more downloads.
+                  <%
+                      }
                   } else {
-                      %>
-              The file you are viewing has exceeded it's allowed downloads. Please contact the uploader to enable more downloads.
-              <%
-                  }
+                          %>Download not available<%
+
+                      }
               %>
 
               </td>

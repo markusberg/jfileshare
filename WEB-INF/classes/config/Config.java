@@ -18,6 +18,7 @@ public class Config {
 
     private static final int _USIZE_ALLOW = 1024000;
 
+    private static final int _KEEP_FOR_DAYS = 14;
 
 
     public static String getDb() {
@@ -41,5 +42,9 @@ public class Config {
 
     public static int getUsizeAllow() {
         return _USIZE_ALLOW;
+    }
+
+    public static int getKeepForDays(){
+        return _KEEP_FOR_DAYS;
     }
 }

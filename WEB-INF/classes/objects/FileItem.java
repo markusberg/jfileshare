@@ -33,6 +33,8 @@ public class FileItem {
 
     private UserItem owner;
 
+    private boolean enabled = true;
+
 
     public int getFid() {
         return fid;
@@ -131,6 +133,13 @@ public class FileItem {
         this.owner = owner;
     }
 
+    public boolean isEnabled(){
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled){
+        this.enabled = enabled;
+    }
 
     
 
@@ -138,7 +147,7 @@ public class FileItem {
         PreparedStatement st = null;
         if ( this.fid == -1 ){
             try {
-                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1,this.name);
                 st.setString(2,this.type);
                 st.setDouble(3,this.size);
@@ -161,6 +170,7 @@ public class FileItem {
                     st.setTimestamp(9,new Timestamp(this.expiration.getTime()));
                 }
                 st.setInt(10,this.owner.getUid());
+                st.setBoolean(11,this.enabled);
                 st.executeUpdate();
                 ResultSet rs = st.getGeneratedKeys();
                 while (rs.next()){
@@ -175,7 +185,7 @@ public class FileItem {
 
         } else {
             try {
-                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=? where fid=?");
+                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=?,enabled=? where fid=?");
                 st.setBoolean(1,this.permanent);
                 st.setInt(2,this.downloads);
                 if ( expiration == null ){
@@ -183,7 +193,8 @@ public class FileItem {
                 } else {
                     st.setTimestamp(3,new Timestamp(this.expiration.getTime()));
                 }
-                st.setInt(4,this.fid);
+                st.setBoolean(4,this.enabled);
+                st.setInt(5,this.fid);
                 st.executeUpdate();
                 st.close();
                 return true;
@@ -206,6 +217,7 @@ public class FileItem {
                 this.size = rs.getDouble("size");
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
+                this.enabled = rs.getBoolean("enabled");
                 if ( rs.wasNull() ) this.permanent = false;
                 rs.getInt("downloads");
                 if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
@@ -255,7 +267,7 @@ public class FileItem {
         try {
             Statement st = conn.createStatement();
             CustomLogger.logme(this.getClass().getName(),"Locking FileItems table for upgrade");
-            st.execute("LOCK TABLES FileItems");
+            //st.execute("LOCK TABLES FileItems");
             PreparedStatement st2 = conn.prepareStatement("SELECT downloads FROM FileItems WHERE fid=?");
             st2.setInt(1,this.fid);
             ResultSet rs = st2.executeQuery();

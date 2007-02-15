@@ -67,6 +67,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 FileItem file = new FileItem();
                 file.setFid(Integer.parseInt(request.getParameter("fid")));
                 file.setPermanent(request.getParameter("permanent").equals("yes"));
+                file.setEnabled(request.getParameter("enabled").equals("yes"));
                 if ( request.getParameter("downloads").equals("unlimited")){
                     file.setDownloads(-1);
                 } else file.setDownloads(Integer.parseInt(request.getParameter("downloads")));

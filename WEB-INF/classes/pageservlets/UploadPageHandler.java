@@ -117,6 +117,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     savedfile.setMd5sum(md5);
                     UserItem owner = (UserItem) request.getSession().getAttribute("user");
                     savedfile.setOwner(owner);
+                    savedfile.setPermanent(false);
                     savedfile.save(conn);
                     File destfile = new File(Config.getFilestore() + "/" +  savedfile.getFid());
                     data.setStatus("Moving file");

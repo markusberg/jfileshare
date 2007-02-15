@@ -114,6 +114,7 @@ public class UserItemView {
                 file.setSize(rs.getDouble("FileItems.size"));
                 file.setMd5sum(rs.getString("FileItems.md5sum"));
                 file.setPermanent(rs.getBoolean("FileItems.permanent"));
+                file.setEnabled(rs.getBoolean("FileItems.enabled"));
                 file.setDownloads(rs.getInt("FileItems.downloads"));
                 if ( rs.wasNull()){
                     file.setDownloads(-1);
