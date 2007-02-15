@@ -75,8 +75,9 @@
                   length = length/1024/1024;
                   total = Math.round(10*total)/10 + "M";
                   length = Math.round(10*length)/10 + "M";
-                  statusdive.innerHTML="Status: " + status + "<br />" + length + " / " + total;
                   var procent = response.getElementsByTagName('procent')[0].firstChild.data;
+                  statusdive.innerHTML="Status: " + status + "<br /><span style=\"font-weight: bold; font-size:15px\">" + procent + "%</span><span style=\"font-size:11px\">("+ length + " / " + total + ")</span>";
+
                   changewidth_procent(procent);
 
               } else {
@@ -185,7 +186,7 @@
 
   </form>
   <div id="p" style="width: 400px;" onclick="changewidth_procent(100)">
-      <div id="b" style="width: 1px; background-image: url(/images/progress.jpg);"></div>
+      <div id="b" style="width: 0; background-image: url(/images/progress.jpg);"></div>
       </div>
 
   <div id="statusdiv">Status: </div>

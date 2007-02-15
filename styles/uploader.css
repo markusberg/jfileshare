@@ -13,10 +13,12 @@
 }
 
 #statusdiv {
-     width:398px;
+     width:378px;
+    padding-left: 20px;
     height: 50px;
     border: 1px solid green;
     margin-top: 10px;
+    background-image: url(/images/banner_bg.gif);
 }
 
 form {
@@ -24,6 +26,7 @@ form {
     width: 388px;
     height: 50px;
     padding: 5px;
+    background-image: url(/images/banner_bg.gif);
 }
 
 #note {
