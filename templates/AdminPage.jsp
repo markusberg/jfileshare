@@ -44,7 +44,10 @@
                                     FileItem file = files.get(key);
                                     %>
                             <tr class="filename">
-                                <td>Filename: </td><td><%=file.getName()%></td><td class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
+                                <td>Filename: </td><td colspan="2"><%=file.getName()%></td>
+                            </tr>
+                            <tr class="filedata">
+                                <td>&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
                             </tr>
                             <tr class="filedata">
                                 <td>&nbsp;</td><td>Size:</td><td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>
