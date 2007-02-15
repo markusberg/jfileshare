@@ -19,8 +19,8 @@
 
   <%
 
-      if (request.getAttribute("user") != null) {
-          UserItem user = (UserItem) request.getAttribute("user");
+      if (request.getSession().getAttribute("user") != null) {
+          UserItem user = (UserItem) request.getSession().getAttribute("user");
           %>
     <table cellpadding="0" cellspacing="0" id="userinfo">
         <tr>
