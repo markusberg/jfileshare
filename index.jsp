@@ -10,9 +10,8 @@
   <head><title>Welcome to SECTRA fileshare</title></head>
   <body>
 
-  <a href="/upload">Upload</a><br />
-  <a href="/download">Download</a><br />
-  <a href="/register">Register</a>
+  This facility is intended for registered users only. If you are
+  registered, you are welcome to <a href="/admin">LOGIN</a>.
 
   </body>
 </html>

@@ -29,6 +29,9 @@
         <tr>
             <td>Email: </td><td><%=user.getEmail()%></td>
         </tr>
+        <tr>
+            <td colspan="2"><a href="/upload/">Upload new file</a></td>
+        </tr>
     </table>
     <%
             if (request.getAttribute("files") != null) {
