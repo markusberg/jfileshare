@@ -23,14 +23,27 @@ public class UserItemView {
     private int id = -1;
     private String username = null;
     private String email = null;
+    private int creator = -1;
     public static int SEARCH_EMAIL = 1;
+    public static int SEARCH_BY_CREATOR = 1;
     private UserItem user = null;
+    private Map<Integer,UserItem> users = new TreeMap<Integer,UserItem>();
     private Map<Integer, FileItem> files = new TreeMap<Integer,FileItem>();
+
+    public UserItemView(){
+
+    }
 
     public UserItemView(Connection conn, int id) {
         this.conn = conn;
         this.id = id;
         searchUser();
+    }
+
+    public UserItemView(Connection conn, int creator, int SEARCH_BY_CREATOR) {
+        this.conn = conn;
+        this.creator = creator;
+        this.users = getChildren();
     }
 
 
@@ -46,6 +59,7 @@ public class UserItemView {
         this.email = email;
         searchUser();
     }
+
 
     private void searchUser(){
         PreparedStatement st = null;
@@ -89,6 +103,37 @@ public class UserItemView {
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
         }
+    }
+
+
+    private Map<Integer,UserItem> getChildren(){
+        if ( this.conn == null || this.creator == -1 ) return null;
+        Map<Integer,UserItem> users = new TreeMap<Integer,UserItem>();
+        try {
+            PreparedStatement st = this.conn.prepareStatement("SELECT * FROM UserItems WHERE creator=?");
+            st.setInt(1,this.creator);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                UserItem user = new UserItem();
+                user.setUid(rs.getInt("UserItems.uid"));
+                user.setUsername(rs.getString("UserItems.username"));
+                user.setPassword(rs.getString("UserItems.password"));
+                user.setEmail(rs.getString("UserItems.email"));
+                user.setUserType(rs.getInt("UserItems.usertype"));
+                user.setCreated(rs.getTimestamp("UserItems.created"));
+                user.setLastlogin(rs.getTimestamp("UserItems.lastlogin"));
+                user.setExpires(rs.getBoolean("UserItems.expires"));
+                user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                users.put(user.getUid(),user);
+
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(),e.toString(),true);
+        }
+        return users;
+
     }
 
 

@@ -19,6 +19,7 @@ public class Config {
     private static final int _USIZE_ALLOW = 1024000;
 
     private static final int _KEEP_FOR_DAYS = 14;
+    private static final int _USER_EXPIRES = 60;
 
     private static final boolean _LOGIN_REQUIRES_HTTPS = false;
 
@@ -48,6 +49,10 @@ public class Config {
 
     public static int getKeepForDays(){
         return _KEEP_FOR_DAYS;
+    }
+
+    public static int getUserExpires(){
+        return _USER_EXPIRES;
     }
 
 
