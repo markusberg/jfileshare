@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.io.IOException;
 
 import objects.UserItem;
+import views.UserItemView;
 
 /**
  * Created by Zoran Pucar zoran@medorian.com.
@@ -91,7 +92,8 @@ public class LoginFilter implements Filter {
 	    HttpSession session = req.getSession(true);
 	    //First check if we are logged in
 	    if ( session.getAttribute("user") != null ){
-            CustomLogger.logme(this.getClass().getName(),"USER " + ((UserItem)session.getAttribute("user")).getUsername() + " IS LOGGED IN");
+            UserItem user = (UserItem) session.getAttribute("user");
+            CustomLogger.logme(this.getClass().getName(),"USER " + user.getUsername() + "(" + user.getUid() + ")" + " IS LOGGED IN");
             return true;
         }
 
@@ -106,26 +108,11 @@ public class LoginFilter implements Filter {
             UserItem user = new UserItem();
             ResultSet result = null;
 			if ( username != null && password != null ){
-			    try {
-				PreparedStatement st = conn.prepareStatement("select * from UserItems where username=?");
-				    st.setString(1,username);
-				result = st.executeQuery();
-				while ( result.next()) {
-				    dbuser = result.getString("username");
-				    dbpass = result.getString("password");
-                    if ( dbuser != null ){
-                        user.setUsername(dbuser);
-                        user.setPassword(dbpass);
-                        user.setUid(result.getInt("uid"));
-                        user.setEmail(result.getString("email"));
-                    }
-                }
-                result.close();
-                    st.close();
-                } catch (java.sql.SQLException e){
-				    CustomLogger.logme(this.getClass().getName(),e.toString(),true);
-			    }
-				CustomLogger.logme(this.getClass().getName(),"Got password *******");
+                UserItemView uview = new UserItemView(conn,username);
+                user = uview.getUserItem();
+                dbpass = user.getPassword();
+                
+                CustomLogger.logme(this.getClass().getName(),"Got password *******");
                 //Jcrypt.crypt(dbpass,password).equals(dbpass)
                 //if ( password.equals(dbpass)){
                 String encrypted = Jcrypt.crypt(dbpass,password);

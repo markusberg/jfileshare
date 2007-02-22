@@ -49,6 +49,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
 
         UserItem loginuser = (UserItem) request.getSession().getAttribute("user");
         UserItemView useritemview = new UserItemView(conn,loginuser.getUsername());
+        loginuser = useritemview.getUserItem();
 
         if ( request.getParameter("action") != null ){
             if ( request.getParameter("action").equals("delete")){

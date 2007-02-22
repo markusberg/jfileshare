@@ -27,6 +27,7 @@ public class UserItemView {
     public static int SEARCH_EMAIL = 1;
     public static int SEARCH_BY_CREATOR = 1;
     private UserItem user = null;
+    private Map<Integer,UserItem> children = new TreeMap<Integer,UserItem>();
     private Map<Integer,UserItem> users = new TreeMap<Integer,UserItem>();
     private Map<Integer, FileItem> files = new TreeMap<Integer,FileItem>();
 
@@ -38,12 +39,19 @@ public class UserItemView {
         this.conn = conn;
         this.id = id;
         searchUser();
+        CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
+        UserItemView uview = new UserItemView(conn,this.id,UserItemView.SEARCH_BY_CREATOR);
+        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
+        this.user.setChildren(uview.getUsers());
     }
 
     public UserItemView(Connection conn, int creator, int SEARCH_BY_CREATOR) {
+        CustomLogger.logme(this.getClass().getName(),"Searching for children of user " + creator);
         this.conn = conn;
         this.creator = creator;
-        this.users = getChildren();
+        this.users = searchChildren();
+        String plural = this.users.size()==1?"":"ren";
+        CustomLogger.logme(this.getClass().getName(),"Found " + this.users.size() + " child" + plural );
     }
 
 
@@ -51,6 +59,10 @@ public class UserItemView {
         this.conn = conn;
         this.username = username;
         searchUser();
+        CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
+        UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
+        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
+        this.user.setChildren(uview.getUsers());
     }
 
 
@@ -58,6 +70,10 @@ public class UserItemView {
         this.conn = conn;
         this.email = email;
         searchUser();
+        CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
+        UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
+        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
+        this.user.setChildren(uview.getUsers());
     }
 
 
@@ -106,7 +122,7 @@ public class UserItemView {
     }
 
 
-    private Map<Integer,UserItem> getChildren(){
+    private Map<Integer,UserItem> searchChildren(){
         if ( this.conn == null || this.creator == -1 ) return null;
         Map<Integer,UserItem> users = new TreeMap<Integer,UserItem>();
         try {
@@ -123,7 +139,9 @@ public class UserItemView {
                 user.setCreated(rs.getTimestamp("UserItems.created"));
                 user.setLastlogin(rs.getTimestamp("UserItems.lastlogin"));
                 user.setExpires(rs.getBoolean("UserItems.expires"));
-                user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                if ( user.expires() ){
+                    user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                }
                 users.put(user.getUid(),user);
 
             }
@@ -178,6 +196,14 @@ public class UserItemView {
 
     public UserItem getUserItem(){
         return this.user;
+    }
+
+    public Map<Integer,UserItem> getChildren(){
+        return this.children;
+    }
+
+    public Map<Integer,UserItem> getUsers(){
+        return this.users;
     }
 
     public Map<Integer,FileItem> getFiles(){
