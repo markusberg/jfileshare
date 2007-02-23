@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.sql.*;
+import java.io.File;
 
 /**
  * Created by Zoran Pucar zoran@medorian.com.
@@ -31,7 +32,7 @@ public class UserItem {
     private Date expiry;
     private UserItem creator;
     private Map<Integer,UserItem> children = new TreeMap<Integer,UserItem>();
-
+    private Map<Integer, FileItem> files = new TreeMap<Integer,FileItem>();
     public static final int TYPE_ADMIN = 1;
     public static final int TYPE_SECTRA = 2;
     public static final int TYPE_EXTERNAL = 3;
@@ -134,6 +135,22 @@ public class UserItem {
 
     public void deleteChild(UserItem user){
         this.children.remove(user.getUid());
+    }
+
+    public Map<Integer,FileItem> getFiles(){
+        return this.files;
+    }
+
+    public void setFiles(Map<Integer,FileItem> files ){
+        this.files = files;
+    }
+
+    public void addFile(FileItem file){
+        this.files.put(file.getFid(),file);
+    }
+
+    public FileItem getFile(int key){
+        return this.files.containsKey(key)?this.files.get(key):null;
     }
 
 

@@ -34,6 +34,29 @@
         </tr>
     </table>
     <%
+        if ( user.getChildren() != null && user.getChildren().size() > 0 ){
+            %>
+    <table cellpadding="0" cellspacing="0">
+        <%
+        Map<Integer,UserItem> children = user.getChildren();
+            for ( Integer key: children.keySet()){
+                UserItem child = children.get(key);
+                %>
+            <tr>
+                <td>User: <%=child.getUid()%></td>
+                <td>Email: <%=child.getEmail()%></td>
+                <td>Lastlogin: <%=utils.Helpers.formatDate(child.getLastlogin())%></td>
+            </tr>
+        <%
+            }
+
+        %>
+    </table>
+
+    <%
+        }
+    %>
+    <%
             if (request.getAttribute("files") != null) {
                 Map<Integer, FileItem> files = (Map<Integer,FileItem>) request.getAttribute("files");
                 if ( files.size() > 0 ){

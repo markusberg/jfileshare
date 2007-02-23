@@ -188,6 +188,7 @@ public class UserItemView {
                 file.setExpiration(rs.getTimestamp("FileItems.expiration"));
                 file.setOwner(this.user);
                 this.files.put(file.getFid(),file);
+                this.user.addFile(file);
             }
         } catch (SQLException e ){
             CustomLogger.logme(this.getClass().getName(),e.toString(), true);

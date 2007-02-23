@@ -50,6 +50,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
         UserItem loginuser = (UserItem) request.getSession().getAttribute("user");
         UserItemView useritemview = new UserItemView(conn,loginuser.getUsername());
         loginuser = useritemview.getUserItem();
+        CustomLogger.logme(this.getClass().getName(),"From userdata found " + loginuser.getFiles().size());
 
         if ( request.getParameter("action") != null ){
             if ( request.getParameter("action").equals("delete")){
@@ -91,6 +92,13 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 email.setUrl(useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid"))).getMd5sum());
                 email.sendHTMLMail();
                 request.setAttribute("message","Email is sent to " + request.getParameter("email"));
+            } else if ( request.getParameter("action").equals("editch") && request.getParameter("uid") != null ){
+                if ( loginuser.getChildren().containsKey(Integer.parseInt(request.getParameter("uid")))){
+                    UserItemView useritemview2 = new UserItemView(conn,Integer.parseInt(request.getParameter("uid")));
+                    request.setAttribute("edited",useritemview2.getUserItem());    
+                } else {
+                    CustomLogger.logme(this.getClass().getName(),"Nonexistent user or no privilege to edit user");
+                }
             }
 
         }
