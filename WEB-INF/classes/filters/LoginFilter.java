@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.io.IOException;
+import java.util.Hashtable;
 
 import objects.UserItem;
 import views.UserItemView;
@@ -35,15 +36,31 @@ public class LoginFilter implements Filter {
     private FilterConfig filterconfig;
     private DataSource datasource;
 
+
+    private Hashtable<String,Integer> authorization_map = new Hashtable<String,Integer>();
+
+
     public void init(FilterConfig config) throws ServletException {
 	try {
 	    this.filterconfig = config;
 	    Context env = (Context) new InitialContext().lookup("java:comp/env");
 	    datasource = (DataSource) env.lookup("jdbc/" + Config.getDb() );
-	} catch (NamingException e){
+        initAuth();
+    } catch (NamingException e){
 	    CustomLogger.logme(this.getClass().getName(),"Throwing exception: " + e.toString(),true);
 	    throw new ServletException(e);
 	}
+
+    }
+
+    /**
+     * Initalizes authorization map.
+     * The map should take 2 args. One is path, and the other is lowest allowed usertype to access the path
+     */
+    private void initAuth(){
+        this.authorization_map.put("/registration",UserItem.TYPE_SECTRA);
+        this.authorization_map.put("/upload",UserItem.TYPE_EXTERNAL);
+        this.authorization_map.put("/admin",UserItem.TYPE_EXTERNAL);
 
     }
 
@@ -51,14 +68,41 @@ public class LoginFilter implements Filter {
 	//To change body of implemented methods use File | Settings | File Templates.
     }
 
+
+    private boolean isAuthorised(HttpServletRequest request, UserItem user){
+        //Get required type:
+        for ( String path : this.authorization_map.keySet() ){
+            if ( request.getServletPath().startsWith(path)){
+                if ( this.authorization_map.get(path) >= user.getUserType() ){
+                    CustomLogger.logme(this.getClass().getName(),this.authorization_map.get(path) +"=" + user.getUserType()); 
+                    return true;
+                } else {
+                    CustomLogger.logme(this.getClass().getName(),"Privilege level of " + this.authorization_map.get(path) + " required, got only " + user.getUserType());
+                    return false;
+                }
+            }
+        }
+
+        return false;
+
+    }
+
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 	Connection _conn = null;
 	try {
 	    _conn = datasource.getConnection();
 	    if ( CheckUser(_conn,servletRequest)) {
-		      filterChain.doFilter(servletRequest,servletResponse);
 
-	    }  else {
+            HttpServletRequest request = (HttpServletRequest)servletRequest;
+            HttpSession session = request.getSession();
+            UserItem user = (UserItem) session.getAttribute("user");
+            if ( isAuthorised(request,user) ){
+              filterChain.doFilter(servletRequest,servletResponse);
+            } else {
+                filterconfig.getServletContext().getRequestDispatcher("/templates/NoAccess.jsp").forward(servletRequest,servletResponse);
+            }
+
+        }  else {
             HttpServletResponse response = (HttpServletResponse) servletResponse;
             HttpServletRequest request = (HttpServletRequest)servletRequest;
             if ( ! request.isSecure() && Config.loginRequiresHttps() ){

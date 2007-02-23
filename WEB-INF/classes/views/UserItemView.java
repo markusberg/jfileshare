@@ -41,8 +41,12 @@ public class UserItemView {
         searchUser();
         CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
         UserItemView uview = new UserItemView(conn,this.id,UserItemView.SEARCH_BY_CREATOR);
-        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
-        this.user.setChildren(uview.getUsers());
+        CustomLogger.logme(this.getClass().getName(),"In conn,uid found " + uview.getUsers().size());
+        if ( this.user != null ){
+            this.user.setChildren(uview.getUsers());
+        } else {
+            CustomLogger.logme(this.getClass().getName(),"For some reason this.user is null");
+        }
     }
 
     public UserItemView(Connection conn, int creator, int SEARCH_BY_CREATOR) {
@@ -72,7 +76,7 @@ public class UserItemView {
         searchUser();
         CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
         UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
-        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
+        CustomLogger.logme(this.getClass().getName(),"In conn,email found " + uview.getUsers().size());
         this.user.setChildren(uview.getUsers());
     }
 
@@ -82,9 +86,13 @@ public class UserItemView {
         ResultSet rs = null;
         if ( this.id != -1 ){
             try {
-                st = this.conn.prepareStatement("select * from UserItems,FileItems where UserItems.uid=FileItems.owner and owner=?");
+                CustomLogger.logme(this.getClass().getName(),"THIS ID Should be " + this.id);
+                st = this.conn.prepareStatement("select * from UserItems,FileItems where UserItems.uid=FileItems.owner and UserItems.uid=?");
                 st.setInt(1,this.id);
                 rs = st.executeQuery();
+                if (rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be NULL... WTF WTF");
+                }
             } catch ( SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
@@ -111,6 +119,7 @@ public class UserItemView {
 
 
         if ( rs != null ){
+            CustomLogger.logme(this.getClass().getName(),"RS AINT null");
             populateFromSQL(rs);
             try {
                 rs.close();
@@ -118,6 +127,8 @@ public class UserItemView {
             } catch (SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
+        } else {
+            CustomLogger.logme(this.getClass().getName(),"ResultSet is null WTF!!!");
         }
     }
 
@@ -156,18 +167,31 @@ public class UserItemView {
 
 
     private void populateFromSQL(ResultSet rs){
+        CustomLogger.logme(this.getClass().getName(),"AINT NULL YET");
         boolean run = false;
         try {
             while (rs.next()){
+                CustomLogger.logme(this.getClass().getName(),"ONE TURN IN POPULATE");
                  //Prevent object creation
                 if ( ! run ){
+                    CustomLogger.logme(this.getClass().getName(),"Creatin' user");
                     UserItem user = new UserItem();
                     user.setUid(rs.getInt("UserItems.uid"));
                     user.setUsername(rs.getString("UserItems.username"));
                     user.setPassword(rs.getString("UserItems.password"));
                     user.setEmail(rs.getString("UserItems.email"));
+                    user.setUserType(rs.getInt("UserItems.usertype"));
+                    user.setCreated(rs.getTimestamp("UserItems.created"));
+                    user.setLastlogin(rs.getTimestamp("UserItems.lastlogin"));
+                    user.setExpires(rs.getBoolean("UserItems.expires"));
+                    if ( user.expires() ){
+                        user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                    }
                     this.user = user;
+                    if ( this.user != null ) CustomLogger.logme(this.getClass().getName(),"NOW the usr isn't null");
                     run = true;
+                } else {
+                    CustomLogger.logme(this.getClass().getName(),"Not creating user");
                 }
 
                 FileItem file = new FileItem();

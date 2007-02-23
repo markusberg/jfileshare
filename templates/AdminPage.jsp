@@ -21,6 +21,7 @@
 
       if (request.getSession().getAttribute("user") != null) {
           UserItem user = (UserItem) request.getSession().getAttribute("user");
+          if ( request.getAttribute("edited") != null ) user = (UserItem) request.getAttribute("edited");
           %>
     <table cellpadding="0" cellspacing="0" id="userinfo">
         <tr>
@@ -43,7 +44,7 @@
                 UserItem child = children.get(key);
                 %>
             <tr>
-                <td>User: <%=child.getUid()%></td>
+                <td>User: <a href="/admin/?action=editch&uid=<%=child.getUid()%>">(<%=child.getUid()%>) <%=child.getUsername()%></a></td>
                 <td>Email: <%=child.getEmail()%></td>
                 <td>Lastlogin: <%=utils.Helpers.formatDate(child.getLastlogin())%></td>
             </tr>
