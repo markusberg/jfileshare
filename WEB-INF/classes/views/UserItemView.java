@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Iterator;
 
 import utils.CustomLogger;
 
@@ -31,6 +32,10 @@ public class UserItemView {
     private Map<Integer,UserItem> users = new TreeMap<Integer,UserItem>();
     private Map<Integer, FileItem> files = new TreeMap<Integer,FileItem>();
 
+    private static final int RESULT_TYPE_USER = 1;
+    private static final int RESULT_TYPE_FILES = 2;
+    private static final int RESULT_TYPE_CHILDREN = 3;
+
     public UserItemView(){
 
     }
@@ -40,10 +45,11 @@ public class UserItemView {
         this.id = id;
         searchUser();
         CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
-        UserItemView uview = new UserItemView(conn,this.id,UserItemView.SEARCH_BY_CREATOR);
-        CustomLogger.logme(this.getClass().getName(),"In conn,uid found " + uview.getUsers().size());
+        //UserItemView uview = new UserItemView(conn,this.id,UserItemView.SEARCH_BY_CREATOR);
+        //this.user = uview.getUserItem();
+        //CustomLogger.logme(this.getClass().getName(),"In conn,uid found " + uview.getUsers().size());
         if ( this.user != null ){
-            this.user.setChildren(uview.getUsers());
+            //this.user.setChildren(uview.getUsers());
         } else {
             CustomLogger.logme(this.getClass().getName(),"For some reason this.user is null");
         }
@@ -87,12 +93,34 @@ public class UserItemView {
         if ( this.id != -1 ){
             try {
                 CustomLogger.logme(this.getClass().getName(),"THIS ID Should be " + this.id);
-                st = this.conn.prepareStatement("select * from UserItems,FileItems where UserItems.uid=FileItems.owner and UserItems.uid=?");
+                st = this.conn.prepareStatement("select * from UserItems where UserItems.uid=?");
                 st.setInt(1,this.id);
                 rs = st.executeQuery();
                 if (rs == null ){
                     CustomLogger.logme(this.getClass().getName(),"RS seams to be NULL... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_USER );
                 }
+
+                st = this.conn.prepareStatement("select * from FileItems where FileItems.owner=?");
+                st.setInt(1,this.id);
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be null when getting fileitems... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_FILES);
+                }
+
+                st = this.conn.prepareStatement("select * from UserItems where creator=?");
+                st.setInt(1,this.id);
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS null when getting children... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_CHILDREN);
+                }
+
+
             } catch ( SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
@@ -100,35 +128,77 @@ public class UserItemView {
 
         } else if ( this.username != null ){
             try {
-                st = this.conn.prepareStatement("select * from UserItems,FileItems where UserItems.uid=FileItems.owner and username=?");
+                CustomLogger.logme(this.getClass().getName(),"THIS USERNAME Should be " + this.username);
+                st = this.conn.prepareStatement("select * from UserItems where UserItems.username=?");
                 st.setString(1,this.username);
                 rs = st.executeQuery();
+                if (rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be NULL... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_USER );
+                }
+
+                CustomLogger.logme(this.getClass().getName(),"Searching for files uploaded by " + this.user.getUsername());
+                st = this.conn.prepareStatement("select * from FileItems where FileItems.owner=?");
+                st.setInt(1,this.user.getUid());
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be null when getting fileitems... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_FILES);
+                }
+
+                CustomLogger.logme(this.getClass().getName(),"Searching for users created by " + this.user.getUsername());
+                st = this.conn.prepareStatement("select * from UserItems where creator=?");
+                st.setInt(1,this.user.getUid());
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS null when getting children... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_CHILDREN);
+                }
             } catch ( SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
         } else if ( this.email != null ){
             try {
-                st = this.conn.prepareStatement("select * from UserItems,FileItems where UserItems.uid=FileItems.owner and email=?");
+                CustomLogger.logme(this.getClass().getName(),"THIS EMAIL Should be " + this.email);
+                st = this.conn.prepareStatement("select * from UserItems where UserItems.email=?");
                 st.setString(1,this.email);
                 rs = st.executeQuery();
+                if (rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be NULL... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_USER );
+                }
+
+                st = this.conn.prepareStatement("select * from FileItems where FileItems.owner=?");
+                st.setInt(1,this.user.getUid());
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS seams to be null when getting fileitems... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_FILES);
+                }
+
+                st = this.conn.prepareStatement("select * from UserItems where creator=?");
+                st.setInt(1,this.user.getUid());
+                rs = st.executeQuery();
+                if ( rs == null ){
+                    CustomLogger.logme(this.getClass().getName(),"RS null when getting children... WTF WTF");
+                } else {
+                    populateFromSQL(rs, RESULT_TYPE_CHILDREN);
+                }
             } catch ( SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
         }
+        try {
+            if ( rs != null ) rs.close();
 
-
-
-        if ( rs != null ){
-            CustomLogger.logme(this.getClass().getName(),"RS AINT null");
-            populateFromSQL(rs);
-            try {
-                rs.close();
-                st.close();
-            } catch (SQLException e){
-                CustomLogger.logme(this.getClass().getName(),e.toString(),true);
-            }
-        } else {
-            CustomLogger.logme(this.getClass().getName(),"ResultSet is null WTF!!!");
+            if ( st != null ) st.close();
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
         }
     }
 
@@ -166,14 +236,14 @@ public class UserItemView {
     }
 
 
-    private void populateFromSQL(ResultSet rs){
+    private void populateFromSQL(ResultSet rs, int RESULT_TYPE){
         CustomLogger.logme(this.getClass().getName(),"AINT NULL YET");
-        boolean run = false;
-        try {
-            while (rs.next()){
-                CustomLogger.logme(this.getClass().getName(),"ONE TURN IN POPULATE");
-                 //Prevent object creation
-                if ( ! run ){
+        if ( rs == null ) CustomLogger.logme(this.getClass().getName(),"NOW IT SEAMS NULL");
+        else CustomLogger.logme(this.getClass().getName(),"NO NOT YET");
+
+        if ( RESULT_TYPE == RESULT_TYPE_USER){
+            try {
+                while ( rs.next() ){
                     CustomLogger.logme(this.getClass().getName(),"Creatin' user");
                     UserItem user = new UserItem();
                     user.setUid(rs.getInt("UserItems.uid"));
@@ -188,34 +258,60 @@ public class UserItemView {
                         user.setExpiry(rs.getInt("UserItems.daystoexpire"));
                     }
                     this.user = user;
-                    if ( this.user != null ) CustomLogger.logme(this.getClass().getName(),"NOW the usr isn't null");
-                    run = true;
-                } else {
-                    CustomLogger.logme(this.getClass().getName(),"Not creating user");
-                }
 
-                FileItem file = new FileItem();
-                file.setFid(rs.getInt("FileItems.fid"));
-                file.setName(rs.getString("FileItems.name"));
-                file.setType(rs.getString("FileItems.type"));
-                file.setSize(rs.getDouble("FileItems.size"));
-                file.setMd5sum(rs.getString("FileItems.md5sum"));
-                file.setPermanent(rs.getBoolean("FileItems.permanent"));
-                file.setEnabled(rs.getBoolean("FileItems.enabled"));
-                file.setDownloads(rs.getInt("FileItems.downloads"));
-                if ( rs.wasNull()){
-                    file.setDownloads(-1);
                 }
-                file.setPassword(rs.getString("FileItems.password"));
-                if ( rs.wasNull()) file.setPassword(null);
-                file.setDdate(rs.getTimestamp("FileItems.ddate"));
-                file.setExpiration(rs.getTimestamp("FileItems.expiration"));
-                file.setOwner(this.user);
-                this.files.put(file.getFid(),file);
-                this.user.addFile(file);
+            } catch (SQLException e) {
+                CustomLogger.logme(this.getClass().getName(),e.toString(),true);
             }
-        } catch (SQLException e ){
-            CustomLogger.logme(this.getClass().getName(),e.toString(), true);
+        } else if ( RESULT_TYPE == RESULT_TYPE_FILES ){
+            try {
+                while ( rs.next() ){
+                    FileItem file = new FileItem();
+                    file.setFid(rs.getInt("FileItems.fid"));
+                    file.setName(rs.getString("FileItems.name"));
+                    file.setType(rs.getString("FileItems.type"));
+                    file.setSize(rs.getDouble("FileItems.size"));
+                    file.setMd5sum(rs.getString("FileItems.md5sum"));
+                    file.setPermanent(rs.getBoolean("FileItems.permanent"));
+                    file.setEnabled(rs.getBoolean("FileItems.enabled"));
+                    file.setDownloads(rs.getInt("FileItems.downloads"));
+                    if ( rs.wasNull()){
+                        file.setDownloads(-1);
+                    }
+                    file.setPassword(rs.getString("FileItems.password"));
+                    if ( rs.wasNull()) file.setPassword(null);
+                    file.setDdate(rs.getTimestamp("FileItems.ddate"));
+                    file.setExpiration(rs.getTimestamp("FileItems.expiration"));
+                    file.setOwner(this.user);
+                    this.files.put(file.getFid(),file);
+                    this.user.addFile(file);
+                }
+            } catch (SQLException e) {
+                CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+            }
+
+        } else if ( RESULT_TYPE == RESULT_TYPE_CHILDREN ){
+            try {
+                while ( rs.next() ){
+                    UserItem user = new UserItem();
+                    user.setUid(rs.getInt("UserItems.uid"));
+                    user.setUsername(rs.getString("UserItems.username"));
+                    user.setPassword(rs.getString("UserItems.password"));
+                    user.setEmail(rs.getString("UserItems.email"));
+                    user.setUserType(rs.getInt("UserItems.usertype"));
+                    user.setCreated(rs.getTimestamp("UserItems.created"));
+                    user.setLastlogin(rs.getTimestamp("UserItems.lastlogin"));
+                    user.setExpires(rs.getBoolean("UserItems.expires"));
+                    if ( user.expires() ){
+                        user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                    }
+                    this.children.put(user.getUid(),user);
+                    this.user.addChild(user);
+
+                }
+            } catch (SQLException e) {
+                CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+            }
         }
     }
 

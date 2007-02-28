@@ -18,10 +18,14 @@
     Administration page
 
   <%
-
+      boolean childedit = false;
       if (request.getSession().getAttribute("user") != null) {
           UserItem user = (UserItem) request.getSession().getAttribute("user");
-          if ( request.getAttribute("edited") != null ) user = (UserItem) request.getAttribute("edited");
+          if ( request.getAttribute("edited") != null ){
+              user = (UserItem) request.getAttribute("edited");
+              childedit = true;
+              %>Editing child<%
+          }
           %>
     <table cellpadding="0" cellspacing="0" id="userinfo">
         <tr>
@@ -29,10 +33,10 @@
         </tr>
         <tr>
             <td>Email: </td><td><%=user.getEmail()%></td>
-        </tr>
+        </tr><%if ( ! childedit ){%>
         <tr>
             <td colspan="2"><a href="/upload/">Upload new file</a></td>
-        </tr>
+        </tr><%}%>
     </table>
     <%
         if ( user.getChildren() != null && user.getChildren().size() > 0 ){
@@ -60,6 +64,9 @@
     <%
             if (request.getAttribute("files") != null) {
                 Map<Integer, FileItem> files = (Map<Integer,FileItem>) request.getAttribute("files");
+                if ( request.getAttribute("edited") != null ){
+                    files = user.getFiles();
+                }
                 if ( files.size() > 0 ){
                                         %>
                         <table cellpadding="0" cellspacing="0" id="files">
