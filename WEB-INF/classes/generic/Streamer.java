@@ -51,7 +51,10 @@ public class Streamer extends HttpServlet {
         String[] pathparts = request.getServletPath().split("/");
         String lastpart = pathparts[pathparts.length - 1 ];
         CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
-        //Lastpart is md5sum
+        //Lastpart is md5sum_SECTRA_fid
+        String md5sum = lastpart.split("_SECTRA_")[0];
+        int fid = Integer.parseInt(lastpart.split("_SECTRA_")[1]);
+
         FileItem file = new FileItem();
         Connection conn = null;
         try {
@@ -60,9 +63,17 @@ public class Streamer extends HttpServlet {
             CustomLogger.logme(this.getClass().getName(), e.toString(), true);
         }
 
-
-        if ( file.search(conn,lastpart) && file.isEnabled() && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
+        if ( file.search(conn,md5sum,fid)){
+            CustomLogger.logme(this.getClass().getName(),"CHECK found file");
+            CustomLogger.logme(this.getClass().getName(),file.isEnabled()?"isEnabled":"Not enabled");
+            CustomLogger.logme(this.getClass().getName(),Integer.toString(file.getDownloads()));
+        } else {
+            CustomLogger.logme(this.getClass().getName(),"No file in database");
+        }
+        if ( file.search(conn,lastpart,fid) && file.isEnabled() && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
+            CustomLogger.logme(this.getClass().getName(),"STREAMER FOUND FILE...");
             if ( pathparts[pathparts.length - 2].equals("get") ){
+                CustomLogger.logme(this.getClass().getName(),"... about to stream");
                 response.setContentType(file.getType());
                 response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
                 response.setHeader("Content-length",Long.toString(file.getFile().length()));
@@ -100,13 +111,37 @@ public class Streamer extends HttpServlet {
 
 
         } else {
-            //If file is not found, dispatch an html-page
+            //If file is not found, terminate connections and dispatch an html-page
+            CustomLogger.logme(this.getClass().getName(),"Can't find that file");
+            try {
+                    if ( conn != null ) conn.close();
+                } catch (SQLException e) {
+                    CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+                } finally {
+                    try {
+                        if ( conn != null ) conn.close();
+                    } catch (SQLException ex){
+                        CustomLogger.logme(this.getClass().getName(),"SERIOUS ERROR HAPPENED!! ", true);
+                    }
+            }
             request.setAttribute("error", "File is not found");
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/FileNotFound.jsp");
             disp.forward(request,response);
 
         }
+
+        try {
+                    if ( conn != null ) conn.close();
+                } catch (SQLException e) {
+                    CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+                } finally {
+                    try {
+                        if ( conn != null ) conn.close();
+                    } catch (SQLException ex){
+                        CustomLogger.logme(this.getClass().getName(),"SERIOUS ERROR HAPPENED!! ", true);
+                    }
+                }
     }
 
 

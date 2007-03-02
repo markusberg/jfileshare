@@ -105,11 +105,14 @@ public class UserItem {
     }
 
     public void setExpiry(int days){
+        Date thedate = new Date();
+        if ( this.expiry == null ) this.expiry = thedate;
         GregorianCalendar expiry = new GregorianCalendar(
                             Integer.parseInt(new SimpleDateFormat("yyyy").format(this.expiry)),
                             Integer.parseInt(new SimpleDateFormat("m").format(this.expiry)),
                             Integer.parseInt(new SimpleDateFormat("d").format(this.expiry)) + days
                     );
+
 
         this.expiry = expiry.getTime();
         this.daystoexpire = days;

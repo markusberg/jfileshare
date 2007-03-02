@@ -53,12 +53,16 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
                 String[] pathparts = request.getServletPath().split("/");
                 String lastpart = pathparts[pathparts.length - 1 ];
                 CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
-                //Lastpart is md5sum
+                //Lastpart is md5sum_SECTRA_fid
+                String md5sum = lastpart.split("_SECTRA_")[0];
+                int fid = Integer.parseInt(lastpart.split("_SECTRA_")[1]);
 
                 FileItem file = new FileItem();
-                if ( file.search(conn,lastpart)){
+                if ( file.search(conn,md5sum,fid)){
+                    CustomLogger.logme(this.getClass().getName(),"File found");
                      request.setAttribute("file",file);
                 } else {
+                    CustomLogger.logme(this.getClass().getName(),"File not found");
                     request.setAttribute("error", "File is not found");
                 }
 

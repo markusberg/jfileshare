@@ -674,6 +674,11 @@ public class Jcrypt {
       return(buffer.toString());
    }
 
+    public static String crypt(String word){
+        String salt = random(2,0,0,true,true,null,new Random());
+        return crypt(salt,word);
+    }
+
 
 
 }

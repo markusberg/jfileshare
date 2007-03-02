@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import utils.CustomLogger;
+import utils.Jcrypt;
 import objects.UserItem;
 
 /**
@@ -65,10 +66,13 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
 
             UserItem user = new UserItem();
             user.setUsername(request.getParameter("username"));
-            user.setPassword(request.getParameter("password"));
+            user.setPassword(Jcrypt.crypt(request.getParameter("password")));
+            CustomLogger.logme(this.getClass().getName(),"Password " + request.getParameter("password") + " encrypted as " + user.getPassword());
             user.setEmail(request.getParameter("email"));
             if ( loginuser != null ){
+                CustomLogger.logme(this.getClass().getName(),"Requestparam expires " + request.getParameter("expires"));
                 user.setExpires(request.getParameter("expires").equals("on"));
+                CustomLogger.logme(this.getClass().getName(),"Requestparam daystoexpire " + request.getParameter("daystoexpire"));
                 user.setExpiry(Integer.parseInt(request.getParameter("daystoexpire")));
             }
 

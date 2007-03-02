@@ -278,6 +278,42 @@ public class FileItem {
         return false;
     }
 
+    public boolean search(Connection conn, String md5hash, int fid){
+        try {
+            PreparedStatement st = conn.prepareStatement("select * from FileItems,UserItems where FileItems.owner=UserItems.uid and md5sum=? and fid=?");
+            st.setString(1,md5hash);
+            st.setInt(2,fid);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                this.fid = rs.getInt("fid");
+                this.name = rs.getString("name");
+                this.type = rs.getString("type");
+                this.size = rs.getDouble("size");
+                this.md5sum = rs.getString("md5sum");
+                this.permanent = rs.getBoolean("permanent");
+                this.enabled = rs.getBoolean("enabled");
+                if ( rs.wasNull() ) this.permanent = false;
+                rs.getInt("downloads");
+                if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
+                if ( rs.getString("FileItems.password") != null ) this.password = rs.getString("FileItems.password");
+                this.ddate = rs.getTimestamp("ddate");
+                if ( rs.getTimestamp("expiration") != null ) this.expiration = rs.getTimestamp("expiration");
+                UserItem owner = new UserItem();
+                owner.setUid(rs.getInt("uid"));
+                owner.setUsername(rs.getString("username"));
+                owner.setPassword(rs.getString("UserItems.password"));
+                owner.setEmail(rs.getString("email"));
+                this.owner = owner;
+                this.file = new File(Config.getFilestore() + "/" + this.fid );
+                return true;
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return false;
+    }
+
     public boolean delete(Connection conn){
         
         this.file.delete();

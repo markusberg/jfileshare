@@ -50,7 +50,7 @@
                   if ( file.isEnabled() ){
                       if ( file.getDownloads() == -1 || file.getDownloads() > 0 ){
                   %>
-                  <a href="/download/get/<%=file.getMd5sum()%>/">Download file</a>
+                  <a href="/download/get/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>/">Download file</a>
                   <%
                       } else {
                           %>
