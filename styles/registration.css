@@ -6,3 +6,9 @@
     background-color: orange;
     width: 400px;
 }
+
+.note {
+    font-size: 11px;
+    font-family: Helvetica,Arial,sans-serif;
+    font-style: italic;
+}

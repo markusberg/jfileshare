@@ -44,6 +44,7 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
     public String handlePageRequest(Connection conn, HttpServletRequest request, HttpServletResponse response, ServletContext context)
         throws SQLException, ServletException {
         String urlPattern = request.getServletPath();
+        UserItem loginuser = (UserItem) request.getSession().getAttribute("user");
 
         CustomLogger.logme(this.getClass().getName(),"RegistrationPageHandler");
 
@@ -66,6 +67,18 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
             user.setUsername(request.getParameter("username"));
             user.setPassword(request.getParameter("password"));
             user.setEmail(request.getParameter("email"));
+            if ( loginuser != null ){
+                user.setExpires(request.getParameter("expires").equals("on"));
+                user.setExpiry(Integer.parseInt(request.getParameter("daystoexpire")));
+            }
+
+            if ( loginuser.getUserType() == objects.UserItem.TYPE_ADMIN ){
+                user.setUserType(Integer.parseInt(request.getParameter("usertype")));
+            } else {
+                //Default is external;
+                user.setUserType(3);
+            }
+            user.setCreator(loginuser);
             if ( user.save(conn)){
                 request.setAttribute("message","User with uid " + user.getUid() + " successfully registered");
                 request.setAttribute("success", true);

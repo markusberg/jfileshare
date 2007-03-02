@@ -64,3 +64,9 @@ input {
 #userinfo {
     margin-bottom: 10px;
 }
+
+#childdata {
+    font-size: 11px;
+    font-family: Helvetica,Arial,sans-serif;
+    width: 600px;
+}

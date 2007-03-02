@@ -36,12 +36,20 @@
         </tr><%if ( ! childedit ){%>
         <tr>
             <td colspan="2"><a href="/upload/">Upload new file</a></td>
-        </tr><%}%>
+        </tr>
+        <tr>
+            <td colspan="2"><a href="/register/">Register new user</a></td>
+        </tr><%} else {%>
+        <tr>
+            <td colspan="2"><a href="/admin/?action=delch&uid=<%=user.getUid()%>">DELETE THIS USER</a></td>
+        </tr>
+
+        <%}%>
     </table>
     <%
         if ( user.getChildren() != null && user.getChildren().size() > 0 ){
             %>
-    <table cellpadding="0" cellspacing="0">
+    <table cellpadding="0" cellspacing="0" id="childdata">
         <%
         Map<Integer,UserItem> children = user.getChildren();
             for ( Integer key: children.keySet()){

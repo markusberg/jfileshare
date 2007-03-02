@@ -99,6 +99,13 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 } else {
                     CustomLogger.logme(this.getClass().getName(),"Nonexistent user or no privilege to edit user");
                 }
+            } else if ( request.getParameter("action").equals("delch") && request.getParameter("uid") != null ){
+                if ( loginuser.getChildren().containsKey(Integer.parseInt(request.getParameter("uid")))){
+                    UserItemView useritemview2 = new UserItemView(conn,Integer.parseInt(request.getParameter("uid")));
+                    useritemview2.getUserItem().delete(conn);    
+                } else {
+                    CustomLogger.logme(this.getClass().getName(),"Nonexistent user or no privilege to edit user");
+                }
             }
 
         }

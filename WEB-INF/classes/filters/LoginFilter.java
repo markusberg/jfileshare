@@ -58,7 +58,7 @@ public class LoginFilter implements Filter {
      * The map should take 2 args. One is path, and the other is lowest allowed usertype to access the path
      */
     private void initAuth(){
-        this.authorization_map.put("/registration",UserItem.TYPE_SECTRA);
+        this.authorization_map.put("/register",UserItem.TYPE_SECTRA);
         this.authorization_map.put("/upload",UserItem.TYPE_EXTERNAL);
         this.authorization_map.put("/admin",UserItem.TYPE_EXTERNAL);
 
@@ -70,16 +70,21 @@ public class LoginFilter implements Filter {
 
 
     private boolean isAuthorised(HttpServletRequest request, UserItem user){
+        CustomLogger.logme(this.getClass().getName(),"Got user " + user.getUsername());
+        CustomLogger.logme(this.getClass().getName(),"Got path " + request.getServletPath());
         //Get required type:
         for ( String path : this.authorization_map.keySet() ){
+            CustomLogger.logme(this.getClass().getName(),"Checking for " + path);
             if ( request.getServletPath().startsWith(path)){
                 if ( this.authorization_map.get(path) >= user.getUserType() ){
-                    CustomLogger.logme(this.getClass().getName(),this.authorization_map.get(path) +"=" + user.getUserType()); 
+                    CustomLogger.logme(this.getClass().getName(),this.authorization_map.get(path) +">=" + user.getUserType()); 
                     return true;
                 } else {
                     CustomLogger.logme(this.getClass().getName(),"Privilege level of " + this.authorization_map.get(path) + " required, got only " + user.getUserType());
                     return false;
                 }
+            } else {
+                CustomLogger.logme(this.getClass().getName(),request.getServletPath() + " does not start with " + path);
             }
         }
 
@@ -96,6 +101,8 @@ public class LoginFilter implements Filter {
             HttpServletRequest request = (HttpServletRequest)servletRequest;
             HttpSession session = request.getSession();
             UserItem user = (UserItem) session.getAttribute("user");
+            if ( user == null ) CustomLogger.logme(this.getClass().getName(),"USER SEAMS TO BE NULL");
+            else CustomLogger.logme(this.getClass().getName(),"USER " + user.getUsername() + " is in");
             if ( isAuthorised(request,user) ){
               filterChain.doFilter(servletRequest,servletResponse);
             } else {

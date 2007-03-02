@@ -240,14 +240,47 @@ public class FileItem {
         return false;
     }
 
+
+    public boolean search(Connection conn, int fid){
+        try {
+            PreparedStatement st = conn.prepareStatement("select * from FileItems,UserItems where FileItems.owner=UserItems.uid and fid=?");
+            st.setInt(1,fid);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                this.fid = rs.getInt("fid");
+                this.name = rs.getString("name");
+                this.type = rs.getString("type");
+                this.size = rs.getDouble("size");
+                this.md5sum = rs.getString("md5sum");
+                this.permanent = rs.getBoolean("permanent");
+                this.enabled = rs.getBoolean("enabled");
+                if ( rs.wasNull() ) this.permanent = false;
+                rs.getInt("downloads");
+                if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
+                if ( rs.getString("FileItems.password") != null ) this.password = rs.getString("FileItems.password");
+                this.ddate = rs.getTimestamp("ddate");
+                if ( rs.getTimestamp("expiration") != null ) this.expiration = rs.getTimestamp("expiration");
+
+                /// REMEMBER using view here needs making sure that view doesn't recurse back to FileItems when populating users.
+                UserItem owner = new UserItem();
+                owner.setUid(rs.getInt("uid"));
+                owner.setUsername(rs.getString("username"));
+                owner.setPassword(rs.getString("UserItems.password"));
+                owner.setEmail(rs.getString("email"));
+                this.owner = owner;
+                this.file = new File(Config.getFilestore() + "/" + this.fid );
+                return true;
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return false;
+    }
+
     public boolean delete(Connection conn){
-        //First load the file in order to remove the actual file from the disk;
-
-        FileItem me = new FileItem();
-        me.search(conn,this.md5sum);
-        File file = me.getFile();
-        file.delete();
-
+        
+        this.file.delete();
 
         try {
             PreparedStatement st = conn.prepareStatement("delete from FileItems where fid=?");

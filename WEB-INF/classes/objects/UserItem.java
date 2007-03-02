@@ -30,6 +30,7 @@ public class UserItem {
     private Date lastlogin;
     private boolean expires = false;
     private Date expiry;
+    private int daystoexpire = -1;
     private UserItem creator;
     private Map<Integer,UserItem> children = new TreeMap<Integer,UserItem>();
     private Map<Integer, FileItem> files = new TreeMap<Integer,FileItem>();
@@ -111,6 +112,7 @@ public class UserItem {
                     );
 
         this.expiry = expiry.getTime();
+        this.daystoexpire = days;
     }
 
     public UserItem getCreator(){
@@ -164,7 +166,11 @@ public class UserItem {
                 st.setString(3,this.password);
                 st.setString(4,this.email);
                 st.setBoolean(5,this.expires);
-                st.setInt(6,Config.getUserExpires());
+                if ( this.daystoexpire == -1 ){
+                    st.setInt(6,Config.getUserExpires());
+                } else {
+                    st.setInt(6,this.daystoexpire);
+                }
                 if ( this.creator != null ){
                     st.setInt(7,this.creator.getUid());
                 } else {
@@ -179,12 +185,21 @@ public class UserItem {
                 st.setTimestamp(5,new java.sql.Timestamp((new java.util.Date()).getTime()));
                 st.setBoolean(6,this.expires);
                 if ( this.expires ){
-                    GregorianCalendar cal = new GregorianCalendar(
+                    if ( daystoexpire == -1 ){
+                        GregorianCalendar cal = new GregorianCalendar(
+                                Integer.parseInt(new SimpleDateFormat("yyyy").format(this.created)),
+                                Integer.parseInt(new SimpleDateFormat("m").format(this.created)),
+                                Integer.parseInt(new SimpleDateFormat("d").format(this.created)) + Config.getUserExpires()
+                        );
+                        this.expiry = cal.getTime();
+                    } else {
+                        GregorianCalendar cal = new GregorianCalendar(
                             Integer.parseInt(new SimpleDateFormat("yyyy").format(this.created)),
                             Integer.parseInt(new SimpleDateFormat("m").format(this.created)),
-                            Integer.parseInt(new SimpleDateFormat("d").format(this.created)) + Config.getUserExpires()
-                    );
-                    this.expiry = cal.getTime();
+                            Integer.parseInt(new SimpleDateFormat("d").format(this.created)) + this.daystoexpire
+                        );
+                        this.expiry = cal.getTime();
+                    }
                     st.setTimestamp(7,new Timestamp(this.expiry.getTime()));
 
                 } else {
@@ -210,6 +225,29 @@ public class UserItem {
 
     public void delete(Connection conn){
         if ( this.uid != -1 ){
+            //Delete all files
+            if ( this.files.size() > 0 ){
+                for ( Integer key: this.files.keySet()){
+                    FileItem file = this.files.get(key);
+                    CustomLogger.logme(this.getClass().getName(),"Deleting " + file.getName());
+                    this.files.remove(key);
+                    file.delete(conn);
+                }
+                CustomLogger.logme(this.getClass().getName(),"Files removed");
+            } else {
+                CustomLogger.logme(this.getClass().getName(),"No files for this user"); 
+            }
+
+            //Delete all children
+            if ( this.children.size() > 0 ){
+                for ( Integer key: this.children.keySet()){
+                    UserItem child = this.children.get(key);
+                    CustomLogger.logme(this.getClass().getName(),"Deleting child " + child.getUsername());
+                    child.delete(conn);
+                    this.children.remove(key);
+                    CustomLogger.logme(this.getClass().getName(),"Child successfully deleted");
+                }
+            }
             try {
                 PreparedStatement st = conn.prepareStatement("delete from UserItems where uid=?");
                 st.setInt(1,this.uid);
@@ -265,5 +303,15 @@ public class UserItem {
         return expiry.compareTo(now)/1000/60/60/24;        
 
     }
+
+    public boolean isChildTo(UserItem user){
+        return this.creator.getUid()==user.getUid();
+
+    }
+
+    public boolean isParentTo(UserItem user){
+        return user.getCreator().getUid() == this.uid;
+    }
+
 
 }

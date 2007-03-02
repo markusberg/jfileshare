@@ -15,6 +15,13 @@
           <div id="content">
             <decorator:body />
           </div>
+          <%
+              if ( session.getAttribute("user") != null ){
+          %>
+          <br /><span style="font-size: 11px; font-family: Helvetica,Arial,sans-serif"><a href="/logout">Logout</a></span>
+          <%
+              }
+          %>
       </div>
 
   </div>
