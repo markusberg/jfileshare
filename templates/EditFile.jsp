@@ -59,7 +59,7 @@
           <td>Downloads allowed</td><td><input style="width: 90px;" type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"><i style="font-size:11px;">Integer to specify max. allowed downloads or "unlimited" for no limit</i></td>
       </tr>
       <tr>
-          <td>Require password</td><td><input id="pwswitch" type="checkbox" onclick="disable();" /></td>
+          <td>Require password</td><td><input id="pwswitch" type="checkbox" name="pwsw" onclick="disable();" /></td>
       </tr>
       <tr>
           <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password" disabled="disabled" /></td>

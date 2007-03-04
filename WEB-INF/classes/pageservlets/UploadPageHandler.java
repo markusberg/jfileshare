@@ -119,7 +119,7 @@ public class UploadPageHandler implements ServletPageRequestHandler {
                     savedfile.setOwner(owner);
                     savedfile.setPermanent(false);
                     if ( req.getParameter("usepwt")!=null && req.getParameter("usepwt").equals("on")){
-                        savedfile.setPassword(req.getParameter("passwordt"));
+                        savedfile.setPassword(utils.Jcrypt.crypt(req.getParameter("passwordt")));
                     }
                     savedfile.save(conn);
                     File destfile = new File(Config.getFilestore() + "/" +  savedfile.getFid());

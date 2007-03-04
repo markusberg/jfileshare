@@ -19,6 +19,11 @@
         <filter-class>filters.LogoutFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>fileAuth</filter-name>
+        <filter-class>filters.FileAuthenticationFilter</filter-class>
+    </filter>
+
     <filter-mapping>
             <filter-name>sitemesh</filter-name>
             <url-pattern>/index.jsp</url-pattern>
@@ -58,6 +63,11 @@
     <filter-mapping>
         <filter-name>logout</filter-name>
         <url-pattern>/logout**</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>fileAuth</filter-name>
+        <url-pattern>/download**</url-pattern>
     </filter-mapping>
 
     

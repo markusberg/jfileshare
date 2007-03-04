@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.io.*;
+import java.util.Hashtable;
 
 import utils.CustomLogger;
 import objects.FileItem;
@@ -48,6 +49,7 @@ public class Streamer extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws
 		ServletException, java.io.IOException {
+        
         String[] pathparts = request.getServletPath().split("/");
         String lastpart = pathparts[pathparts.length - 1 ];
         CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);

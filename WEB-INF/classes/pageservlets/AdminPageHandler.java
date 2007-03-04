@@ -73,6 +73,10 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 if ( request.getParameter("downloads").equals("unlimited")){
                     file.setDownloads(-1);
                 } else file.setDownloads(Integer.parseInt(request.getParameter("downloads")));
+                if ( request.getParameter("pwsw") != null && request.getParameter("pwsw").equals("on")){
+                    CustomLogger.logme(this.getClass().getName(),"Setting password for file ");
+                    file.setPassword(utils.Jcrypt.crypt(request.getParameter("password")));
+                }
                 file.save(conn);
                 useritemview = new UserItemView(conn,loginuser.getUsername());
             } else if ( request.getParameter("action").equals("notify")){

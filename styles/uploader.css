@@ -40,3 +40,9 @@ form {
 #pwlabel {
     color: gray;
 }
+
+.note {
+    font-size: 11px;
+    font-family: Helvetica,Arial,sans-serif;
+    font-style: italic;
+}
