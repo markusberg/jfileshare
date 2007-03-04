@@ -70,7 +70,7 @@ public class Streamer extends HttpServlet {
         } else {
             CustomLogger.logme(this.getClass().getName(),"No file in database");
         }
-        if ( file.search(conn,lastpart,fid) && file.isEnabled() && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
+        if ( file.search(conn,md5sum,fid) && file.isEnabled() && ( file.getDownloads() == -1 || file.getDownloads() > 0 )){
             CustomLogger.logme(this.getClass().getName(),"STREAMER FOUND FILE...");
             if ( pathparts[pathparts.length - 2].equals("get") ){
                 CustomLogger.logme(this.getClass().getName(),"... about to stream");
@@ -91,7 +91,7 @@ public class Streamer extends HttpServlet {
                 if ( bos != null ) bos.close();
                 if ( bis != null ) bis.close();
                 CustomLogger.logme(this.getClass().getName(),"Reducing download");
-                file.reduceDownload(conn);
+                file.registerDownload(conn, request);
 
                 try {
                     if ( conn != null ) conn.close();

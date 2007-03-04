@@ -14,6 +14,22 @@
           FileItem file = (FileItem) request.getAttribute("file");
       %><title>Edit: <%=file.getName()%></title>
       <link rel="stylesheet" href="/styles/editfile.css" type="text/css" />
+      <script type="text/javascript">
+          function disable(){
+
+              var select = document.getElementById("pwfield");
+              var expiresc = document.getElementById("pwswitch");
+              var plabel = document.getElementById("pwlabel");
+              if ( expiresc.checked ){
+                select.disabled=false;
+                  plabel.style.color="black";
+              } else {
+                  select.disabled = true;
+                  plabel.style.color="gray";
+              }
+
+          }
+      </script>
       </head>
   <body>
 
@@ -41,6 +57,12 @@
       </tr>
       <tr>
           <td>Downloads allowed</td><td><input style="width: 90px;" type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"><i style="font-size:11px;">Integer to specify max. allowed downloads or "unlimited" for no limit</i></td>
+      </tr>
+      <tr>
+          <td>Require password</td><td><input id="pwswitch" type="checkbox" onclick="disable();" /></td>
+      </tr>
+      <tr>
+          <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password" disabled="disabled" /></td>
       </tr>
       <tr>
           <td colspan="2">

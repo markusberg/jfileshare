@@ -76,3 +76,36 @@ body {
 #download a:hover {
     color: blue;
 }
+
+#menudiv {
+    padding: 0px;
+    margin: 0px;
+
+}
+
+#menuul {
+    padding: 0px;
+    margin-top:0px;
+     margin-bottom: 10px;
+}
+
+#menuul li {
+    display: inline;
+    text-align: center;
+}
+
+#menuul li a {
+    margin:0px;
+    display: block;
+    float: left;
+    width: 120px;
+    background-color: #cccccc;
+    text-decoration: none;
+    border: 1px solid #999999;
+    color: #440000;
+
+}
+
+#menuul li a:hover {
+    color: green;
+}

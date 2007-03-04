@@ -5,10 +5,16 @@
 #errorbox {
     background-color: orange;
     width: 400px;
+    margin-bottom: 10px;
+    padding: 5px;
 }
 
 .note {
     font-size: 11px;
     font-family: Helvetica,Arial,sans-serif;
     font-style: italic;
+}
+
+.title {
+    margin-top: 10px;
 }

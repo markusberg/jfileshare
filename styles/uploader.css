@@ -19,6 +19,7 @@
     border: 1px solid green;
     margin-top: 10px;
     background-image: url(/images/banner_bg.gif);
+    margin-bottom: 10px;
 }
 
 form {
@@ -34,4 +35,8 @@ form {
     padding: 10px;
     background-color: orange;
     
+}
+
+#pwlabel {
+    color: gray;
 }

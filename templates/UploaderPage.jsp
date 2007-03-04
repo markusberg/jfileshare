@@ -115,6 +115,10 @@
               var ran_number = Math.floor(Math.random()*1000);
               document.getElementById("upid").value=ran_number;
               unid = ran_number;
+              if ( document.getElementById("pwswitch").checked ){
+              document.getElementById("usepwtid").value="on";
+              document.getElementById("passwordtid").value=document.getElementById("pwfield").value;
+                  }
               
               //ajaxRequest("setunid","unid",ran_number);
               
@@ -173,6 +177,23 @@
         }
 
       </script>
+
+  <script type="text/javascript">
+          function disable(){
+
+              var select = document.getElementById("pwfield");
+              var expiresc = document.getElementById("pwswitch");
+              var plabel = document.getElementById("pwlabel");
+              if ( expiresc.checked ){
+                select.disabled=false;
+                  plabel.style.color="black";
+              } else {
+                  select.disabled = true;
+                  plabel.style.color="gray";
+              }
+
+          }
+      </script>
   </head>
   <body>Please upload file<br />
   <!--<form action="/upload/" method="post" id="uploadform" onsubmit="return upidNegotiate();"><input type="hidden" name="action" value="bar" /></form>-->
@@ -180,6 +201,8 @@
       <form action="/upload/" method="post" id="uploadform" onsubmit="upidNegotiate();check_Status();" enctype="multipart/form-data">
       <input id="upid" type="hidden" name="upid" value="" />
       <input type="hidden" name="action" value="sendfile" />
+      <input id="usepwtid" type="hidden" name="usepwt" value="" />
+      <input id="passwordtid" type="hidden" name="passwordt" value="" />
       <input type="file" name="file" />
 
       <input type="submit" name="submit" value="Send"/>
@@ -190,6 +213,14 @@
       </div>
 
   <div id="statusdiv">Status: </div>
+  <table cellpadding="0" cellspacing="0">
+      <tr>
+          <td>Require password</td><td><input id="pwswitch" name="usepw" type="checkbox" onclick="disable();" /></td>
+      </tr>
+      <tr>
+          <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password" disabled="disabled" /></td>
+      </tr>
+  </table>
   </body>
 <script type="text/javascript">
     progress();

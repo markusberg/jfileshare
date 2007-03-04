@@ -10,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 
 import config.Config;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * SECTRA.
  * User: zoran
@@ -185,7 +187,7 @@ public class FileItem {
 
         } else {
             try {
-                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=?,enabled=? where fid=?");
+                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=?,enabled=?,password=? where fid=?");
                 st.setBoolean(1,this.permanent);
                 st.setInt(2,this.downloads);
                 if ( expiration == null ){
@@ -194,7 +196,12 @@ public class FileItem {
                     st.setTimestamp(3,new Timestamp(this.expiration.getTime()));
                 }
                 st.setBoolean(4,this.enabled);
-                st.setInt(5,this.fid);
+                if ( this.password == null ){
+                    st.setNull(5,java.sql.Types.VARCHAR);
+                } else {
+                    st.setString(5,this.password);
+                }
+                st.setInt(6,this.fid);
                 st.executeUpdate();
                 st.close();
                 return true;
@@ -316,7 +323,11 @@ public class FileItem {
 
     public boolean delete(Connection conn){
         
-        this.file.delete();
+        //this.getFile().delete();
+        FileItem me = new FileItem();
+        me.search(conn,this.fid);
+        File file = me.getFile();
+        file.delete();
 
         try {
             PreparedStatement st = conn.prepareStatement("delete from FileItems where fid=?");
@@ -331,7 +342,8 @@ public class FileItem {
         return true;
     }
 
-    public int reduceDownload(Connection conn){
+    public int registerDownload(Connection conn, HttpServletRequest request){
+        String remote_addr = request.getRemoteAddr();
         int dvalue = -2;
         try {
             Statement st = conn.createStatement();
@@ -368,6 +380,13 @@ public class FileItem {
             st.execute("UNLOCK TABLES");
             st.close();
             dvalue = downloads;
+            CustomLogger.logme(this.getClass().getName(),"Logging download");
+            PreparedStatement st3 = conn.prepareStatement("INSERT INTO DownloadLogs VALUES(now(),?,?)");
+            st3.setInt(1,this.fid);
+            st3.setString(2,remote_addr);
+            st3.executeUpdate();
+            st3.close();
+
         } catch (SQLException e) {
             CustomLogger.logme(this.getClass().getName(), e.toString(), true);
         }

@@ -33,13 +33,7 @@
         </tr>
         <tr>
             <td>Email: </td><td><%=user.getEmail()%></td>
-        </tr><%if ( ! childedit ){%>
-        <tr>
-            <td colspan="2"><a href="/upload/">Upload new file</a></td>
-        </tr>
-        <tr>
-            <td colspan="2"><a href="/register/">Register new user</a></td>
-        </tr><%} else {%>
+        </tr><%if ( childedit ){ %>
         <tr>
             <td colspan="2"><a href="/admin/?action=delch&uid=<%=user.getUid()%>">DELETE THIS USER</a></td>
         </tr>
@@ -86,7 +80,7 @@
                                 <td>Filename: </td><td colspan="2"><%=file.getName()%></td>
                             </tr>
                             <tr class="filedata">
-                                <td>&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
+                                <td style="width: 60px">&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
                             </tr>
                             <tr class="filedata">
                                 <td>&nbsp;</td><td>Size:</td><td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>

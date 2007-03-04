@@ -316,5 +316,41 @@ public class UserItem {
         return user.getCreator().getUid() == this.uid;
     }
 
+    public static boolean checkUserExists(Connection conn,String username){
+        boolean retval = false;
+        try {
+            PreparedStatement st = conn.prepareStatement("SELECT username FROM UserItems where username=?");
+            st.setString(1,username);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                retval = true;
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme("objects.UserItem",e.toString(),true);
+        }
+
+
+        return retval;
+
+    }
+
+    public static boolean checkEmailExists(Connection conn,String email){
+        boolean retval = false;
+        try {
+            PreparedStatement st = conn.prepareStatement("SELECT username FROM UserItems where email=?");
+            st.setString(1,email);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                retval = true;
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme("objects.UserItem",e.toString(),true);
+        }
+
+
+        return retval;
+
+    }
+
 
 }

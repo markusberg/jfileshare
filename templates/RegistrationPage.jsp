@@ -32,7 +32,7 @@
   </head>
   <body>
     <div id="registrationbox">
-        <span class="title">Remember, it's imperative that all fields are filled in correctly</span><br />
+        <br /><div class="title">Remember, it's imperative that all fields are filled in correctly</div><br />
         <%
             if ( request.getAttribute("message") != null && ! request.getAttribute("message").equals("")){
                 %>
@@ -47,16 +47,16 @@
         <form action="/register" method="post">
             <table id="regtable" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td>Username</td><td><input type="text" name="username" /></td>
+                    <td>Username</td><td><input type="text" name="username" value="<%=request.getParameter("username")!=null?request.getParameter("username"):""%>"/></td>
                 </tr>
                 <tr>
-                    <td>Password</td><td><input type="password" name="password" /></td>
+                    <td>Password</td><td><input type="password" name="password" value="<%=request.getParameter("password")!=null?request.getParameter("password"):""%>" /></td>
                 </tr>
                 <tr>
-                    <td>Verify password</td><td><input type="password" name="password2" /></td>
+                    <td>Verify password</td><td><input type="password" name="password2" value="<%=request.getParameter("password2")!=null?request.getParameter("password2"):""%>" /></td>
                 </tr>
                 <tr>
-                    <td>Email</td><td><input type="text" name="email" /></td>
+                    <td>Email</td><td><input type="text" name="email" value="<%=request.getParameter("email")!=null?request.getParameter("email"):""%>" /></td>
                 </tr>
                 <tr>
                     <td>Expires</td><td><input id="expires" type="checkbox" name="expires" checked="checked" onchange="disable_days();"/><span class="note">When account expires, it will be removed together with all uploaded files</span></td>

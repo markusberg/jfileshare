@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import utils.CustomLogger;
 import utils.Jcrypt;
 import objects.UserItem;
+import config.Config;
 
 /**
  * Created by Zoran Pucar zoran@medorian.com.
@@ -59,6 +60,11 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
                 request.setAttribute("message","Username can't be empty");
                 return "/templates/RegistrationPage.jsp";
             }
+
+            if ( objects.UserItem.checkUserExists(conn,request.getParameter("username"))){
+                request.setAttribute("message","Username allready exists");
+                return "/templates/RegistrationPage.jsp";
+            }
             if ( request.getParameter("email") == null || request.getParameter("email").equals("")){
                 request.setAttribute("message","Email can't be empty");
                 return "/templates/RegistrationPage.jsp";
@@ -71,9 +77,13 @@ public class RegistrationPageHandler implements ServletPageRequestHandler {
             user.setEmail(request.getParameter("email"));
             if ( loginuser != null ){
                 CustomLogger.logme(this.getClass().getName(),"Requestparam expires " + request.getParameter("expires"));
-                user.setExpires(request.getParameter("expires").equals("on"));
-                CustomLogger.logme(this.getClass().getName(),"Requestparam daystoexpire " + request.getParameter("daystoexpire"));
-                user.setExpiry(Integer.parseInt(request.getParameter("daystoexpire")));
+                user.setExpires(request.getParameter("expires") != null && request.getParameter("expires").equals("on"));
+                if ( user.expires() ){
+                    CustomLogger.logme(this.getClass().getName(),"Requestparam daystoexpire " + request.getParameter("daystoexpire"));
+                    user.setExpiry(Integer.parseInt(request.getParameter("daystoexpire")));
+                } else {
+                    user.setExpiry(Config.getUserExpires());
+                }
             }
 
             if ( loginuser.getUserType() == objects.UserItem.TYPE_ADMIN ){

@@ -1,3 +1,7 @@
 #fileedit td {
     padding-right: 10px;
 }
+
+#pwlabel {
+    color: gray;
+}
