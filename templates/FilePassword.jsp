@@ -10,7 +10,7 @@
   <head><title>Please supply password</title></head>
   <body>
     <div>
-        In order to download this file, password needs to be entered.
+        Enter password to download this file.
     </div>
   <div>
       <form action="" method="post">
