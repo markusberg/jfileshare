@@ -20,6 +20,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.activation.DataHandler;
+import javax.servlet.http.HttpServletRequest;
 
 import utils.CustomLogger;
 
@@ -30,18 +31,19 @@ import utils.CustomLogger;
  * zoran@medorian.com
  */
 public class EmailItem {
+    private HttpServletRequest request = null;
     private String subject = "";
     private String sender = "";
     private String body = "Hi,\n" +
             "You have a file from \n" +
             "00PUSER to download from\n" +
-            "http://dude.sectra.se/download/view/00PURL\n" +
+            "https://00PHOST/download/view/00PURL\n" +
             "\n" +
             "Kind Regards\n";
     private String htmlbody = "Hi,<BR />" +
             "You have a file from <BR />" +
             "00PUSER to download from<BR />" +
-            "<a href=\"http://dude.sectra.se/download/view/00PURL\">http://dude.sectra.se/download/view/00PURL</a><BR />" +
+            "<a href=\"https://00PHOST/download/view/00PURL\">https://00PHOST/download/view/00PURL</a><BR />" +
             "<BR />" +
             "Kind Regards<BR />";
 
@@ -99,6 +101,11 @@ public class EmailItem {
 	    this.sender = "dude@sectra.se";
     }
 
+    public EmailItem(HttpServletRequest request) {
+        this.request = request;
+        this.sender = "dude@sectra.se";
+    }
+
     public EmailItem(String sender){
         this.sender = sender;
     }
@@ -134,8 +141,12 @@ public class EmailItem {
     }
 
     public void setUrl(String url){
-        this.htmlbody = htmlbody.replaceAll("00PURL",url).replaceAll("00PUSER",this.sender);
-        this.body = this.body.replaceAll("00PURL",url).replaceAll("00PUSER",this.sender);
+        String host = "files.sectra.se";
+        if ( this.request != null ){
+            host = this.request.getServerName();
+        }
+        this.htmlbody = htmlbody.replaceAll("00PURL",url).replaceAll("00PUSER",this.sender).replaceAll("00PHOST",host);
+        this.body = this.body.replaceAll("00PURL",url).replaceAll("00PUSER",this.sender).replaceAll("00PHOST",host);
     }
 
 

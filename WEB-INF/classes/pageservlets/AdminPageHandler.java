@@ -80,7 +80,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 file.save(conn);
                 useritemview = new UserItemView(conn,loginuser.getUsername());
             } else if ( request.getParameter("action").equals("notify")){
-                EmailItem email = new EmailItem();
+                EmailItem email = new EmailItem(request);
                 try {
                     email.addRcpt(new InternetAddress(request.getParameter("email")));
                     email.addBcpt(new InternetAddress("zoran@sectra.se"));
