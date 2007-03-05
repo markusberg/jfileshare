@@ -29,6 +29,7 @@ public class Config {
     private static final int _USER_EXPIRES = 60;
 
     private static final boolean _LOGIN_REQUIRES_HTTPS = false;
+    private static final boolean _ALLWAYS_FORCE_HTTPS = false;
 
     private static final Hashtable<String,Integer> authorization_map = new Hashtable<String,Integer>();
 
@@ -72,6 +73,11 @@ public class Config {
 
     public static boolean loginRequiresHttps() {
         return _LOGIN_REQUIRES_HTTPS;
+    }
+
+
+    public static boolean allwaysForceHttps() {
+        return _ALLWAYS_FORCE_HTTPS;
     }
 
     public static boolean isAuthorised(HttpServletRequest request, UserItem user){
