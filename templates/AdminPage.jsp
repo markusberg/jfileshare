@@ -14,6 +14,13 @@
       <link rel="stylesheet" href="/styles/admin.css" type="text/css" />
   </head>
   <body>
+  <%
+      if ( request.getAttribute("message") != null ){
+          %><div id="message">
+      <%=request.getAttribute("message")%>
+          </div><%
+      }
+  %>
 
     Administration page
 
