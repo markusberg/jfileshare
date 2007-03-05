@@ -93,7 +93,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                     CustomLogger.logme(this.getClass().getName(),"INVALID ADDRESS " + e.toString(),true);
                 }
                 
-                email.setUrl(useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid"))).getMd5sum());
+                email.setUrl(useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid"))).getMd5sum() + "_SECTRA_" + request.getParameter("fid"));
                 email.sendHTMLMail();
                 request.setAttribute("message","Email is sent to " + request.getParameter("email"));
             } else if ( request.getParameter("action").equals("editch") && request.getParameter("uid") != null ){
