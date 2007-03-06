@@ -66,7 +66,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 request.setAttribute("file",file);
                 return "/templates/EditFile.jsp";
             } else if ( request.getParameter("action").equals("savefile")){
-                FileItem file = new FileItem();
+                FileItem file = useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid")));
                 file.setFid(Integer.parseInt(request.getParameter("fid")));
                 file.setPermanent(request.getParameter("permanent").equals("yes"));
                 file.setEnabled(request.getParameter("enabled").equals("yes"));
@@ -75,7 +75,10 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 } else file.setDownloads(Integer.parseInt(request.getParameter("downloads")));
                 if ( request.getParameter("pwsw") != null && request.getParameter("pwsw").equals("on")){
                     CustomLogger.logme(this.getClass().getName(),"Setting password for file ");
-                    file.setPassword(utils.Jcrypt.crypt(request.getParameter("password")));
+                    if ( ! request.getParameter("password").equals("<ENCRYPTED>")){
+                        file.setPassword(utils.Jcrypt.crypt(request.getParameter("password")));
+                    }
+
                 }
                 file.save(conn);
                 useritemview = new UserItemView(conn,loginuser.getUsername());

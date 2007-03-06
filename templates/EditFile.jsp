@@ -58,11 +58,21 @@
       <tr>
           <td>Downloads allowed</td><td><input style="width: 90px;" type="text" name="downloads" value="<%=file.getDownloads()==-1?"unlimited":file.getDownloads()%>"><i style="font-size:11px;">Integer to specify max. allowed downloads or "unlimited" for no limit</i></td>
       </tr>
-      <tr>
-          <td>Require password</td><td><input id="pwswitch" type="checkbox" name="pwsw" onclick="disable();" /></td>
+      <tr><%
+          String checked="";
+          String disabled=" disabled=\"disabled\"";
+          String password="";
+          if ( file.getPassword() != null && file.getPassword().length() > 0 ){
+              checked = " checked=\"checked\"";
+              disabled = "";
+              password = " value=\"<ENCRYPTED>\"";
+
+          }
+      %>
+          <td>Require password</td><td><input id="pwswitch" type="checkbox" name="pwsw" onclick="disable();"<%=checked%> /></td>
       </tr>
       <tr>
-          <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password" disabled="disabled" /></td>
+          <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password"<%=disabled%><%=password%> /></td>
       </tr>
       <tr>
           <td colspan="2">

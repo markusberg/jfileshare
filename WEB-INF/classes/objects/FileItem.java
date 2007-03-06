@@ -4,6 +4,8 @@ import utils.CustomLogger;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Set;
+import java.util.HashSet;
 import java.sql.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -393,4 +395,46 @@ public class FileItem {
 
         return dvalue;
     }
+
+    public Set<DownloadLog> getLogs(Connection conn){
+        Set<DownloadLog> logs = new HashSet<DownloadLog>();
+
+        try {
+            PreparedStatement st = conn.prepareStatement("select * from DownloadLogs where fid=?");
+            st.setInt(1,this.fid);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                DownloadLog log = new DownloadLog();
+                log.setIp(rs.getString(1));
+                log.setTime(rs.getTimestamp(2));
+            }
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+
+        return logs;
+    }
+
+    public class DownloadLog{
+        private String ip;
+        private Date time;
+
+        public void setIp(String ip){
+            this.ip = ip;
+        }
+
+        public String getIp(){
+            return this.ip;
+        }
+
+        public void setTime(Date time){
+            this.time = time;
+        }
+
+        public Date getTime(){
+            return this.time;
+        }
+
+
+}
 }

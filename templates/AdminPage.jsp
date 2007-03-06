@@ -51,15 +51,23 @@
         if ( user.getChildren() != null && user.getChildren().size() > 0 ){
             %>
     <table cellpadding="0" cellspacing="0" id="childdata">
+        <tr>
+            <td>Uid</td><td>Username</td><td>Email</td><td>UserType</td><td>Files</td><td>Lastlogin</td>
+        </tr>
         <%
         Map<Integer,UserItem> children = user.getChildren();
             for ( Integer key: children.keySet()){
                 UserItem child = children.get(key);
                 %>
             <tr>
-                <td>User: <a href="/admin/?action=editch&uid=<%=child.getUid()%>">(<%=child.getUid()%>) <%=child.getUsername()%></a></td>
-                <td>Email: <%=child.getEmail()%></td>
-                <td>Lastlogin: <%=utils.Helpers.formatDate(child.getLastlogin())%></td>
+                <td><%=child.getUid()%></td>
+                <td><a href="/admin/?action=editch&uid=<%=child.getUid()%>"><%=child.getUsername()%></a></td>
+                <td><%=child.getEmail()%></td>
+                <td><%=child.getUserType()==1?"ADMIN":child.getUserType()==2?"SECTRA":"EXTERNAL"%></td>
+                <td><%=child.getFiles().size()%></td>
+
+                <td><%=utils.Helpers.formatDate(child.getLastlogin())%></td>
+                <td><%=child.expires()?child.getDaysUntillExpiration():"never"%></td>
             </tr>
         <%
             }
@@ -87,7 +95,7 @@
                                 <td>Filename: </td><td colspan="2"><%=file.getName()%></td>
                             </tr>
                             <tr class="filedata">
-                                <td style="width: 60px">&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a></td>
+                                <td style="width: 60px">&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a><a href="?action=viewlog&fid=<%=file.getFid()%>">VIEW LOG</a></td>
                             </tr>
                             <tr class="filedata">
                                 <td>&nbsp;</td><td>Size:</td><td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>
@@ -102,7 +110,10 @@
                                 <td>&nbsp;</td><td>Downloads</td><td><%=file.getDownloads()==-1?"unlimited":file.getDownloads()%></td>
                             </tr>
                             <tr class="filedata">
-                                <td>&nbsp;</td><td>Url</td><td><a href="/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
+                                <td>&nbsp;</td><td>Password protected</td><td><%=file.getPassword()!=null&&file.getPassword().length()>0?"yes":"no"%></td>
+                            </tr>
+                            <tr class="filedata">
+                                <td>&nbsp;</td><td>Url</td><td><a href="http://<%=request.getServerName()%>/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
                             </tr>
                             <tr class="filedatal">
                                 <td>&nbsp;</td><td>Notify email</td><td><form action="/admin/" method="post"><input type="text" name="email"><input type="hidden" name="fid" value="<%=file.getFid()%>"><input type="hidden" name="action" value="notify">&nbsp;<input class="notify" type="submit" name="submit" value="NOTIFY"></form> </td>
