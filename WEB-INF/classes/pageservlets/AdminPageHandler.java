@@ -10,6 +10,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.AddressException;
 import java.util.regex.Pattern;
 import java.util.Map;
+import java.util.Set;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -113,6 +114,13 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 } else {
                     CustomLogger.logme(this.getClass().getName(),"Nonexistent user or no privilege to edit user");
                 }
+            } else if ( request.getParameter("action").equals("viewlog") && request.getParameter("fid") != null ){
+                CustomLogger.logme(this.getClass().getName(),"Searching for logs for fid=" + request.getParameter("fid"));
+                Set<FileItem.DownloadLog> downloadlog = new FileItem(Integer.parseInt(request.getParameter("fid"))).getLogs(conn);
+                CustomLogger.logme(this.getClass().getName(),"Found " + downloadlog.size()  + " logs");
+                request.setAttribute("downloadlogs",downloadlog);
+                return "/templates/DownloadLog.jsp";
+
             }
 
         }

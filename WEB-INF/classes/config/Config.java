@@ -18,8 +18,8 @@ import utils.CustomLogger;
  */
 public class Config {
     private static final String _DB = "uploader";
-    private static final String _UDIR = "c:/tmp/jfileshare";
-    private static final String _FILESTORE = "c:/tmp/store";
+    private static final String _UDIR = "/tmp/jfileshare";
+    private static final String _FILESTORE = "/tmp/store";
 
     private static final boolean _USIZE_CHECK = false;
 

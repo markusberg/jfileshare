@@ -39,6 +39,13 @@ public class FileItem {
 
     private boolean enabled = true;
 
+    public FileItem(){
+
+    }
+
+    public FileItem(int fid){
+        this.fid = fid;
+    }
 
     public int getFid() {
         return fid;
@@ -400,13 +407,15 @@ public class FileItem {
         Set<DownloadLog> logs = new HashSet<DownloadLog>();
 
         try {
-            PreparedStatement st = conn.prepareStatement("select * from DownloadLogs where fid=?");
+            PreparedStatement st = conn.prepareStatement("SELECT * FROM DownloadLogs WHERE fid=?");
             st.setInt(1,this.fid);
             ResultSet rs = st.executeQuery();
             while ( rs.next() ){
                 DownloadLog log = new DownloadLog();
-                log.setIp(rs.getString(1));
-                log.setTime(rs.getTimestamp(2));
+                log.setIp(rs.getString(3));
+                log.setTime(rs.getTimestamp(1));
+                logs.add(log);
+
             }
         } catch (SQLException e) {
             CustomLogger.logme(this.getClass().getName(), e.toString(), true);
