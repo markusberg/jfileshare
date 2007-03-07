@@ -215,7 +215,7 @@
   <div id="statusdiv">Status: </div>
   <table cellpadding="0" cellspacing="0">
       <tr>
-          <td style="width: 150px;vertical-align: top;">Require password</td><td><input id="pwswitch" name="usepw" type="checkbox" onclick="disable();" /><span class="note">Even dough url is hard to guess, some toolboxes send the url-data to <br />Alexa and similar. To protect sensitive data, additional password is a good idea. <br />This password will be required before user is allowed to download the file.</span></td>
+          <td style="width: 150px;vertical-align: top;">Require password</td><td><input id="pwswitch" name="usepw" type="checkbox" onclick="disable();" /><span class="note">Even though the url is hard to guess, some browsers may exchange the url data with third parties <br />. To protect sensitive data, additional password is a good idea. <br />This password will be required before user is allowed to download the file.</span></td>
       </tr>
       <tr>
           <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password" disabled="disabled" /></td>
