@@ -26,7 +26,7 @@
                     for ( FileItem.DownloadLog log: logs){
                         %>
                     <tr class="<%=order%>">
-                        <td><%=utils.Helpers.formatDate(log.getTime())%></td><td><%=log.getIp()%></td>
+                        <td><%=utils.Helpers.formatDate(log.getTime())%></td><td><a href="http://www.ripe.net/perl/whois?form_type=simple&full_query_string=&searchtext=<%=log.getIp()%>&do_search=Search"><%=log.getIp()%></a></td>
                     </tr>
                 <%
                         if ( order.equals("even")){

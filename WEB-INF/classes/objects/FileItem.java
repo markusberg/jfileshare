@@ -364,7 +364,7 @@ public class FileItem {
             int downloads = -1;
             while ( rs.next() ){
                 downloads = rs.getInt("downloads");
-                if ( rs.wasNull()) {
+                if ( rs.wasNull() || downloads == -1 ) {
                     //If downloads is null, set it to -1 otherwise decrease one
                     downloads = -1;
                 } else {

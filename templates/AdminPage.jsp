@@ -113,7 +113,7 @@
                                 <td>&nbsp;</td><td>Password protected</td><td><%=file.getPassword()!=null&&file.getPassword().length()>0?"yes":"no"%></td>
                             </tr>
                             <tr class="filedata">
-                                <td>&nbsp;</td><td>Url</td><td><a href="http://<%=request.getServerName()%>/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
+                                <td>&nbsp;</td><td>Url</td><td><a href="/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
                             </tr>
                             <tr class="filedatal">
                                 <td>&nbsp;</td><td>Notify email</td><td><form action="/admin/" method="post"><input type="text" name="email"><input type="hidden" name="fid" value="<%=file.getFid()%>"><input type="hidden" name="action" value="notify">&nbsp;<input class="notify" type="submit" name="submit" value="NOTIFY"></form> </td>
