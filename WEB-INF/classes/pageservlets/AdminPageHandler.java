@@ -53,6 +53,7 @@ public class AdminPageHandler implements ServletPageRequestHandler {
         loginuser = useritemview.getUserItem();
         CustomLogger.logme(this.getClass().getName(),"From userdata found " + loginuser.getFiles().size());
 
+
         if ( request.getParameter("action") != null ){
             if ( request.getParameter("action").equals("delete")){
                 FileItem file = useritemview.getFiles().get(Integer.parseInt(request.getParameter("fid")));

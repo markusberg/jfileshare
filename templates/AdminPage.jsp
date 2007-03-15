@@ -61,7 +61,7 @@
                 %>
             <tr>
                 <td><%=child.getUid()%></td>
-                <td><a href="/admin/?action=editch&uid=<%=child.getUid()%>"><%=child.getUsername()%></a></td>
+                <td><%=child.isExpired()?"(*) ":""%><a href="/admin/?action=editch&uid=<%=child.getUid()%>"><%=child.getUsername()%></a></td>
                 <td><%=child.getEmail()%></td>
                 <td><%=child.getUserType()==1?"ADMIN":child.getUserType()==2?"SECTRA":"EXTERNAL"%></td>
                 <td><%=child.getFiles().size()%></td>

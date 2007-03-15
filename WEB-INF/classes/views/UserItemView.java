@@ -7,9 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Iterator;
+import java.util.*;
 
 import utils.CustomLogger;
 
@@ -38,6 +36,10 @@ public class UserItemView {
 
     public UserItemView(){
 
+    }
+
+    public UserItemView(Connection conn){
+        this.conn = conn;
     }
 
     public UserItemView(Connection conn, int id) {
@@ -80,9 +82,7 @@ public class UserItemView {
         this.conn = conn;
         this.email = email;
         searchUser();
-        CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
         UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
-        CustomLogger.logme(this.getClass().getName(),"In conn,email found " + uview.getUsers().size());
         this.user.setChildren(uview.getUsers());
     }
 
@@ -92,7 +92,7 @@ public class UserItemView {
         ResultSet rs = null;
         if ( this.id != -1 ){
             try {
-                CustomLogger.logme(this.getClass().getName(),"THIS ID Should be " + this.id);
+
                 st = this.conn.prepareStatement("select * from UserItems where UserItems.uid=?");
                 st.setInt(1,this.id);
                 rs = st.executeQuery();
@@ -237,14 +237,11 @@ public class UserItemView {
 
 
     private void populateFromSQL(ResultSet rs, int RESULT_TYPE){
-        CustomLogger.logme(this.getClass().getName(),"AINT NULL YET");
-        if ( rs == null ) CustomLogger.logme(this.getClass().getName(),"NOW IT SEAMS NULL");
-        else CustomLogger.logme(this.getClass().getName(),"NO NOT YET");
 
         if ( RESULT_TYPE == RESULT_TYPE_USER){
             try {
                 while ( rs.next() ){
-                    CustomLogger.logme(this.getClass().getName(),"Creatin' user");
+
                     UserItem user = new UserItem();
                     user.setUid(rs.getInt("UserItems.uid"));
                     user.setUsername(rs.getString("UserItems.username"));
@@ -335,5 +332,38 @@ public class UserItemView {
         this.files.remove(fid);
     }
 
+
+    public Set<UserItem> getExpiredUsers(Connection conn){
+        Set<Integer> uids_expiring = new HashSet<Integer>();
+        Set<UserItem> expired_users = new HashSet<UserItem>();
+        try {
+            PreparedStatement st = conn.prepareStatement("SELECT uid FROM UserItems WHERE expires=?");
+            st.setBoolean(1,true);
+            ResultSet rs = st.executeQuery();
+            while ( rs.next() ){
+                uids_expiring.add(rs.getInt(1));
+
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            CustomLogger.logme(this.getClass().getName(), e.toString(), true);
+        }
+        CustomLogger.logme(this.getClass().getName(),"CHECKING " + uids_expiring.size() + " UZRZ");
+        for ( Integer uid: uids_expiring ){
+            UserItemView uview = new UserItemView(conn,uid);
+            UserItem user = uview.getUserItem();
+            if ( user.isExpired() ){
+                CustomLogger.logme(this.getClass().getName(),"User " + user.getUid() + " is expired");
+                expired_users.add(user);
+            } else {
+                CustomLogger.logme(this.getClass().getName(),"User " + user.getUid() + " is not expired");
+            }
+        }
+
+        return expired_users;
+
+
+    }
 
 }

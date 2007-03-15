@@ -265,45 +265,48 @@ public class UserItem {
     public boolean isExpired(){
         if ( ! expires ) return expires;
         GregorianCalendar now = new GregorianCalendar(
-                            Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date())),
-                            Integer.parseInt(new SimpleDateFormat("m").format(new Date())),
-                            Integer.parseInt(new SimpleDateFormat("d").format(new Date()))
+                            Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date().getTime())),
+                            Integer.parseInt(new SimpleDateFormat("M").format(new Date().getTime()))-1 ,
+                            Integer.parseInt(new SimpleDateFormat("d").format(new Date().getTime()))
+                    );
+        GregorianCalendar expiry = new GregorianCalendar(
+                Integer.parseInt(new SimpleDateFormat("yyyy").format(this.created.getTime())),
+                Integer.parseInt(new SimpleDateFormat("M").format(this.created.getTime()))-1 ,
+                  Integer.parseInt(new SimpleDateFormat("d").format(this.created.getTime()))
                     );
 
-        GregorianCalendar expiry = new GregorianCalendar(
-                            Integer.parseInt(new SimpleDateFormat("yyyy").format(this.expiry)),
-                            Integer.parseInt(new SimpleDateFormat("m").format(this.expiry)),
-                            Integer.parseInt(new SimpleDateFormat("d").format(this.expiry))
-                    );
+
+        expiry.add(GregorianCalendar.DATE,this.daystoexpire);
 
         if ( expiry.before(now)) return true;
-        CustomLogger.logme(this.getClass().getName(),expiry.compareTo(now)/1000/60/60/24 + " DAYS untill expiration");
+        CustomLogger.logme(this.getClass().getName(),(expiry.getTime().getTime() - now.getTime().getTime())/1000/60/60/24  + " -days to expire");
+
         return false;
 
     }
 
     /**
-     *
+     *      CustomLogger.logme(this.getClass().getName(),expiry.compareTo(now) + " DAYS untill expiration");
      * @return value of days before expiration
      */
 
     public int getDaysUntillExpiration(){
+        GregorianCalendar creation = new GregorianCalendar(
+                                    Integer.parseInt(new SimpleDateFormat("yyyy").format(this.created)),
+                                    Integer.parseInt(new SimpleDateFormat("M").format(this.created))-1,
+                                    Integer.parseInt(new SimpleDateFormat("d").format(this.created))
+                            );
         GregorianCalendar now = new GregorianCalendar(
                                     Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date())),
-                                    Integer.parseInt(new SimpleDateFormat("m").format(new Date())),
+                                    Integer.parseInt(new SimpleDateFormat("M").format(new Date()))-1,
                                     Integer.parseInt(new SimpleDateFormat("d").format(new Date()))
                             );
 
-        GregorianCalendar expiry = new GregorianCalendar(
-                            Integer.parseInt(new SimpleDateFormat("yyyy").format(this.expiry)),
-                            Integer.parseInt(new SimpleDateFormat("m").format(this.expiry)),
-                            Integer.parseInt(new SimpleDateFormat("d").format(this.expiry))
-                    );
 
+        GregorianCalendar expiry = (GregorianCalendar) creation.clone();
+        expiry.add(GregorianCalendar.DATE,this.daystoexpire);
 
-        CustomLogger.logme(this.getClass().getName(),expiry.compareTo(now)/1000/60/60/24 + " DAYS untill expiration");
-
-        return expiry.compareTo(now)/1000/60/60/24;        
+        return Integer.parseInt(Long.toString((expiry.getTime().getTime()-now.getTime().getTime())/1000/60/60/24));
 
     }
 
