@@ -14,7 +14,7 @@
     </div>
   <div>
       <form action="" method="post">
-          <input type="text" name="password" />
+          <input type="password" name="password" />
           <input type="submit" name="sendpassword" value="Submit" />
       </form>
   </div>
