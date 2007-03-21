@@ -105,6 +105,11 @@
         <servlet-class>generic.Streamer</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>Vacuum</servlet-name>
+        <servlet-class>utils.VacuumCleaner</servlet-class>
+    </servlet>
+
 
     <!-- Servlet mappings -->
     <servlet-mapping>
