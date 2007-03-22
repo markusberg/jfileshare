@@ -81,6 +81,8 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                         file.setPassword(utils.Jcrypt.crypt(request.getParameter("password")));
                     }
 
+                } else {
+                    file.setPassword(null);
                 }
                 file.save(conn);
                 useritemview = new UserItemView(conn,loginuser.getUsername());
