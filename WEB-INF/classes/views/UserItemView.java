@@ -132,30 +132,33 @@ public class UserItemView {
                 st = this.conn.prepareStatement("select * from UserItems where UserItems.username=?");
                 st.setString(1,this.username);
                 rs = st.executeQuery();
+
                 if (rs == null ){
                     CustomLogger.logme(this.getClass().getName(),"RS seams to be NULL... WTF WTF");
                 } else {
                     populateFromSQL(rs, RESULT_TYPE_USER );
                 }
 
-                CustomLogger.logme(this.getClass().getName(),"Searching for files uploaded by " + this.user.getUsername());
-                st = this.conn.prepareStatement("select * from FileItems where FileItems.owner=?");
-                st.setInt(1,this.user.getUid());
-                rs = st.executeQuery();
-                if ( rs == null ){
-                    CustomLogger.logme(this.getClass().getName(),"RS seams to be null when getting fileitems... WTF WTF");
-                } else {
-                    populateFromSQL(rs, RESULT_TYPE_FILES);
-                }
+                if ( this.user != null ){
+                    CustomLogger.logme(this.getClass().getName(),"Searching for files uploaded by " + this.user.getUsername());
+                    st = this.conn.prepareStatement("select * from FileItems where FileItems.owner=?");
+                    st.setInt(1,this.user.getUid());
+                    rs = st.executeQuery();
+                    if ( rs == null ){
+                        CustomLogger.logme(this.getClass().getName(),"RS seams to be null when getting fileitems... WTF WTF");
+                    } else {
+                        populateFromSQL(rs, RESULT_TYPE_FILES);
+                    }
 
-                CustomLogger.logme(this.getClass().getName(),"Searching for users created by " + this.user.getUsername());
-                st = this.conn.prepareStatement("select * from UserItems where creator=?");
-                st.setInt(1,this.user.getUid());
-                rs = st.executeQuery();
-                if ( rs == null ){
-                    CustomLogger.logme(this.getClass().getName(),"RS null when getting children... WTF WTF");
-                } else {
-                    populateFromSQL(rs, RESULT_TYPE_CHILDREN);
+                    CustomLogger.logme(this.getClass().getName(),"Searching for users created by " + this.user.getUsername());
+                    st = this.conn.prepareStatement("select * from UserItems where creator=?");
+                    st.setInt(1,this.user.getUid());
+                    rs = st.executeQuery();
+                    if ( rs == null ){
+                        CustomLogger.logme(this.getClass().getName(),"RS null when getting children... WTF WTF");
+                    } else {
+                        populateFromSQL(rs, RESULT_TYPE_CHILDREN);
+                    }
                 }
             } catch ( SQLException e){
                 CustomLogger.logme(this.getClass().getName(),e.toString(),true);
