@@ -71,10 +71,12 @@ public class UserItemView {
         this.conn = conn;
         this.username = username;
         searchUser();
-        CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
-        UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
-        CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
-        this.user.setChildren(uview.getUsers());
+        if ( this.user != null ){
+            CustomLogger.logme(this.getClass().getName(),"User set. Getting children...");
+            UserItemView uview = new UserItemView(conn,this.user.getUid(),UserItemView.SEARCH_BY_CREATOR);
+            CustomLogger.logme(this.getClass().getName(),"In conn,username found " + uview.getUsers().size());
+            this.user.setChildren(uview.getUsers());
+        }
     }
 
 
