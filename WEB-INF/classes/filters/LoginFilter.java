@@ -160,7 +160,11 @@ public class LoginFilter implements Filter {
             ResultSet result = null;
 			if ( username != null && password != null ){
                 UserItemView uview = new UserItemView(conn,username);
+
                 user = uview.getUserItem();
+                if ( user == null ){
+                    return false;
+                }
                 dbpass = user.getPassword();
                 
                 CustomLogger.logme(this.getClass().getName(),"Got password *******");
