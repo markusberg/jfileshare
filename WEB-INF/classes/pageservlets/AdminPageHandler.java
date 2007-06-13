@@ -90,7 +90,6 @@ public class AdminPageHandler implements ServletPageRequestHandler {
                 EmailItem email = new EmailItem(request);
                 try {
                     email.addRcpt(new InternetAddress(request.getParameter("email")));
-                    email.addBcpt(new InternetAddress("zoran@sectra.se"));
                     if ( loginuser.getEmail() != null ){
                         email.setSender(loginuser.getEmail());
                     }
