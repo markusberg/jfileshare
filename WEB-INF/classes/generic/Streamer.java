@@ -81,17 +81,21 @@ public class Streamer extends HttpServlet {
                 response.setHeader("Content-length",Long.toString(file.getFile().length()));
                 ServletOutputStream sos = response.getOutputStream();
                 FileInputStream fis = new FileInputStream(file.getFile());
-                BufferedInputStream bis = new BufferedInputStream(fis);
-                BufferedOutputStream bos = new BufferedOutputStream(sos);
-                byte[] buff = new byte[new Long(file.getFile().length()).intValue()];
+                //BufferedInputStream bis = new BufferedInputStream(fis);
+                //BufferedOutputStream bos = new BufferedOutputStream(sos);
+               // byte[] buff = new byte[new Long(file.getFile().length()).intValue()];
                 int bytesRead;
                 // Simple read/write loop.
-                while(-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
-                    bos.write(buff, 0, bytesRead);
+
+
+                while(-1 != (bytesRead = fis.read())) {
+                    sos.write(bytesRead);
                 }
 
-                if ( bos != null ) bos.close();
-                if ( bis != null ) bis.close();
+                //if ( bos != null ) bos.close();
+                //if ( bis != null ) bis.close();
+                if ( fis != null ) fis.close();
+                if ( sos != null ) sos.close();
                 CustomLogger.logme(this.getClass().getName(),"Reducing download");
                 file.registerDownload(conn, request);
 
