@@ -86,13 +86,10 @@ public class Streamer extends HttpServlet {
                // byte[] buff = new byte[new Long(file.getFile().length()).intValue()];
                 int bytesRead;
                 // Simple read/write loop.
-                Long totbytes = new Long(file.getFile().length());
+
 
                 while(-1 != (bytesRead = fis.read())) {
                     sos.write(bytesRead);
-                    if ( Math.IEEEremainder(totbytes-bytesRead,10)==0){
-                        CustomLogger.logme(this.getClass().getName(),"Sent : " + bytesRead + " bytes (" + (bytesRead/totbytes)*100 + "%)");
-                    }
                 }
 
                 //if ( bos != null ) bos.close();
