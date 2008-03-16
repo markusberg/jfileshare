@@ -77,7 +77,7 @@ public class Streamer extends HttpServlet {
             if ( pathparts[pathparts.length - 2].equals("get") ){
                 CustomLogger.logme(this.getClass().getName(),"... about to stream");
                 response.setContentType(file.getType());
-                response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
+                response.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
                 response.setHeader("Content-length",Long.toString(file.getFile().length()));
                 ServletOutputStream sos = response.getOutputStream();
                 FileInputStream fis = new FileInputStream(file.getFile());
