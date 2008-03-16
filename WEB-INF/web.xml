@@ -67,6 +67,10 @@
         <filter-name>sitemesh</filter-name>
         <url-pattern>/admin**</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/mainadmin**</url-pattern>
+    </filter-mapping>
 
     <filter-mapping>
         <filter-name>login</filter-name>
