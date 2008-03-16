@@ -136,6 +136,10 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
+        <url-pattern>/mainadmin**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
         <url-pattern>/ajax**</url-pattern>
     </servlet-mapping>
 </web-app>
