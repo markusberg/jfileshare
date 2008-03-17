@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import utils.CustomLogger;
+import objects.UserItem;
 
 /**
  * User: zoran
@@ -71,6 +72,8 @@ public class FileAuthenticationFilter implements Filter {
         HttpSession session = request.getSession();
         String[] pathparts = request.getServletPath().split("/");
         String lastpart = pathparts[pathparts.length - 1 ];
+        // if we are logged in as TYPE_ADMIN and have fullfiles-admin-flag set.
+        if ( session.getAttribute("user") != null && ( ( (UserItem)session.getAttribute("user")).getUserType() == objects.UserItem.TYPE_ADMIN && session.getAttribute("fullfiles") != null )) return true;
         //First, are we authenticated for this file
         if ( session.getAttribute("authfiles") != null ){
             Set<String> authfiles = (Set<String>) session.getAttribute("authfiles");
