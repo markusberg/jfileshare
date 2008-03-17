@@ -37,6 +37,11 @@
                               %><li><a href="/register">Register</a></li><%
                           }
                       %>
+                      <%
+                          if (user.getUserType() <= Config.getRequiredLevel("/mainadmin")){
+                              %><li><a href="/mainadmin">Main Administration</a></li><%
+                          }
+                      %>
                   </ul>
               </div><br /><br />
               <%

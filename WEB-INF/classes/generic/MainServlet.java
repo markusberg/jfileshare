@@ -37,6 +37,7 @@ public class MainServlet extends HttpServlet {
         handlers.put("2",new RegistrationPageHandler());
         handlers.put("3",new AdminPageHandler());
         handlers.put("4",new AjaxPageHandler());
+        handlers.put("5",new MainAdminPageHandler());
 
     }
 

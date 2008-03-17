@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import pageservlets.subhandlers.UserAdminHandler;
+import pageservlets.subhandlers.PageSubhandler;
+
 /**
  * SECTRA.
  * User: zoran
@@ -36,10 +39,13 @@ public class MainAdminPageHandler implements ServletPageRequestHandler {
 
     }
 
-    private String handleSubUrl(HttpServletRequest request){
+    private String handleSubUrl(Connection conn,HttpServletRequest request){
         String urlPattern = request.getServletPath();
         if ( Pattern.compile("(users)").matcher(urlPattern).find()){
             request.setAttribute("subhandler","userSubHandler()");
+            PageSubhandler handler= new UserAdminHandler();
+            return handler.handle(conn,request);
+
         } else {
             request.setAttribute("subhandler","UNKNOWN");
         }
@@ -49,7 +55,7 @@ public class MainAdminPageHandler implements ServletPageRequestHandler {
 
     public String handlePageRequest(Connection conn, HttpServletRequest request, HttpServletResponse response, ServletContext context)
                 throws SQLException, ServletException {
-        return handleSubUrl(request);
+        return handleSubUrl(conn,request);
         //return "/templates/AdminPage.jsp";
     }
 

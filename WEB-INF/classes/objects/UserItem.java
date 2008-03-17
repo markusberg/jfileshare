@@ -1,6 +1,7 @@
 package objects;
 
 import utils.CustomLogger;
+import utils.Jcrypt;
 
 
 import config.Config;
@@ -54,6 +55,10 @@ public class UserItem {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setClearTextPassword(String password){
+        this.password = Jcrypt.crypt(password);
     }
 
     public String getEmail() {

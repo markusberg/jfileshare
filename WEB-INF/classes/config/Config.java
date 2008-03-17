@@ -37,6 +37,8 @@ public class Config {
         authorization_map.put("/register", UserItem.TYPE_SECTRA);
         authorization_map.put("/upload",UserItem.TYPE_EXTERNAL);
         authorization_map.put("/admin",UserItem.TYPE_EXTERNAL);
+        authorization_map.put("/mainadmin",UserItem.TYPE_ADMIN);
+        authorization_map.put("/mainadmin/users",UserItem.TYPE_ADMIN);
     }
 
     public static String getDb() {

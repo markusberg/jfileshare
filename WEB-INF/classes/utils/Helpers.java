@@ -1,6 +1,8 @@
 package utils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
+import java.util.Set;
 
 /**
  * User: zoran@sectra.se
@@ -18,4 +20,10 @@ public class Helpers {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return formatter.format(date);
 	}
+
+    public static void debugHttpRequest(HttpServletRequest request){
+        for ( Object pname: request.getParameterMap().keySet() ){
+            CustomLogger.logme("REQUEST_DEBUGGER: ",pname.toString() + ": " + request.getParameter(pname.toString()));
+        }
+    }
 }

@@ -61,6 +61,8 @@ public class LoginFilter implements Filter {
         this.authorization_map.put("/register",UserItem.TYPE_SECTRA);
         this.authorization_map.put("/upload",UserItem.TYPE_EXTERNAL);
         this.authorization_map.put("/admin",UserItem.TYPE_EXTERNAL);
+        this.authorization_map.put("/mainadmin",UserItem.TYPE_ADMIN);
+        this.authorization_map.put("/mainadmin/users",UserItem.TYPE_ADMIN);
 
     }
 
@@ -73,7 +75,7 @@ public class LoginFilter implements Filter {
         CustomLogger.logme(this.getClass().getName(),"Got user " + user.getUsername());
         CustomLogger.logme(this.getClass().getName(),"Got path " + request.getServletPath());
         //Get required type:
-        for ( String path : this.authorization_map.keySet() ){
+        /*for ( String path : this.authorization_map.keySet() ){
             CustomLogger.logme(this.getClass().getName(),"Checking for " + path);
             if ( request.getServletPath().startsWith(path)){
                 if ( this.authorization_map.get(path) >= user.getUserType() ){
@@ -85,6 +87,26 @@ public class LoginFilter implements Filter {
                 }
             } else {
                 CustomLogger.logme(this.getClass().getName(),request.getServletPath() + " does not start with " + path);
+            }
+        } */
+
+        if ( this.authorization_map.containsKey(request.getServletPath())){
+            if ( this.authorization_map.get(request.getServletPath()) >= user.getUserType()){
+                CustomLogger.logme(this.getClass().getName(),"Path found, user authorized");
+                return true;
+            } else {
+                CustomLogger.logme(this.getClass().getName(),"Path found, user NOT authorized");
+            }
+
+
+        } else {
+            CustomLogger.logme(this.getClass().getName(),"Path NOT found, defaulting to SECTRA-level");
+            if ( user.getUserType() <= UserItem.TYPE_SECTRA ){
+                CustomLogger.logme(this.getClass().getName(),"User is at least SECTRA-type, allowed");
+                return true;
+            } else {
+                CustomLogger.logme(this.getClass().getName(),"User is not SECTRA-type, NOT ALLOWED");
+                return false;
             }
         }
 

@@ -48,7 +48,7 @@
         <%}%>
     </table>
     <%
-        if ( user.getChildren() != null && user.getChildren().size() > 0 ){
+        if ( user.getChildren() != null && user.getChildren().size() > 0 && user.getUserType() != objects.UserItem.TYPE_ADMIN ){
             %>
     <table cellpadding="0" cellspacing="0" id="childdata">
         <tr>

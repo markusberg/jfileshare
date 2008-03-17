@@ -71,6 +71,10 @@
         <filter-name>sitemesh</filter-name>
         <url-pattern>/mainadmin**</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/mainadmin**/**/**</url-pattern>
+    </filter-mapping>
 
     <filter-mapping>
         <filter-name>login</filter-name>
@@ -81,6 +85,16 @@
         <filter-name>login</filter-name>
         <url-pattern>/admin**</url-pattern>
     </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/mainadmin**</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/mainadmin/users**</url-pattern>
+    </filter-mapping>
+
 
     <filter-mapping>
         <filter-name>login</filter-name>
@@ -141,6 +155,10 @@
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/mainadmin**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/mainadmin/users**</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
