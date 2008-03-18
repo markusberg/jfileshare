@@ -9,15 +9,16 @@
 <html>
   <head><title>Main administration</title></head>
   <body>
-  <table>
-      <tr>
-          <td><a href="/mainadmin/users">USERS</a></td>
-          <td><a href="/mainadmin/files">FILES</a></td>
-      </tr>
-      <tr>
-
-      </tr>
-  </table>
-    <%=request.getAttribute("subhandler")%>
+  <table cellpadding="0" cellspacing="0">
+      <tr><td>
+              <div class="menudiv">
+                  <ul class="menuul">
+                      <li><a href="/mainadmin/users">USERS</a></li>
+                      <li><a href="/mainadmin/files">FILES</a></li>
+                  </ul>
+              </div>
+      </td></tr>
+   </table>
+    
   </body>
 </html>

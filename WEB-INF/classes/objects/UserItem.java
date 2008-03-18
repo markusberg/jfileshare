@@ -163,6 +163,10 @@ public class UserItem {
         return this.files.containsKey(key)?this.files.get(key):null;
     }
 
+    public int getDaysToExpire(){
+        return this.daystoexpire;
+    }
+
 
     public boolean save(Connection conn){
         PreparedStatement st = null;

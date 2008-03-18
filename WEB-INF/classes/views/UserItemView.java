@@ -282,6 +282,47 @@ public class UserItemView {
     }
 
 
+    public Map<Integer,UserItem> getAllExpiredUsers(){
+        if ( this.conn != null ){
+            Map<Integer,UserItem> users = new HashMap<Integer,UserItem>();
+            int usersfound = 0;
+            try {
+            PreparedStatement st = conn.prepareStatement("select * from UserItems where (TO_DAYS(created)+daystoexpire)<TO_DAYS(now()) and expires=1 order by uid");
+            st.execute();
+            ResultSet rs = st.getResultSet();
+
+            while ( rs.next() ){
+                UserItem user = new UserItem();
+                user.setUid(rs.getInt("UserItems.uid"));
+                user.setUsername(rs.getString("UserItems.username"));
+                user.setPassword(rs.getString("UserItems.password"));
+                user.setEmail(rs.getString("UserItems.email"));
+                user.setUserType(rs.getInt("UserItems.usertype"));
+                user.setCreated(rs.getTimestamp("UserItems.created"));
+                user.setLastlogin(rs.getTimestamp("UserItems.lastlogin"));
+                user.setExpires(rs.getBoolean("UserItems.expires"));
+                if ( user.expires() ){
+                    user.setExpiry(rs.getInt("UserItems.daystoexpire"));
+                }
+                users.put(user.getUid(),user);
+                usersfound +=1;
+
+            }
+            } catch ( SQLException e){
+                CustomLogger.logme(this.getClass().getName(),"Exception: " + e.toString());
+            }
+            if (users.isEmpty()) return null;
+            CustomLogger.logme(this.getClass().getName(),"Found " + usersfound + " users ");
+            return users;
+
+        } else {
+            return null;
+        }
+
+
+
+    }
+
     private void populateFromSQL(ResultSet rs, int RESULT_TYPE){
 
         if ( RESULT_TYPE == RESULT_TYPE_USER){

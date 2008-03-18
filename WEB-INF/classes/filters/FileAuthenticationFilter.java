@@ -73,7 +73,10 @@ public class FileAuthenticationFilter implements Filter {
         String[] pathparts = request.getServletPath().split("/");
         String lastpart = pathparts[pathparts.length - 1 ];
         // if we are logged in as TYPE_ADMIN and have fullfiles-admin-flag set.
-        if ( session.getAttribute("user") != null && ( ( (UserItem)session.getAttribute("user")).getUserType() == objects.UserItem.TYPE_ADMIN && session.getAttribute("fullfiles") != null )) return true;
+        if ( session.getAttribute("user") != null && ( ( (UserItem)session.getAttribute("user")).getUserType() == objects.UserItem.TYPE_ADMIN && session.getAttribute("fullfiles") != null )){
+            CustomLogger.logme(this.getClass().getName(),"No file authorization overridden for TYPE_ADMIN");
+            return true;
+        }
         //First, are we authenticated for this file
         if ( session.getAttribute("authfiles") != null ){
             Set<String> authfiles = (Set<String>) session.getAttribute("authfiles");

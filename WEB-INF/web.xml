@@ -94,6 +94,10 @@
         <filter-name>login</filter-name>
         <url-pattern>/mainadmin/users**</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/mainadmin/files**</url-pattern>
+    </filter-mapping>
 
 
     <filter-mapping>
@@ -159,6 +163,10 @@
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/mainadmin/users**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/mainadmin/files**</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>

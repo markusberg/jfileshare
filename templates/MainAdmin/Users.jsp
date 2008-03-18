@@ -45,7 +45,7 @@
               <td>Email: </td><td><input type="text" name="email" value="<%=user.getEmail()%>" /></td>
           </tr>
           <tr>
-              <td>Expires: </td><td><input type="checkbox" name="expires"<%=user.expires()?" checked=\"checked\"":""%></td>
+              <td>Expires: </td><td><input type="checkbox" name="expires"<%=user.expires()?" checked=\"checked\"":""%> /></td>
           </tr>
           <tr>
               <td>User-type:</td><td><select name="usertype">
@@ -96,7 +96,7 @@
               <td>Email: </td><td><input disabled="disabled" type="text" name="email" value="<%=user.getEmail()%>" /></td>
           </tr>
           <tr>
-              <td>Expires: </td><td><input disabled="disabled" type="checkbox" name="expires"<%=user.expires()?" checked=\"checked\"":""%></td>
+              <td>Expires: </td><td><input disabled="disabled" type="checkbox" name="expires"<%=user.expires()?" checked=\"checked\"":""%> /></td>
           </tr>
           <tr>
               <td>User-type:</td><td><select disabled="disabled" name="usertype">
@@ -140,25 +140,42 @@
   <%
       if (request.getAttribute("users") !=null ){
   %>
+  <form action="/mainadmin/users" method="POST">
+        <table cellpadding="0" cellspacing="0" id="search">
+        <tr><td>Username </td><td><input type="text" name="username" /></td></tr>
+            <tr><td>&nbsp;<input type="hidden" name="action" value="dosearch" /></td><td><input type="submit" value="Search" /></td></tr>
+        </table>
+    </form>
+  
   <table id="users" cellpadding="0" cellspacing="0">
+      <form id="deleteform" action="/" method="POST">
+      <tr>
+          <th colspan="7">Expired users</th><th align="center"><a href="/mainadmin/users"><img src="/images/stock_delete.png" alt="delete" width="20" height="20"/></a></th>
+      </tr>
+      <tr class="uheader">
+          <th>uid</th><th>username</th><th>email</th><th>created</th><th>last login</th><th>expires</th><th></th><th class="lastcol"><input type="checkbox" name="all" onchange="selectall(this);"/></th>
+      </tr>
       <%
           Map<Integer, UserItem> users = (Map<Integer,UserItem>) request.getAttribute("users");
-          boolean isfirst = true;
           for ( Integer uid: users.keySet()){
               UserItem user = users.get(uid);
               %>
-      <tr<%=isfirst?" class=\"first\"":""%>>
+      <tr>
           <td><%=user.getUid()%></td>
           <td><%=user.getUsername()%></td>
           <td><%=user.getEmail()%></td>
-          <td class="last"><%=user.getLastlogin()%></td>
+          <td><%=user.getCreated()%></td>
+          <td><%=user.getLastlogin()%></td>
+          <td><%=user.getDaysToExpire()%></td>
+          <td><a href="/mainadmin/users?action=dosearch&username=<%=user.getUsername()%>"><img src="/images/pencil.gif" alt="edit" /></a>&nbsp;&nbsp;<a href="/mainadmin/users?action=confirmdelete&uid=<%=user.getUid()%>"><img src="/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
+          <td class="last"><input class="deletesel" type="checkbox" name="<%=user.getUid()%>" /></td>
+
           
       </tr>
       <%
-              isfirst = false;
           }
       %>
-
+      </form>
   </table>
 
   <%

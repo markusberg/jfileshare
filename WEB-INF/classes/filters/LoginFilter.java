@@ -122,6 +122,11 @@ public class LoginFilter implements Filter {
 
             HttpServletRequest request = (HttpServletRequest)servletRequest;
             HttpSession session = request.getSession();
+            HttpServletResponse response = (HttpServletResponse)servletResponse;
+            response.setHeader("Pragma", "no-cache");
+		    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+		    response.setDateHeader("Expires", -1);
+		    response.setDateHeader("Last-Modified", System.currentTimeMillis() - 1000*60*30 );
             UserItem user = (UserItem) session.getAttribute("user");
             if ( user == null ) CustomLogger.logme(this.getClass().getName(),"USER SEAMS TO BE NULL");
             else CustomLogger.logme(this.getClass().getName(),"USER " + user.getUsername() + " is in");

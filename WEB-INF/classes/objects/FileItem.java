@@ -6,9 +6,11 @@ import java.io.File;
 import java.util.Date;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.GregorianCalendar;
 import java.sql.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 
 import config.Config;
 
@@ -29,7 +31,7 @@ public class FileItem {
     private String md5sum;
 
 
-    private boolean permanent = true;
+    private boolean permanent = false;
     private int downloads = -1;
     private String password;
     private Date ddate;
@@ -176,7 +178,13 @@ public class FileItem {
                 }
                 st.setTimestamp(8,new Timestamp(this.ddate.getTime()));
                 if ( this.expiration == null ){
-                    st.setNull(9,java.sql.Types.TIMESTAMP);
+                    if ( this.permanent ){
+                        st.setNull(9,java.sql.Types.TIMESTAMP);
+                    } else {
+                        Date thedate = new Date();
+                        Date newdate = utils.Helpers.calcDate(thedate,14);
+                        st.setTimestamp(9, new Timestamp(newdate.getTime()));
+                    }
                 } else {
                     st.setTimestamp(9,new Timestamp(this.expiration.getTime()));
                 }
@@ -401,6 +409,13 @@ public class FileItem {
         }
 
         return dvalue;
+    }
+
+    public boolean isExpired(){
+        if ( this.expiration == null ){
+            return new Date().after(utils.Helpers.calcDate(this.ddate,14));
+        }
+        return new Date().after(this.expiration);
     }
 
     public Set<DownloadLog> getLogs(Connection conn){

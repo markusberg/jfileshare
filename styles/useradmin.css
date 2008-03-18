@@ -80,3 +80,14 @@
     
     
 }
+
+.uheader th {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    padding-left: 3px;
+}
+
+.uheader th.lastcol {
+    border-right: 1px solid black;
+}

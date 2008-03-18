@@ -203,7 +203,7 @@
       <input type="hidden" name="action" value="sendfile" />
       <input id="usepwtid" type="hidden" name="usepwt" value="" />
       <input id="passwordtid" type="hidden" name="passwordt" value="" />
-      <input type="file" name="file" />
+      <input id="fileinput" type="file" name="file" />
 
       <input type="submit" name="submit" value="Send"/>
 

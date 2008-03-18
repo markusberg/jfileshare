@@ -59,8 +59,16 @@ public class UserAdminHandler implements PageSubhandler{
             request.setAttribute("page","confirmdelete");
             return "/templates/MainAdmin/Users.jsp";
         }
-        request.setAttribute("page","search");
-        //request.setAttribute("users",new UserItemView(conn).getAllUsers());
+
+        if (request.getParameter("action") != null && request.getParameter("action").equals("dodelete")){
+            UserItemView userview = new UserItemView(conn,new Integer(request.getParameter("uid")));
+            userview.getUserItem().delete(conn);
+            request.setAttribute("message","User deleted!");
+        }
+
+
+        request.setAttribute("page","expiredusers");
+        request.setAttribute("users",new UserItemView(conn).getAllExpiredUsers());
         return "/templates/MainAdmin/Users.jsp";
         
     }

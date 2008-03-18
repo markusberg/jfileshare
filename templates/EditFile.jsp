@@ -44,6 +44,14 @@
           </td>
        </tr>
       <tr>
+          <td>Md5sum:</td>
+          <td><%=file.getMd5sum()%></td>
+      </tr>
+      <tr>
+          <td>URL:</td>
+          <td>https://<%=request.getServerName()%>/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%></td>
+      </tr>
+      <tr>
           <td>Enabled</td><td><select name="enabled">
           <option value="yes"<%=file.isEnabled()?" selected=\"selected\"":""%>>yes</option>
           <option value="no"<%=file.isEnabled()?"":" selected=\"selected\""%>>no</option>

@@ -5,6 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
   <head><title>SECTRA file distribution facility <decorator:title /></title>
       <link rel="stylesheet" href="/styles/main.css" type="text/css" />
+      <script type="text/javascript" xml:space="preserve" src="/scripts/main.js"></script>
       <decorator:head />
   </head>
   <body>
@@ -24,26 +25,52 @@
                   <ul id="menuul">
                       <%
                           if (user.getUserType() <= Config.getRequiredLevel("/admin")){
-                              %><li><a href="/admin">Administration</a></li><%
+                              %><li><a href="/admin">ADMINISTRATION</a></li><%
                           }
                       %>
                       <%
                           if (user.getUserType() <= Config.getRequiredLevel("/upload")){
-                              %><li><a href="/upload">Upload</a></li><%
+                              %><li><a href="/upload">UPLOAD</a></li><%
                           }
                       %>
                       <%
                           if (user.getUserType() <= Config.getRequiredLevel("/register")){
-                              %><li><a href="/register">Register</a></li><%
+                              %><li><a href="/register">REGISTER</a></li><%
                           }
                       %>
                       <%
                           if (user.getUserType() <= Config.getRequiredLevel("/mainadmin")){
-                              %><li><a href="/mainadmin">Main Administration</a></li><%
+                              %><li><a href="/mainadmin">MAIN ADMINISTRATION</a></li><%
                           }
+
+                          if (user.getUserType() <= objects.UserItem.TYPE_ADMIN ){
+                            boolean fullfiles = session.getAttribute("fullfiles")!=null;
                       %>
+                      <li>
+                          <script type="text/javascript" xml:space="preserve">
+                              function submitthis(box){
+                                  if ( box.checked ){
+                                      ajaxRequest("sessionadm","subaction=set&name=fullfiles&value","on");
+                                      alert("You are running with full file access");
+                                  } else {
+                                      ajaxRequest("sessionadm","subaction=unset&name","fullfiles");
+                                      alert("You are running with not file access");
+                                  }
+
+                              }
+
+                              function triggered(){
+
+                              }
+                          </script>
+                          <form action="<%=request.getAttribute("urlPattern")%>" method="POST">
+                            <input type="checkbox" name="fullfiles" onchange="submitthis(this);"<%=fullfiles?" checked=\"checked\" ":""%>/>(Full file administration)
+                        </form>
+
+                      </li><%} %>
                   </ul>
-              </div><br /><br />
+              </div>
+              <br /><br />
               <%
                   }
               %>

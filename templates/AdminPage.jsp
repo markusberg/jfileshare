@@ -87,42 +87,29 @@
                 if ( files.size() > 0 ){
                                         %>
                         <table cellpadding="0" cellspacing="0" id="files">
+                            <tr>
+                                <th>Name</th><th>Size</th><th>Perm.</th><th>Downloads</th><th>PW</th><th>Url</th><th></th>
+                            </tr>
                             <%
+                                boolean even = true;
+                                boolean first = true;
                                 for ( Integer key: files.keySet() ){
                                     FileItem file = files.get(key);
                                     %>
-                            <tr class="filename">
-                                <td>Filename: </td><td colspan="2"><%=file.getName()%></td>
+                            <tr class="<%=first?"first":""%><%=even?"even":"odd"%>">
+                                <td><%=file.getName()%></td>
+                                <td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>
+                                
+                                <td><%=file.isPermanent()?"YES":"NO"%><%=file.isExpired()?"*":""%></td>
+                                <td><%=file.getDownloads()==-1?"unlimited":file.getDownloads()%></td>
+                                <td><%=file.getPassword()!=null&&file.getPassword().length()>0?"yes":"no"%></td>
+                                <td><a href="/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
+                                <td class="lastcol"><a href="?action=edit&fid=<%=file.getFid()%>"><img src="/images/pencil.gif" alt="edit" /></a>&nbsp;&nbsp;<a href="?action=viewlog&fid=<%=file.getFid()%>"><img src="/images/stock_log.png" alt="delete" width="15" height="15"/></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="?action=delete&fid=<%=file.getFid()%>" onclick="return confirm('Are you sure that you want to delete this file?');"><img src="/images/stock_delete.png" alt="delete" width="13" height="13"/></a></td>
                             </tr>
-                            <tr class="filedata">
-                                <td style="width: 60px">&nbsp;</td><td colspan="2" class="delete"><a href="?action=edit&fid=<%=file.getFid()%>">EDIT</a><a href="?action=delete&fid=<%=file.getFid()%>">DELETE</a><a href="?action=viewlog&fid=<%=file.getFid()%>">VIEW LOG</a></td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Size:</td><td><%=new Double(file.getSize()/1024).intValue()%> Kb</td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Md5sum</td><td><%=file.getMd5sum()%></td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Permanent</td><td><%=file.isPermanent()?"yes":"no"%></td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Downloads</td><td><%=file.getDownloads()==-1?"unlimited":file.getDownloads()%></td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Password protected</td><td><%=file.getPassword()!=null&&file.getPassword().length()>0?"yes":"no"%></td>
-                            </tr>
-                            <tr class="filedata">
-                                <td>&nbsp;</td><td>Url</td><td><a href="/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
-                            </tr>
-                            <tr class="filedatal">
-                                <td>&nbsp;</td><td>Notify email</td><td><form action="/admin/" method="post"><input type="text" name="email"><input type="hidden" name="fid" value="<%=file.getFid()%>"><input type="hidden" name="action" value="notify">&nbsp;<input class="notify" type="submit" name="submit" value="NOTIFY"></form> </td>
-                            </tr>
-                            <tr class="spacer">
-                                <td colspan="3">&nbsp;</td>
-                            </tr>
-
+                           
                             <%
+                                    even = !even;
+                                    first = false;
                                 }
                             %>
                         </table>

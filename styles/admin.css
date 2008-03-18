@@ -1,43 +1,39 @@
 #files {
-    width: 580px;
+    width: 880px;
+    font-family: Arial, Garamound, sans-serif;
+    font-size: 11px;
 }
-tr.filedata td {
+
+tr.firsteven td {
     background-color: #cccccc;
-    color: green;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
-tr.filedatal td {
+tr.even td {
     background-color: #cccccc;
-    color: green;
-    padding-bottom: 5px;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
-tr.filename td {
-    background-color: white;
-    color: black;
+tr.odd td {
+    background-color: #eeeeee;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
-td.delete {
-    width: 50px;
-    font-size: 10px;
-    text-align: right;
+td.lastcol {
+   border-right: 1px solid black;
+    width: 60px;
 }
 
-td.delete a {
-    display: block;
-    width: 100px;
-    background-color: #444444;
-    color: white;
-    float: right;
-    margin-right: 10px;
-    text-decoration: none;
-    padding-left: 2px;
-    padding-right: 2px;
-    text-align: center;
-    font-family: Helvetica,Arial,sans-serif;
-
-
-}
 
 input.notify {
     width: 50px;
