@@ -12,6 +12,74 @@
 <html>
   <head><title>Administration</title>
       <link rel="stylesheet" href="/styles/admin.css" type="text/css" />
+      <script type="text/javascript">
+          function chpw(){
+              var row1 = document.getElementById("row1");
+              var row2 = document.getElementById("row2");
+              var row3 = document.getElementById("row3");
+              row1.style.display = "block";
+              row2.style.display = "block";
+              row3.style.display = "block";
+
+              
+          }
+
+          function hiderows(){
+              var row1 = document.getElementById("row1");
+              var row2 = document.getElementById("row2");
+              var row3 = document.getElementById("row3");
+              row1.style.display = "none";
+              row2.style.display = "none";
+              row3.style.display = "none";
+          }
+
+          function savepw(){
+              var pw1 = document.getElementById("pw1");
+              var pw2 = document.getElementById("pw2");
+              if ( pw1.value == pw2.value ){
+                  if ( pw1.value.length < 6 ){
+                      alert("Your password has to be at least 6 characters")
+                  } else {
+
+                      var url="/ajax/?action=chpw&password=" + pw1.value + "&password2=" + pw2.value;
+
+                     try {
+
+                        xmlhttp = window.XMLHttpRequest?new XMLHttpRequest():
+                             new ActiveXObject("Microsoft.XMLHTTP");
+
+                      }
+                      catch (e) {
+                             alert(e);
+                      }
+
+                      xmlhttp.onreadystatechange = trigg;
+                      xmlhttp.open("GET", url);
+                      xmlhttp.send(null);
+                  }
+              } else {
+                  alert("You must type your password twice");
+              }
+
+
+          }
+
+          function trigg(){
+              if ((xmlhttp.readyState == 4) && (xmlhttp.status == 200)) {
+
+                response = xmlhttp.responseXML;
+                status =  response.getElementsByTagName('status')[0].firstChild.data;
+                message = response.getElementsByTagName('message')[0].firstChild.data;
+                if ( status ){
+
+                    hiderows();
+
+                }
+                  alert(message);
+              }
+
+          }
+      </script>
   </head>
   <body>
   <%
@@ -40,7 +108,23 @@
         </tr>
         <tr>
             <td>Email: </td><td><%=user.getEmail()%></td>
-        </tr><%if ( childedit ){ %>
+        </tr>
+        <tr>
+            <td colspan="2"><a href="#" onclick="chpw(); return false;" />Change your password</td>
+        </tr>
+        <tr class="newpw" id="row1">
+            <td>Your password</td>
+            <td><input type="password" name="password" id="pw1" /></td>
+        </tr>
+        <tr class="newpw" id="row2">
+            <td>Repeat your password</td>
+            <td><input type="password" name="password2" id="pw2" /></td>
+        </tr>
+        <tr class="newpw" id="row3">
+            <td colspan="2"><input type="button" name="Save" value="Save" id="savepw" onclick="savepw();" /></td>
+        </tr>
+
+        <%if ( childedit ){ %>
         <tr>
             <td colspan="2"><a href="/admin/?action=delch&uid=<%=user.getUid()%>">DELETE THIS USER</a></td>
         </tr>

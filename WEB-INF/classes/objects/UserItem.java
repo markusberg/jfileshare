@@ -24,6 +24,7 @@ import java.io.File;
 public class UserItem {
     private String username;
     private String password;
+    private String cleartextpassword;
     private String email;
     private int uid = -1;
     private int usertype = TYPE_EXTERNAL;
@@ -59,6 +60,11 @@ public class UserItem {
 
     public void setClearTextPassword(String password){
         this.password = Jcrypt.crypt(password);
+        this.cleartextpassword = password;
+    }
+
+    public String getClearTextPassword(){
+        return this.cleartextpassword;
     }
 
     public String getEmail() {
@@ -362,6 +368,11 @@ public class UserItem {
 
         return retval;
 
+    }
+
+    public void generateRandomPw(){
+        String randompw = Jcrypt.random(10,0,0,true,true,null,new Random());
+        this.setClearTextPassword(randompw);
     }
 
 

@@ -85,6 +85,15 @@
         <filter-name>login</filter-name>
         <url-pattern>/admin**</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>login</filter-name>
+        <url-pattern>/admin*/*/*</url-pattern>
+    </filter-mapping>
+
 
     <filter-mapping>
         <filter-name>login</filter-name>
@@ -155,6 +164,14 @@
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/admin**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/admin*/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/admin*/*/*/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>

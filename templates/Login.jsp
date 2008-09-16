@@ -9,6 +9,14 @@
 <html>
   <head><title>Simple jsp page</title></head>
   <body>
+    
+  <%
+      if ( request.getAttribute("message") != null ){
+          %>
+  <div class="message"><%=request.getAttribute("message")%></div>
+  <%
+      }
+  %>
   <form action="<%=request.getAttribute("urlPattern")%>/" method="post">
   <table cellpadding="0" cellspacing="0">
       <tr>
@@ -18,7 +26,8 @@
           <td>Password</td><td><input type="password" name="password" /></td>
       </tr>
       <tr>
-          <td colspan="2"><input type="hidden" name="action" value="login" /><input type="submit" name="submit" value="Login" /></td>
+          <td><input type="hidden" name="action" value="login" /><input type="submit" name="submit" value="Login" /></td>
+          <td style="padding-left: 10px"><a href="?action=resetpw">Reset your password</a></td>
       </tr>
   </table>
       </form>

@@ -92,3 +92,12 @@ input {
     background-color: #cccccc;
     padding-left: 3px;
 }
+
+.newpw {
+    display: none;
+
+}
+
+.newpw td {
+    width: 150px;
+}

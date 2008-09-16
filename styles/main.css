@@ -154,3 +154,12 @@ body {
 a img{
     border: 0;
 }
+
+.message {
+    background-color: orange;
+    border: 1px solid red;
+    width: 400px;
+    margin: 20px;
+    padding: 20px;
+    font-size: 12px;
+}

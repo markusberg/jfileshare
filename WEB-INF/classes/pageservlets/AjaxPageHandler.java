@@ -29,6 +29,7 @@ public class AjaxPageHandler implements ServletPageRequestHandler{
 	    handlers.put("getstatus",new AjaxStatusHandler());
         handlers.put("setunid", new AjaxUploadIdNegotiator());
         handlers.put("sessionadm", new AjaxSessionSetter());
+        handlers.put("chpw", new AjaxPasswordHandler());
     }
 
 

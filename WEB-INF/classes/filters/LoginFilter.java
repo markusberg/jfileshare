@@ -10,6 +10,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.Context;
 import javax.sql.DataSource;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.AddressException;
 
 import utils.CustomLogger;
 import utils.Jcrypt;
@@ -19,8 +21,10 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import objects.UserItem;
+import objects.EmailItem;
 import views.UserItemView;
 
 /**
@@ -41,7 +45,8 @@ public class LoginFilter implements Filter {
 
 
     public void init(FilterConfig config) throws ServletException {
-	try {
+        CustomLogger.logme(this.getClass().getName(),"Running LoginFilter");
+    try {
 	    this.filterconfig = config;
 	    Context env = (Context) new InitialContext().lookup("java:comp/env");
 	    datasource = (DataSource) env.lookup("jdbc/" + Config.getDb() );
@@ -119,6 +124,7 @@ public class LoginFilter implements Filter {
 	try {
 	    _conn = datasource.getConnection();
 	    if ( CheckUser(_conn,servletRequest)) {
+            CustomLogger.logme(this.getClass().getName(),"Checking user");
 
             HttpServletRequest request = (HttpServletRequest)servletRequest;
             HttpSession session = request.getSession();
@@ -136,7 +142,19 @@ public class LoginFilter implements Filter {
                 filterconfig.getServletContext().getRequestDispatcher("/templates/NoAccess.jsp").forward(servletRequest,servletResponse);
             }
 
-        }  else {
+        }  else if (servletRequest.getParameter("action") != null && servletRequest.getParameter("action").equals("resetpw") ){
+            CustomLogger.logme(this.getClass().getName(),"Action resetpw");
+            filterconfig.getServletContext().getRequestDispatcher("/templates/ResetPassword.jsp").forward(servletRequest,servletResponse);
+
+        } else {
+            if (servletRequest.getParameter("action") != null && servletRequest.getParameter("action").equals("Reset") && servletRequest.getParameter("username") != null && ! servletRequest.getParameter("username").equals("")){
+                if ( resetPw(_conn,servletRequest.getParameter("username"))){
+                    servletRequest.setAttribute("message","Your new password has been successfully sent to you");
+                } else {
+                    servletRequest.setAttribute("message","Your password could not be sent to you");
+                }
+            }
+            CustomLogger.logme(this.getClass().getName(),"Running regular forward");
             HttpServletResponse response = (HttpServletResponse) servletResponse;
             HttpServletRequest request = (HttpServletRequest)servletRequest;
             if ( ! request.isSecure() && Config.loginRequiresHttps() ){
@@ -220,5 +238,42 @@ public class LoginFilter implements Filter {
 
 
 	return false;
+    }
+
+    private boolean resetPw(Connection conn, String username){
+        UserItemView uview = new UserItemView(conn,username);
+
+        UserItem user = uview.getUserItem();
+        if ( user == null ){
+            return false;
+        }
+        user.generateRandomPw();
+        String newpassword = user.getClearTextPassword();
+        user.save(conn);
+
+        EmailItem email = new EmailItem();
+        String body = "Your new password is\n" +
+                newpassword + "\n\n" +
+                "/Kind regards";
+        String htmlbody = "Your new password is<br>\n" +
+                newpassword + "<br><br>\n\n" +
+                "/Kind regards";
+        email.setBody(body);
+        email.setHtmlbody(htmlbody);
+        email.setSender("noreply@sectra.se");
+        email.setSubject("New password");
+        Vector<InternetAddress> adv = new Vector<InternetAddress>();
+        try {
+            adv.add(new InternetAddress(user.getEmail()));
+        } catch (AddressException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return false;
+        }
+        email.setRcptsv(adv);
+        email.sendHTMLMail();
+
+        return true;
+
+
     }
 }
