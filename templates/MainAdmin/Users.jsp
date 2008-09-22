@@ -19,7 +19,7 @@
   </div>
   <%
       }
-      if ( (request.getParameter("page") != null && request.getParameter("page").equals("search")) || ( request.getAttribute("page") != null && request.getAttribute("page").equals("search"))){
+      //if ( (request.getParameter("page") != null && request.getParameter("page").equals("search")) || ( request.getAttribute("page") != null && request.getAttribute("page").equals("search")))
           %>
   <form action="/mainadmin/users" method="POST">
       <table cellpadding="0" cellspacing="0" id="search">
@@ -30,7 +30,7 @@
 
   <%
 
-      } else if ( request.getAttribute("user") != null && request.getAttribute("page") != null && request.getAttribute("page").equals("userdetail")){
+      if ( request.getAttribute("user") != null && request.getAttribute("page") != null && request.getAttribute("page").equals("userdetail")){
               UserItem user = (UserItem) request.getAttribute("user");
           %>
   <table cellpadding="0" cellspacing="0" id="userdetail">

@@ -19,6 +19,10 @@ import java.sql.SQLException;
 import config.Config;
 import utils.CustomLogger;
 import pageservlets.*;
+import objects.UserItem;
+import objects.FileItem;
+import views.UserItemView;
+import views.FileItemView;
 
 /**
  * User: zoran@sectra.se
@@ -56,22 +60,11 @@ public class MainServlet extends HttpServlet {
     }
 
 
-    private java.sql.Connection getConnection(String domain,ServletPageRequestHandler handler)
+    private java.sql.Connection getConnection()
      throws SQLException {
 
 
-
-
-	    if( handler.liveConnection() )
-	    {
-
 		return datasource.getConnection();
-	    // read only database //
-
-
-	    }  else {
-		return datasource.getConnection();
-	    }
 
 
 
@@ -87,9 +80,48 @@ public class MainServlet extends HttpServlet {
 	RequestDispatcher disp = null;
 	Connection conn = null;
 	String urlPattern = "";
+        Connection conn1 = null;
+        try {
+            conn1 = getConnection();
+            Set<UserItem> expiredusers = new UserItemView().getExpiredUsers(conn1);
+            CustomLogger.logme(this.getClass().getName(),"REMOVING EXPIRED USERS");
+            if ( expiredusers != null && expiredusers.size() > 0 ){
+                for ( UserItem user: expiredusers){
+                    CustomLogger.logme(this.getClass().getName(),"User " + user.getUsername() + " is expired");
+                    user.delete(conn1);
+                    CustomLogger.logme(this.getClass().getName(),"Deleted user " + user.getUsername());
+                }
 
+            }
+            CustomLogger.logme(this.getClass().getName(),"REMOVING EXPIRED FILES");
+            Set<FileItem> expiredfiles = new FileItemView().getExpiredFiles(conn1);
+            if ( expiredfiles != null && expiredfiles.size() > 0 ){
+                for ( FileItem file: expiredfiles ){
+                    CustomLogger.logme(this.getClass().getName(),"File " + file.getName() + " " + file.getMd5sum() + " is expired");
+                    file.delete(conn1);
+                    CustomLogger.logme(this.getClass().getName(),"Removed file " + file.getName());
+                }
+            }
+            conn1.close();
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            try {
+                conn1.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
 
-	try {
+        } finally {
+            if ( conn1 != null ){
+                try {
+                    conn1.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
+        }
+
+        try {
 		boolean handler_done = false;
 		urlPattern = request.getServletPath();
 		CustomLogger.logme(this.getClass().getName(),"urlPattern: " + urlPattern );
@@ -100,7 +132,7 @@ public class MainServlet extends HttpServlet {
 		    if ( ! handler_done ){
 			if ( handler.handleRequest(urlPattern)){
 			    CustomLogger.logme(this.getClass().getName(),"MainServlet.processRequest." + handler.getClass().getName() + "=true" );
-			    conn = getConnection(request.getServerName(),handler);
+			    conn = getConnection();
 			    includefile = handler.handlePageRequest(conn, request, response, app);
 			    CustomLogger.logme(this.getClass().getName(),"includefile = " + includefile);
 			    handler_done = true;

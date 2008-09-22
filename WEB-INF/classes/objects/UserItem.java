@@ -248,7 +248,6 @@ public class UserItem {
                 for ( Integer key: this.files.keySet()){
                     FileItem file = this.files.get(key);
                     CustomLogger.logme(this.getClass().getName(),"Deleting " + file.getName());
-                    this.files.remove(key);
                     file.delete(conn);
                 }
                 CustomLogger.logme(this.getClass().getName(),"Files removed");
