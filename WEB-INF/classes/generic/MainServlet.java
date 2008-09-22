@@ -81,6 +81,7 @@ public class MainServlet extends HttpServlet {
 	Connection conn = null;
 	String urlPattern = "";
         Connection conn1 = null;
+        if ( ! request.getServletPath().contains("ajax")){
         try {
             conn1 = getConnection();
             Set<UserItem> expiredusers = new UserItemView().getExpiredUsers(conn1);
@@ -119,6 +120,7 @@ public class MainServlet extends HttpServlet {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
+        }
         }
 
         try {
