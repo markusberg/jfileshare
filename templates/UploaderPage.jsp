@@ -57,7 +57,7 @@
               
           }
 
-          function triggered() {
+          function triggme() {
               var response;
               var status;
               var unid;
@@ -170,7 +170,7 @@
                     alert(e);
              }
 
-             xmlhttp.onreadystatechange = triggered;
+             xmlhttp.onreadystatechange = triggme;
              xmlhttp.open("GET", url);
              xmlhttp.send(null);
 
