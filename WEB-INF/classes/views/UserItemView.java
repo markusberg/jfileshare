@@ -245,13 +245,20 @@ public class UserItemView {
             Map<Integer,UserItem> users = new HashMap<Integer,UserItem>();
             int usersfound = 0;
             try {
-            PreparedStatement st = conn.prepareStatement("select * from UserItems order by uid");
+            PreparedStatement st = conn.prepareStatement("select * from UserItems left join FileItems on FileItems.owner=UserItems.uid;");
             st.execute();
             ResultSet rs = st.getResultSet();
 
             while ( rs.next() ){
                 UserItem user = new UserItem();
+
                 user.setUid(rs.getInt("UserItems.uid"));
+                if ( users.containsKey(user.getUid())){
+                    user = users.get(user.getUid());
+
+                } else {
+                    usersfound +=1;    
+                }
                 user.setUsername(rs.getString("UserItems.username"));
                 user.setPassword(rs.getString("UserItems.password"));
                 user.setEmail(rs.getString("UserItems.email"));
@@ -262,8 +269,26 @@ public class UserItemView {
                 if ( user.expires() ){
                     user.setExpiry(rs.getInt("UserItems.daystoexpire"));
                 }
+                FileItem file = new FileItem();
+                file.setFid(rs.getInt("FileItems.fid"));
+                if ( ! rs.wasNull() ){
+                    file.setName(rs.getString("FileItems.name"));
+                    file.setType(rs.getString("FileItems.type"));
+                    file.setSize(rs.getDouble("FileItems.size"));
+                    file.setMd5sum(rs.getString("FileItems.md5sum"));
+                    file.setPermanent(rs.getBoolean("FileItems.permanent"));
+                    file.setDownloads(rs.getInt("FileItems.downloads"));
+                    file.setPassword(rs.getString("FileItems.password"));
+                    file.setDdate(rs.getDate("FileItems.ddate"));
+                    file.setExpiration(rs.getDate("FileItems.expiration"));
+                    file.setOwner(user);
+                    file.setEnabled(rs.getBoolean("FileItems.enabled"));
+                    user.addFile(file);
+
+                }
+
                 users.put(user.getUid(),user);
-                usersfound +=1;
+
 
             }
             } catch ( SQLException e){

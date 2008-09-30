@@ -68,7 +68,9 @@ public class UserAdminHandler implements PageSubhandler{
 
 
         request.setAttribute("page","expiredusers");
-        request.setAttribute("users",new UserItemView(conn).getAllExpiredUsers());
+        UserItemView userview = new UserItemView(conn);
+        request.setAttribute("expiredusers",userview.getAllExpiredUsers());
+        request.setAttribute("users",userview.getAllUsers());
         return "/templates/MainAdmin/Users.jsp";
         
     }

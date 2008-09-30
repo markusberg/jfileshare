@@ -153,7 +153,7 @@
           <th colspan="7">Expired users</th><th align="center"><a href="/mainadmin/users"><img src="/images/stock_delete.png" alt="delete" width="20" height="20"/></a></th>
       </tr>
       <tr class="uheader">
-          <th>uid</th><th>username</th><th>email</th><th>created</th><th>last login</th><th>expires</th><th></th><th class="lastcol"><input type="checkbox" name="all" onchange="selectall(this);"/></th>
+          <th>uid</th><th>username</th><th>email</th><th>created</th><th>last login</th><th>expires</th><th>has users</th><th>has files</th><th>tot storage</th><th></th><th class="lastcol"><input type="checkbox" name="all" onchange="selectall(this);"/></th>
       </tr>
       <%
           Map<Integer, UserItem> users = (Map<Integer,UserItem>) request.getAttribute("users");
@@ -167,6 +167,9 @@
           <td><%=user.getCreated()%></td>
           <td><%=user.getLastlogin()%></td>
           <td><%=user.getDaysToExpire()%></td>
+          <td><%=user.getChildren().size()%></td>
+          <td><%=user.getFiles().size()%></td>
+          <td><%=user.getTotalFileSizeHumanReadable()%></td>
           <td><a href="/mainadmin/users?action=dosearch&username=<%=user.getUsername()%>"><img src="/images/pencil.gif" alt="edit" /></a>&nbsp;&nbsp;<a href="/mainadmin/users?action=confirmdelete&uid=<%=user.getUid()%>"><img src="/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
           <td class="last"><input class="deletesel" type="checkbox" name="<%=user.getUid()%>" /></td>
 

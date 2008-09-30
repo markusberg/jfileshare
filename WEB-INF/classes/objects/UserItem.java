@@ -9,6 +9,7 @@ import config.Config;
 import java.util.*;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.text.DecimalFormat;
 import java.sql.*;
 import java.io.File;
 
@@ -372,6 +373,36 @@ public class UserItem {
     public void generateRandomPw(){
         String randompw = Jcrypt.random(10,0,0,true,true,null,new Random());
         this.setClearTextPassword(randompw);
+    }
+
+    public double getTotalFileSize(){
+        double size = 0;
+        if ( this.files != null && this.files.size() > 0 ){
+            for ( Integer fid: this.files.keySet()){
+                FileItem file = this.files.get(fid);
+                size = size + file.getSize();
+            }
+        }
+        return size;
+    }
+
+    public String getTotalFileSizeHumanReadable(){
+        double size = this.getTotalFileSize();
+        DecimalFormat df = new DecimalFormat("0.##");
+
+        if ( size < 1024 ){
+            return size + " bytes";
+        }
+
+        if ( size < (1024*1024)){
+            return df.format(size/1024) + " kb";
+        }
+
+        if ( size < (1024*1024*1024)){
+            return df.format(size/(1024*1024)) + " Mb";
+        }
+
+        return df.format(size/(1024*1024*1024)) + " Gb";
     }
 
 
