@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import config.Config;
+import config.Configurator;
 import utils.CustomLogger;
 import pageservlets.*;
 import objects.UserItem;
@@ -33,6 +34,7 @@ public class MainServlet extends HttpServlet {
 
     Hashtable handlers = new Hashtable(50);
     DataSource datasource;
+    Configurator configurator = null;
 
     private void initHandlers(){
 
@@ -47,10 +49,16 @@ public class MainServlet extends HttpServlet {
 
 
     public void init(ServletConfig config) throws ServletException {
-	super.init(config);
+	    super.init(config);
+        if ( config.getServletContext().getAttribute("configurator") == null ){
+            configurator = Configurator.getInstance(config.getServletContext());
+            config.getServletContext().setAttribute("configurator",configurator);
+        } else {
+            configurator = (Configurator) config.getServletContext().getAttribute("configurator");
+        }
 	try {
 	    Context env = (Context) new InitialContext().lookup("java:comp/env");
-	    datasource = (DataSource) env.lookup("jdbc/" + Config.getDb());
+	    datasource = (DataSource) env.lookup("jdbc/" + configurator.getDATABASE());
 
 	} catch (NamingException e){
 	    throw new ServletException(e);

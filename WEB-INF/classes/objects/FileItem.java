@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 
 import config.Config;
+import config.Configurator;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -328,7 +329,7 @@ public class FileItem {
                 owner.setPassword(rs.getString("UserItems.password"));
                 owner.setEmail(rs.getString("email"));
                 this.owner = owner;
-                this.file = new File(Config.getFilestore() + "/" + this.fid );
+                this.file = new File(Configurator.getInstance() + "/" + this.fid );
                 return true;
             }
         } catch (SQLException e) {

@@ -3,6 +3,18 @@
          xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+    <context-param>
+        <param-name>TMP_PATH</param-name>
+        <param-value>/export/store1/.tmp/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>PERM_PATH</param-name>
+        <param-value>/export/store1/.files/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>DATABASE</param-name>
+        <param-value>uploader</param-value>
+    </context-param>
 
     <filter>
         <filter-name>sitemesh</filter-name>
@@ -154,6 +166,10 @@
     <servlet-mapping>
         <servlet-name>Generic</servlet-name>
         <url-pattern>/register**</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Generic</servlet-name>
+        <url-pattern>/direct*/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
