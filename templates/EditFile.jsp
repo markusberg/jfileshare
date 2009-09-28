@@ -83,6 +83,20 @@
           <td id="pwlabel">Password</td><td><input id="pwfield" type="text" name="password"<%=disabled%><%=password%> /></td>
       </tr>
       <tr>
+
+          <td id="tinyurllabel">Allow tiny-url</td><td>
+          <script type="text/javascript">
+              function warnme(){
+                  var checkid = document.getElementById("tinyurl");
+                  if ( checkid.checked ){
+                      alert("ALLOWING TINY-URL ACCESS MAKES IT EASIER TO GUESS THE URL OF YOUR FILE. USE ONLY WITH PUBLIC DOCUMENTS OR TOGETHER WITH PASSWORD. YOU HAVE BEEN WARNED!!!");
+                  }
+              }
+          </script>
+
+          <input id="tinyurl" type="checkbox" name="tinyurl" onclick="warnme();" /></td>
+      </tr>
+      <tr>
           <td colspan="2">
               <input type="hidden" name="fid" value="<%=file.getFid()%>" />
               <input type="hidden" name="action" value="savefile" />
