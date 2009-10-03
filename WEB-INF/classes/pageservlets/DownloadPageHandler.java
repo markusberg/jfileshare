@@ -37,7 +37,7 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
 
             public boolean handleRequest(String urlPattern){
 
-                if ( Pattern.compile("(download)").matcher(urlPattern).find()){
+                if ( Pattern.compile("(download)").matcher(urlPattern).find() || Pattern.compile("(direct)").matcher(urlPattern).find()){
                     return true;
                 } else {
                     return false;
@@ -48,8 +48,25 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
             public String handlePageRequest(Connection conn, HttpServletRequest request, HttpServletResponse response, ServletContext context)
                 throws SQLException, ServletException {
                 String urlPattern = request.getServletPath();
+                FileItem file = new FileItem();
+                if ( Pattern.compile("(direct)").matcher(urlPattern).find()){
+                    int fid = Integer.parseInt(request.getParameter("fid"));
+                    if ( file.search(conn,fid)){
+                        if ( file.allowTinyurl() ){
+                            CustomLogger.logme(this.getClass().getName(),"File found");
+                            request.setAttribute("file",file);
+                        } else {
+                            CustomLogger.logme(this.getClass().getName(),"File not allowed tinyurl");
+                            request.setAttribute("error", "File is not found");
+                        }
+                    } else {
+                        CustomLogger.logme(this.getClass().getName(),"File not found");
+                        request.setAttribute("error", "File is not found");
+                    }
+                }
 
                 CustomLogger.logme(this.getClass().getName(),"DownloadPageHandler");
+                if ( Pattern.compile("(download)").matcher(urlPattern).find() ){
                 String[] pathparts = request.getServletPath().split("/");
                 String lastpart = pathparts[pathparts.length - 1 ];
                 CustomLogger.logme(this.getClass().getName(),"Lastpart is " + lastpart);
@@ -57,14 +74,15 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
                 String md5sum = lastpart.split("_SECTRA_")[0];
                 int fid = Integer.parseInt(lastpart.split("_SECTRA_")[1]);
 
-                FileItem file = new FileItem();
-                if ( file.search(conn,md5sum,fid)){
-                    CustomLogger.logme(this.getClass().getName(),"File found");
-                     request.setAttribute("file",file);
-                } else {
-                    CustomLogger.logme(this.getClass().getName(),"File not found");
-                    request.setAttribute("error", "File is not found");
-                }
+
+                    if ( file.search(conn,md5sum,fid)){
+                        CustomLogger.logme(this.getClass().getName(),"File found");
+                         request.setAttribute("file",file);
+                    } else {
+                        CustomLogger.logme(this.getClass().getName(),"File not found");
+                        request.setAttribute("error", "File is not found");
+                    }
+
 
                 if ( pathparts[pathparts.length - 2].equals("get") ){
                     //Serve the file;
@@ -87,6 +105,7 @@ public class DownloadPageHandler implements ServletPageRequestHandler {
                     writer.flush();
                     writer.close();
 
+                }
                 }
 
 
