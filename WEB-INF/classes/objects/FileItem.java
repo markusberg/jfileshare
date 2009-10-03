@@ -16,6 +16,7 @@ import config.Config;
 import config.Configurator;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletContext;
 
 /**
  * SECTRA.
@@ -40,6 +41,7 @@ public class FileItem {
 
     private UserItem owner;
 
+    private boolean tinyurl = false;
     private boolean enabled = true;
 
     public FileItem(){
@@ -147,6 +149,14 @@ public class FileItem {
         this.owner = owner;
     }
 
+    public boolean allowTinyurl() {
+        return tinyurl;
+    }
+
+    public void setTinyurl(boolean tinyurl) {
+        this.tinyurl = tinyurl;
+    }
+
     public boolean isEnabled(){
         return this.enabled;
     }
@@ -155,13 +165,15 @@ public class FileItem {
         this.enabled = enabled;
     }
 
-    
+
+
+
 
     public boolean save(Connection conn){
         PreparedStatement st = null;
         if ( this.fid == -1 ){
             try {
-                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                st = conn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1,this.name);
                 st.setString(2,this.type);
                 st.setDouble(3,this.size);
@@ -191,6 +203,7 @@ public class FileItem {
                 }
                 st.setInt(10,this.owner.getUid());
                 st.setBoolean(11,this.enabled);
+                st.setBoolean(12,this.tinyurl);
                 st.executeUpdate();
                 ResultSet rs = st.getGeneratedKeys();
                 while (rs.next()){
@@ -205,7 +218,7 @@ public class FileItem {
 
         } else {
             try {
-                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=?,enabled=?,password=? where fid=?");
+                st = conn.prepareStatement("update FileItems set permanent=?,downloads=?,expiration=?,enabled=?,password=?,allowtinyurl=? where fid=?");
                 st.setBoolean(1,this.permanent);
                 st.setInt(2,this.downloads);
                 if ( expiration == null ){
@@ -219,7 +232,8 @@ public class FileItem {
                 } else {
                     st.setString(5,this.password);
                 }
-                st.setInt(6,this.fid);
+                st.setBoolean(6,this.tinyurl);
+                st.setInt(7,this.fid);
                 st.executeUpdate();
                 st.close();
                 return true;
@@ -243,6 +257,7 @@ public class FileItem {
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
                 this.enabled = rs.getBoolean("enabled");
+                this.tinyurl = rs.getBoolean("allowtinyurl");
                 if ( rs.wasNull() ) this.permanent = false;
                 rs.getInt("downloads");
                 if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
@@ -279,6 +294,7 @@ public class FileItem {
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
                 this.enabled = rs.getBoolean("enabled");
+                this.tinyurl = rs.getBoolean("allowtinyurl");
                 if ( rs.wasNull() ) this.permanent = false;
                 rs.getInt("downloads");
                 if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
@@ -317,6 +333,7 @@ public class FileItem {
                 this.md5sum = rs.getString("md5sum");
                 this.permanent = rs.getBoolean("permanent");
                 this.enabled = rs.getBoolean("enabled");
+                this.tinyurl = rs.getBoolean("allowtinyurl");
                 if ( rs.wasNull() ) this.permanent = false;
                 rs.getInt("downloads");
                 if ( ! rs.wasNull()) this.downloads = rs.getInt("downloads");
@@ -328,8 +345,8 @@ public class FileItem {
                 owner.setUsername(rs.getString("username"));
                 owner.setPassword(rs.getString("UserItems.password"));
                 owner.setEmail(rs.getString("email"));
-                this.owner = owner;
-                this.file = new File(Configurator.getInstance() + "/" + this.fid );
+
+                this.file = new File(Config.getFilestore() + "/" + this.fid );
                 return true;
             }
         } catch (SQLException e) {
