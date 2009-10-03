@@ -345,8 +345,8 @@ public class FileItem {
                 owner.setUsername(rs.getString("username"));
                 owner.setPassword(rs.getString("UserItems.password"));
                 owner.setEmail(rs.getString("email"));
-
-                this.file = new File(Config.getFilestore() + "/" + this.fid );
+                this.owner = owner;
+                this.file = new File(config.Config.getFilestore() + "/" + this.fid );
                 return true;
             }
         } catch (SQLException e) {
