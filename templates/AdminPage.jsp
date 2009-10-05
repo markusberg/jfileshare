@@ -172,7 +172,7 @@
                                         %>
                         <table cellpadding="0" cellspacing="0" id="files">
                             <tr>
-                                <th>Name</th><th>Size</th><th>Perm.</th><th>Downloads</th><th>PW</th><th>Url</th><th></th>
+                                <th>Name</th><th>Size</th><th>Perm.</th><th>Downloads</th><th>PW</th><th>Notify</th><th>Url</th><th></th>
                             </tr>
                             <%
                                 boolean even = true;
@@ -187,6 +187,7 @@
                                 <td><%=file.isPermanent()?"YES":"NO"%><%=file.isExpired()?"*":""%></td>
                                 <td><%=file.getDownloads()==-1?"unlimited":file.getDownloads()%></td>
                                 <td><%=file.getPassword()!=null&&file.getPassword().length()>0?"yes":"no"%></td>
+                                <td><form action="/admin/" method="post"><input type="text" name="email"><input type="hidden" name="fid" value="<%=file.getFid()%>"><input type="hidden" name="action" value="notify">&nbsp;<input class="notify" type="submit" name="submit" value="NOTIFY"></form> </td>
                                 <td><a href="/download/view/<%=file.getMd5sum()%>_SECTRA_<%=file.getFid()%>">url</a></td>
                                 <td class="lastcol"><a href="?action=edit&fid=<%=file.getFid()%>"><img src="/images/pencil.gif" alt="edit" /></a>&nbsp;&nbsp;<a href="?action=viewlog&fid=<%=file.getFid()%>"><img src="/images/stock_log.png" alt="delete" width="15" height="15"/></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="?action=delete&fid=<%=file.getFid()%>" onclick="return confirm('Are you sure that you want to delete this file?');"><img src="/images/stock_delete.png" alt="delete" width="13" height="13"/></a></td>
                             </tr>
