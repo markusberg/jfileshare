@@ -172,7 +172,7 @@
                                         %>
                         <table cellpadding="0" cellspacing="0" id="files">
                             <tr>
-                                <th>Name</th><th>Size</th><th>Perm.</th><th>Downloads</th><th>PW</th><th>Notify</th><th>Url</th><th></th>
+                                <th>Name</th><th>Size</th><th>Perm.</th><th>Downloads</th><th>PW</th><th>Notify a recipient</th><th>Url</th><th></th>
                             </tr>
                             <%
                                 boolean even = true;
