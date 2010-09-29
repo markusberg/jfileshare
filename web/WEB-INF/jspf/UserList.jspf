@@ -1,0 +1,49 @@
+<table id="users">
+    <tr>
+        <th>username</th>
+        <th>email</th>
+        <th>created</th>
+        <th>last login</th>
+        <th>expires</th>
+        <th>users</th>
+        <th>files</th>
+        <th>total storage</th>
+    </tr>
+
+    <%
+                boolean even = false;
+
+                for (UserItem childuser : aUsers) {
+                    String lastlogin;
+                    if (childuser.getDateLastLogin() == null) {
+                        lastlogin = "never";
+                    } else if (childuser.getDateLastLogin().before(childuser.getDateCreation())
+                            || childuser.getDateLastLogin().equals(childuser.getDateCreation())) {
+                        // the first version of jfileshare didn't properly store lastlogin
+                        // so this is a workaround:
+                        lastlogin = "unknown";
+                    } else {
+                        lastlogin = com.sectra.jfileshare.utils.Helpers.formatDate(childuser.getDateLastLogin());
+                    }
+
+    %>
+    <tr class="<%=even ? "even" : "odd"%>">
+        <td><%= childuser.getUsername()%></td>
+        <td><%= childuser.getEmail()%></td>
+        <td><%= com.sectra.jfileshare.utils.Helpers.formatDate(childuser.getDateCreation())%></td>
+        <td><%= lastlogin%></td>
+        <td class="number"><%= childuser.getDateExpiration() == null ? "&nbsp;" : childuser.getDaysUntilExpiration() + " days"%></td>
+        <td class="number"><%= childuser.getSumChildren() == 0 ? "" : childuser.getSumChildren()%></td>
+        <td class="number"><%= childuser.getSumFiles() == 0 ? "" : childuser.getSumFiles()%></td>
+        <td class="number"><%= FileItem.humanReadable(childuser.getSumFilesize())%></td>
+        <td><a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>">url</a></td>
+        <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/stock_delete.png" alt="delete" width="13" height="13"/></a></td>
+    </tr>
+
+    <%
+                    even = !even;
+                }
+    %>
+</table>
+

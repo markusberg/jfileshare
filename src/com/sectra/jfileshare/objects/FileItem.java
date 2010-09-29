@@ -1,0 +1,390 @@
+package com.sectra.jfileshare.objects;
+
+import com.sectra.jfileshare.utils.Jcrypt;
+import com.sectra.jfileshare.utils.Sha512Crypt;
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.ArrayList;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+
+import java.util.logging.Logger;
+
+public class FileItem {
+
+    private int fid = -1;
+    private String name;
+    private String type;
+    private double size = 0d;
+    private String md5sum;
+    private int downloads = -1;
+    private String pwHash = "";
+    private Timestamp dateCreation;
+    private Timestamp dateExpiration;
+    private int ownerUid;
+    private String ownerUsername;
+    private String ownerEmail;
+    private boolean allowTinyUrl = false;
+    private boolean enabled = true;
+    private static final Logger logger =
+            Logger.getLogger(FileItem.class.getName());
+
+    public FileItem() {
+    }
+
+    public FileItem(Connection dbConn, int fid) {
+        try {
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.owner=UserItems.uid and FileItems.fid=?");
+            st.setInt(1, fid);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                setFid(rs.getInt("FileItems.fid"));
+                setName(rs.getString("FileItems.name"));
+                setType(rs.getString("FileItems.type"));
+                setSize(rs.getDouble("FileItems.size"));
+                setMd5sum(rs.getString("FileItems.md5sum"));
+                setEnabled(rs.getBoolean("FileItems.enabled"));
+                setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
+                setDownloads(rs.getInt("FileItems.downloads"));
+                if (rs.wasNull()) {
+                    setDownloads(-1);
+                }
+                setPwHash(rs.getString("FileItems.password"));
+                setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
+                setDateExpiration(rs.getTimestamp("dateExpiration"));
+
+                this.ownerUid = rs.getInt("UserItems.uid");
+                this.ownerUsername = rs.getString("UserItems.username");
+                this.ownerEmail = rs.getString("UserItems.email");
+
+            }
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+        }
+    }
+
+    /**
+     * Number of days that files are kept by default
+     * @param iDays
+     */
+    public void setDaysToKeep(int iDays) {
+        long millis = iDays * 1000 * 60 * 60 * 24;
+        setDateExpiration(new Timestamp(System.currentTimeMillis() + millis));
+    }
+
+    public boolean isPermanent() {
+        return dateExpiration == null ? true : false;
+    }
+
+    public int getFid() {
+        return fid;
+    }
+
+    public void setFid(int fid) {
+        this.fid = fid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
+
+    public String getMd5sum() {
+        return md5sum;
+    }
+
+    public void setMd5sum(String md5sum) {
+        this.md5sum = md5sum;
+    }
+
+    public int getDownloads() {
+        return downloads;
+    }
+
+    public void setDownloads(int iDownloads) {
+        this.downloads = iDownloads;
+    }
+
+    public String getPwHash() {
+        return pwHash;
+    }
+
+    public void setPwHash(String pwHash) {
+        this.pwHash = pwHash;
+    }
+
+    public void setPwPlainText(String pwProvided) {
+        this.pwHash = Sha512Crypt.Sha512_crypt(pwProvided, null, 0);
+        // com.sectra.jfileshare.utils.Jcrypt.crypt(pwPlainText);
+    }
+
+    public Timestamp getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(Timestamp dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public Timestamp getDateExpiration() {
+        return dateExpiration;
+    }
+
+    public void setDateExpiration(Timestamp expiration) {
+        this.dateExpiration = expiration;
+    }
+
+    public void setOwnerUid(int iUid) {
+        this.ownerUid = iUid;
+    }
+
+    public int getOwnerUid() {
+        return ownerUid;
+    }
+
+    public String getOwnerUsername() {
+        return ownerUsername;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public String getURL(String urlPrefix) {
+        return urlPrefix + "/file/view/" + this.getMd5sum() + "_SECTRA_" + this.getFid();
+    }
+
+    public boolean getAllowTinyUrl() {
+        return allowTinyUrl;
+    }
+
+    public void setAllowTinyUrl(boolean allowTinyUrl) {
+        this.allowTinyUrl = allowTinyUrl;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean save(Connection dbConn) {
+        PreparedStatement st = null;
+        if (this.fid == -1) {
+            try {
+                st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                st.setString(1, this.name);
+                st.setString(2, this.type);
+                st.setDouble(3, this.size);
+                st.setString(4, this.md5sum);
+                if (this.downloads == -1) {
+                    st.setNull(5, java.sql.Types.INTEGER);
+                } else {
+                    st.setInt(5, this.downloads);
+                }
+                if (this.pwHash != null) {
+                    st.setString(6, this.pwHash);
+                } else {
+                    st.setNull(6, java.sql.Types.VARCHAR);
+                }
+                st.setTimestamp(7, this.dateExpiration);
+
+                st.setInt(8, this.ownerUid);
+                st.setBoolean(9, this.enabled);
+                st.setBoolean(10, this.allowTinyUrl);
+                st.executeUpdate();
+                ResultSet rs = st.getGeneratedKeys();
+                while (rs.next()) {
+                    this.fid = rs.getInt(1);
+                }
+                st.close();
+                return true;
+            } catch (SQLException e) {
+                logger.severe(e.toString());
+                return false;
+            }
+
+        } else {
+            try {
+                st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,password=?,allowTinyUrl=? where fid=?");
+                st.setInt(1, this.downloads);
+                if (dateExpiration == null) {
+                    st.setNull(2, java.sql.Types.TIMESTAMP);
+                } else {
+                    st.setTimestamp(2, new Timestamp(this.dateExpiration.getTime()));
+                }
+                st.setBoolean(3, this.enabled);
+                if (this.pwHash == null) {
+                    st.setNull(4, java.sql.Types.VARCHAR);
+                } else {
+                    st.setString(4, this.pwHash);
+                }
+                st.setBoolean(5, this.allowTinyUrl);
+                st.setInt(6, this.fid);
+                st.executeUpdate();
+                st.close();
+                return true;
+            } catch (SQLException e) {
+                logger.severe(e.toString());
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Delete the file from the database and from disk
+     * @param dbConn
+     * @param pathFileStore
+     * @return Were any errors encountered during the delete operation?
+     */
+    public boolean delete(Connection dbConn, String pathFileStore) {
+        File realfile = new File(pathFileStore + "/" + Integer.toString(this.fid));
+        realfile.delete();
+
+        try {
+            PreparedStatement st = dbConn.prepareStatement("delete from FileItems where fid=?");
+            st.setInt(1, this.fid);
+            st.executeUpdate();
+            st.close();
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+            return false;
+        }
+        return true;
+    }
+
+    public void logDownload(Connection dbConn, String ipAddr) {
+        logger.info("Logging download");
+        try {
+            PreparedStatement st1 = dbConn.prepareStatement("UPDATE FileItems set downloads=downloads-1 where fid=? and downloads>0");
+            st1.setInt(1, this.fid);
+            st1.executeUpdate();
+            st1.close();
+            PreparedStatement st2 = dbConn.prepareStatement("INSERT INTO DownloadLogs VALUES(now(),?,?)");
+            st2.setInt(1, this.fid);
+            st2.setString(2, ipAddr);
+            st2.executeUpdate();
+            st2.close();
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+        }
+    }
+
+    /**
+     * Verify if the provided password is the correct one
+     * @param pwProvided plaintext password
+     * @return Does the provided password check out?
+     */
+    public boolean authenticated(String pwProvided) {
+        if (this.pwHash.length() < 20) {
+            String pwCrypt = Jcrypt.crypt(pwHash, pwProvided);
+            if (pwCrypt.equals(pwHash)) {
+                return true;
+            }
+        } else {
+            if (Sha512Crypt.verifyPassword(pwProvided, this.pwHash)) {
+                return true;
+            }
+        }
+        logger.info("Incorrect file password for file " + this.fid);
+        return false;
+    }
+
+    public int getDaysUntilExpiration() {
+        if (dateExpiration == null) {
+            return -1;
+        }
+        double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
+        long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
+        return (int) daysLeft;
+    }
+
+        /**
+     * Human readable file size
+     *
+     * @param filesize For example 4020234934
+     * @return Human readable file size, e.g. "4.02 GiB"
+     */
+    public static String humanReadable(double filesize) {
+        DecimalFormat df = new DecimalFormat("0.##");
+
+        if (filesize < 4096) {
+            return (int) filesize + " B";
+        }
+
+        if (filesize < (1024 * 1024)) {
+            return df.format(filesize / 1024) + " KiB";
+        }
+
+        if (filesize < (1024 * 1024 * 1024)) {
+            return df.format(filesize / (1024 * 1024)) + " MiB";
+        }
+
+        return df.format(filesize / (1024 * 1024 * 1024)) + " GiB";
+
+    }
+
+    public ArrayList<DownloadLog> getLogs(Connection conn) {
+        ArrayList<DownloadLog> logs = new ArrayList<DownloadLog>();
+
+        try {
+            PreparedStatement st = conn.prepareStatement("SELECT * FROM DownloadLogs WHERE fid=? order by time DESC");
+            st.setInt(1, this.fid);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                DownloadLog log = new DownloadLog(rs.getTimestamp(1), rs.getString(3));
+                logs.add(log);
+            }
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+        }
+        return logs;
+    }
+
+    public class DownloadLog {
+
+        private String ipAddr;
+        private Date dateAccess;
+
+        public DownloadLog(Date dateAccess, String ipAddr) {
+            this.dateAccess = dateAccess;
+            this.ipAddr = ipAddr;
+        }
+
+        public String getIp() {
+            return this.ipAddr;
+        }
+
+        public Date getTime() {
+            return this.dateAccess;
+        }
+    }
+}

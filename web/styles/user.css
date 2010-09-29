@@ -1,0 +1,30 @@
+#users {
+    border-collapse: collapse;
+}
+
+#users th {
+    text-align: left;
+}
+
+/*
+#users tr:hover td {
+    background: #eee;
+    cursor: pointer;
+}
+*/
+
+#users td, #users th {
+    padding: 0.2em 0.5em;
+    white-space: nowrap;
+}
+#users td {
+    border: 1px solid #a7a7a7;
+}
+
+#users tr.odd {
+    background-color: #eee;
+}
+
+#users tr.even {
+    background-color: #ccc;
+}

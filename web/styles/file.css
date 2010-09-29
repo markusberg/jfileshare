@@ -1,0 +1,70 @@
+/* Styles for status-box and progress bar when uploading */
+
+#Status {
+    background: #f8f8f8;
+    border: 2px outset #a7a7a7;
+    margin: 1em 0em;
+    padding: 1em;
+}
+
+#ProgressBar {
+    background: white;
+    height: 20px;
+    border: 1px inset black;
+    vertical-align: middle;
+    margin-top: 10px;
+}
+
+#Bar {
+    width: 0px;
+    height: 20px;
+    background: green url(../images/progress.jpg);
+}
+
+/* Styles for the single-download window */
+
+#singlefile, #files {
+    border-collapse: collapse;
+}
+
+#singlefile td, #singlefile th {
+    border: 1px solid #a7a7a7;
+}
+
+#singlefile td, #singlefile th {
+    padding: 0.2em 0.5em;
+}
+
+#singlefile th {
+    text-align: right;
+}
+
+#singlefile .admin {
+    background: #eee;
+}
+
+/* Files listing */
+
+#files th, #files td {
+    padding: 0.2em 0.5em;
+    white-space: nowrap;
+}
+
+#files td {
+    border: 1px solid #a7a7a7;
+}
+
+#files th {
+    text-align: left;
+}
+
+#files tr.odd {
+    background-color: #eee;
+}
+
+#files tr.even {
+    background-color: #ccc;
+}
+
+
+

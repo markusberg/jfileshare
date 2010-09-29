@@ -1,0 +1,50 @@
+<table id="singlefile">
+    <tr>
+        <th>Filename: </th><td><%=oFile.getName()%></td>
+    </tr>
+    <tr>
+        <th>Size: </th><td><%=FileItem.humanReadable(oFile.getSize())%></td>
+    </tr>
+    <tr>
+        <th>Type: </th><td><%=oFile.getType()%></td>
+    </tr>
+    <tr>
+        <th>MD5: </th><td><%=oFile.getMd5sum()%></td>
+    </tr>
+    <tr>
+        <th>Owner: </th>
+        <td>
+            <a href="mailto:<%=oFile.getOwnerEmail()%>"><%=oFile.getOwnerEmail()%></a>
+        </td>
+    </tr>
+    <tr>
+        <th>Upload date: </th><td><%=Helpers.formatDate(oFile.getDateCreation())%></td>
+    </tr>
+    <%
+                if (session.getAttribute("user") != null) {
+                    UserItem user = (UserItem) session.getAttribute("user");
+                    if (user.isAdmin() || user.getUid() == oFile.getOwnerUid()) {
+    %>
+    <tr class="admin">
+        <th>File expiration: </th>
+        <td><%= oFile.isPermanent() ? "No" : oFile.getDaysUntilExpiration() + " days"%></td>
+    </tr>
+    <tr class="admin">
+        <th>Password protected: </th>
+        <td><%= oFile.getPwHash().equals("") ? "No" : "Yes"%></td>
+    </tr>
+    <tr class="admin">
+        <th>Downloads enabled: </th><td><%= oFile.isEnabled() ? "Yes" : "No"%></td>
+    </tr>
+    <tr class="admin">
+        <th>Number of downloads: </th>
+        <td>
+            <%= oFile.getDownloads() == -1 ? "Unlimited" : oFile.getDownloads()%>
+        </td>
+    </tr>
+
+    <%
+                    }
+                }
+    %>
+</table>

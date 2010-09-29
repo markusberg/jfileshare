@@ -1,0 +1,23 @@
+JFileShare developer's documentation
+
+Setting up your development environment:
+* install tomcat5.5, ant, mysql
+* install the tomcat5-admin webapps
+* install the mysql connector
+* Create a build.properties file in your homedir or your buildroot. It might
+look something like this:
+catalina.home=/usr/share/tomcat5
+manager.username=myusername
+manager.password=mypassword
+manager.url=http://localhost:8080/manager
+
+Netbeans environment:
+If you want to use the Netbeans IDE, you should follow these simple steps
+* Install netbeans
+* Setup a local tomcat 5.5 installation and configure netbeans to use it
+* Import the existing sources (including the build.xml ant-file) into a new netbeans project
+* Netbeans is a nice IDE to work with
+
+EOF
+
+

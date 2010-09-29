@@ -1,0 +1,20 @@
+
+<decorators defaultdir="/decorators">
+    <excludes>
+        <pattern>/file/download/*</pattern>
+    </excludes>
+    <excludes>
+        <pattern>/ajax/*</pattern>
+    </excludes>
+        <excludes>
+        <pattern>/vacuum/*</pattern>
+    </excludes>
+
+
+    <decorator name="maindecorator" page="main_decorator.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+        
+    <decorator name="errordecorator" page="ErrorDecorator.jsp" />
+
+</decorators>

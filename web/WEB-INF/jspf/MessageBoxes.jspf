@@ -1,0 +1,19 @@
+<%
+            if (request.getAttribute("message_critical") != null) {
+%>
+<div id="messagebox_critical"><%=request.getAttribute("message_critical")%></div>
+<%
+            }
+
+            if (request.getAttribute("message_warning") != null) {
+%>
+<div id="messagebox_warning"><%=request.getAttribute("message_warning")%></div>
+<%
+            }
+
+            if (request.getAttribute("message") != null) {
+%>
+<div id="messagebox_info"><%=request.getAttribute("message")%></div>
+<%
+            }
+%>

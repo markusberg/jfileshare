@@ -1,0 +1,141 @@
+body {
+    background-color: #ccc;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.8em;
+    padding: 0px;
+    margin: 0px;
+}
+
+#container {
+    background-color: #ddd;
+    margin: 2em;
+    border: 1px solid #a7a7a7;
+    padding: 1em;
+}
+
+#header {
+    height: 81px;
+    text-align: right;
+    background-image: url(../images/banner_bg.gif);
+    border: 1px solid #a7a7a7;
+    margin-bottom: 1em;
+}
+
+#header img {
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+#content {
+    background: white;
+    border: 1px solid #a7a7a7;
+    padding: 1em;
+    clear: both;
+}
+
+input.textentry {
+    width: 15em;
+}
+/* Link styles */
+
+a:link, a:visited {
+    color: #206090;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #906020;
+    text-decoration: underline;
+}
+
+a img {
+    border: 0px;
+}
+
+/* Messageboxes */
+
+#messagebox_info {
+    background: #eee url(../images/messagebox_info.png) no-repeat 1em 1em;
+}
+
+#messagebox_warning {
+    background: #eee url(../images/messagebox_warning.png) no-repeat 1em 1em;
+}
+
+#messagebox_critical {
+    background: #eee url(../images/messagebox_critical.png) no-repeat 1em 1em;
+}
+
+#messagebox_info, #messagebox_warning, #messagebox_critical {
+    min-height: 48px;
+    border: 1px solid #a7a7a7;
+    width: 40em;
+    margin: 1em;
+    padding: 1em;
+    padding-left: 80px;
+}
+
+/* A couple of general styles */
+
+.note {
+    font-style: italic;
+}
+
+td.number {
+    text-align: right;
+}
+
+table#singleentry th {
+    text-align: right;
+}
+
+/* styles for the tabbed menu interface */
+
+#Menu {
+    padding: 0px;
+    margin: 0px;
+    height: 2em;
+}
+
+#Menu li {
+    display: inline;
+    text-align: center;
+}
+
+#Menu li a, #Menu li div#tabSelected {
+    margin: 0em 0.3em;
+    display: block;
+    float: left;
+    border: 1px solid #a7a7a7;
+    border-bottom: 0px solid white;
+    -moz-border-radius-topleft: 0.5em;
+    -webkit-border-top-left-radius: 0.5em;
+    -moz-border-radius-topright: 0.5em;
+    -webkit-border-top-right-radius: 0.5em;
+}
+
+#Menu li div#tabSelected {
+    padding: 0.5em 1em;
+    font-weight: bold;
+    color: black;
+    background: white;
+    position: relative;
+    top: 1px;
+}
+
+#Menu li a {
+    padding: 0.3em 1em 0.2em 1em;
+    color: #333;
+    background-color: #ccc;
+    position: relative;
+    top: 0.5em;
+}
+
+#Menu li a:hover {
+    background-color: #eee;
+    color: black;
+    text-decoration: none;
+}
+
+

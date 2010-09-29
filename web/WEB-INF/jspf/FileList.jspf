@@ -1,0 +1,40 @@
+<table id="files">
+    <tr>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Exp.</th>
+        <th>Downloads</th>
+        <th>PW</th>
+        <th>Notify a recipient</th>
+    </tr>
+    <%
+        boolean even = false;
+
+        for (FileItem file : aFiles) {
+            %>
+    <tr class="<%=even ? "even" : "odd" %>">
+        <td><%=file.getName()%></td>
+        <td class="number"><%=FileItem.humanReadable( file.getSize() )%></td>
+        
+        <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days" %></td>
+        <td><%= file.getDownloads() == -1 ? "unlimited" : file.getDownloads() %></td>
+        <td><%= file.getPwHash() != null && file.getPwHash().length() > 0 ? "yes" : "no" %></td>
+        <td><form action="<%= request.getContextPath() %>/user/view/<%= file.getOwnerUid() %>" method="post">
+            <input type="hidden" name="action" value="donotify" />
+            <input type="hidden" name="iFid" value="<%=file.getFid()%>" />
+            <input type="text" name="emailRecipient" />
+            <input type="submit" name="submit" value="Notify" /></form>
+        </td>
+        <td><a href="<%= request.getContextPath() %>/file/view/<%= file.getMd5sum() %>_SECTRA_<%= file.getFid() %>">url</a></td>
+        <td><a href="<%= request.getContextPath() %>/file/edit/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/pencil.gif" alt="edit" /></a></td>
+        <td><a href="<%= request.getContextPath() %>/file/log/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_log.png" alt="delete" width="15" height="15" /></a></td>
+        <td><a href="<%= request.getContextPath() %>/file/delete/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
+    </tr>
+    
+    <%
+            even = !even;
+        }
+    %>
+
+</table>
+
