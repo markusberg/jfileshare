@@ -17,6 +17,8 @@ import java.sql.Timestamp;
 
 import java.util.logging.Logger;
 
+import javax.sql.DataSource;
+
 public class FileItem {
 
     private int fid = -1;
@@ -39,8 +41,10 @@ public class FileItem {
     public FileItem() {
     }
 
-    public FileItem(Connection dbConn, int fid) {
+    public FileItem(DataSource ds, int fid) {
+        Connection dbConn = null;
         try {
+            dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.owner=UserItems.uid and FileItems.fid=?");
             st.setInt(1, fid);
             ResultSet rs = st.executeQuery();
@@ -63,10 +67,17 @@ public class FileItem {
                 this.ownerUid = rs.getInt("UserItems.uid");
                 this.ownerUsername = rs.getString("UserItems.username");
                 this.ownerEmail = rs.getString("UserItems.email");
-
             }
+            st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
@@ -196,10 +207,13 @@ public class FileItem {
         this.enabled = enabled;
     }
 
-    public boolean save(Connection dbConn) {
+    public boolean save(DataSource ds) {
+        Connection dbConn = null;
         PreparedStatement st = null;
-        if (this.fid == -1) {
-            try {
+        try {
+            dbConn = ds.getConnection();
+
+            if (this.fid == -1) {
                 st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1, this.name);
                 st.setString(2, this.type);
@@ -225,15 +239,7 @@ public class FileItem {
                 while (rs.next()) {
                     this.fid = rs.getInt(1);
                 }
-                st.close();
-                return true;
-            } catch (SQLException e) {
-                logger.severe(e.toString());
-                return false;
-            }
-
-        } else {
-            try {
+            } else {
                 st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,password=?,allowTinyUrl=? where fid=?");
                 st.setInt(1, this.downloads);
                 if (dateExpiration == null) {
@@ -250,26 +256,36 @@ public class FileItem {
                 st.setBoolean(5, this.allowTinyUrl);
                 st.setInt(6, this.fid);
                 st.executeUpdate();
-                st.close();
-                return true;
-            } catch (SQLException e) {
-                logger.severe(e.toString());
-                return false;
+            }
+            st.close();
+            return true;
+
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+            return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
             }
         }
     }
 
     /**
      * Delete the file from the database and from disk
-     * @param dbConn
+     * @param ds
      * @param pathFileStore
      * @return Were any errors encountered during the delete operation?
      */
-    public boolean delete(Connection dbConn, String pathFileStore) {
+    public boolean delete(DataSource ds, String pathFileStore) {
         File realfile = new File(pathFileStore + "/" + Integer.toString(this.fid));
         realfile.delete();
 
+        Connection dbConn = null;
         try {
+            dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("delete from FileItems where fid=?");
             st.setInt(1, this.fid);
             st.executeUpdate();
@@ -277,24 +293,41 @@ public class FileItem {
         } catch (SQLException e) {
             logger.severe(e.toString());
             return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
         return true;
     }
 
-    public void logDownload(Connection dbConn, String ipAddr) {
+    public void logDownload(DataSource ds, String ipAddr) {
         logger.info("Logging download");
+        Connection dbConn = null;
         try {
+            dbConn = ds.getConnection();
             PreparedStatement st1 = dbConn.prepareStatement("UPDATE FileItems set downloads=downloads-1 where fid=? and downloads>0");
             st1.setInt(1, this.fid);
             st1.executeUpdate();
+
+            st1 = dbConn.prepareStatement("INSERT INTO DownloadLogs VALUES(now(),?,?)");
+            st1.setInt(1, this.fid);
+            st1.setString(2, ipAddr);
+            st1.executeUpdate();
+
             st1.close();
-            PreparedStatement st2 = dbConn.prepareStatement("INSERT INTO DownloadLogs VALUES(now(),?,?)");
-            st2.setInt(1, this.fid);
-            st2.setString(2, ipAddr);
-            st2.executeUpdate();
-            st2.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
@@ -327,7 +360,7 @@ public class FileItem {
         return (int) daysLeft;
     }
 
-        /**
+    /**
      * Human readable file size
      *
      * @param filesize For example 4020234934

@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 public class FileLogServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileLogServlet.class.getName());
 
@@ -38,7 +38,7 @@ public class FileLogServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -58,41 +58,31 @@ public class FileLogServlet extends HttpServlet {
         ServletContext app = getServletContext();
         RequestDispatcher disp = null;
 
-        try {
-            dbConn = datasource.getConnection();
-            oFile = new FileItem(dbConn, iFid);
+        oFile = new FileItem(ds, iFid);
 
-            if (oFile.getFid() == -1) {
-                logger.info("File not found");
-                req.setAttribute("message_warning", "The requested file is not found");
-                disp = app.getRequestDispatcher("/templates/404.jsp");
-            } else if (!oCurrentUser.isAdmin()
-                    && oFile.getOwnerUid() != oCurrentUser.getUid()) {
-                // Neither admin nor owner
-                req.setAttribute("message_critical", "You don't have access to view the logs of this file");
-                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-            } else {
-                req.setAttribute("oFile", oFile);
-                ArrayList aDownloadLog = oFile.getLogs(dbConn);
-                req.setAttribute("aDownloadLog", aDownloadLog);
-                if (aDownloadLog.size() == 0) {
-                    req.setAttribute("message", "This file (" + oFile.getName() + ") has never been downloaded");
-                }
-                req.setAttribute("tab", "File log");
-                disp = app.getRequestDispatcher("/templates/FileLog.jsp");
+        if (oFile.getFid() == -1) {
+            logger.info("File not found");
+            req.setAttribute("message_warning", "The requested file is not found");
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } else if (!oCurrentUser.isAdmin()
+                && oFile.getOwnerUid() != oCurrentUser.getUid()) {
+            // Neither admin nor owner
+            req.setAttribute("message_critical", "You don't have access to view the logs of this file");
+            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+        } else {
+            req.setAttribute("oFile", oFile);
+            ArrayList aDownloadLog = oFile.getLogs(dbConn);
+            req.setAttribute("aDownloadLog", aDownloadLog);
+            if (aDownloadLog.size() == 0) {
+                req.setAttribute("message", "This file (" + oFile.getName() + ") has never been downloaded");
             }
-        } catch (SQLException e) {
+            req.setAttribute("tab", "File log");
+            disp = app.getRequestDispatcher("/templates/FileLog.jsp");
+        }
+        if (1 == 0) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/blank.jsp");
-            logger.severe("Unable to connect to database " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
         }
         disp.forward(req, resp);
     }

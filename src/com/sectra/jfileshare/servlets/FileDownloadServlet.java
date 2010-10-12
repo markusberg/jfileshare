@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 
 public class FileDownloadServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private String pathFileStore;
     private static final Logger logger =
             Logger.getLogger(FileDownloadServlet.class.getName());
@@ -38,7 +38,7 @@ public class FileDownloadServlet extends HttpServlet {
         super.init(config);
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
             pathFileStore = getServletContext().getInitParameter("PATH_STORE").toString();
 
         } catch (NamingException e) {
@@ -57,23 +57,10 @@ public class FileDownloadServlet extends HttpServlet {
         String md5sum = PathInfo.split("_SECTRA_")[0];
         int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
 
-        Connection dbConn = null;
         FileItem oFile = null;
 
-        try {
-            dbConn = datasource.getConnection();
-            oFile = new FileItem(dbConn, iFid);
-        } catch (SQLException e) {
-            logger.severe("Unable to connect to database " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-        
+        oFile = new FileItem(ds, iFid);
+
         File fileOnDisk = new File(pathFileStore + "/" + Integer.toString(oFile.getFid()));
 
         logger.info("Preparing to stream file");
@@ -107,7 +94,7 @@ public class FileDownloadServlet extends HttpServlet {
             }
         }
         String ipAddr = req.getRemoteAddr();
-        oFile.logDownload(dbConn, ipAddr);
+        oFile.logDownload(ds, ipAddr);
     }
 
     @Override

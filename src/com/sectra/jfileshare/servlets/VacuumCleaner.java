@@ -27,7 +27,7 @@ import java.util.TimerTask;
 
 public class VacuumCleaner extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
     private String pathFileStore;
@@ -41,7 +41,7 @@ public class VacuumCleaner extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
             pathFileStore = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
@@ -75,55 +75,45 @@ public class VacuumCleaner extends HttpServlet {
      */
     private void vacuum() {
         // logger.info("Running scheduled vacuum of database");
-        Connection dbConn = null;
+
+        // Delete expired users
+        ArrayList<UserItem> aUsers = (ArrayList<UserItem>) getExpiredUsers(ds);
+        if (aUsers.size() > 0) {
+            logger.info("Vacuuming " + aUsers.size() + " expired user(s) from the database");
+        }
+        for (UserItem user : aUsers) {
+            user.delete(ds, pathFileStore);
+        }
+
+        // Delete expired files
+        ArrayList<FileItem> aFiles = (ArrayList<FileItem>) getExpiredFiles(ds);
+        if (aFiles.size() > 0) {
+            logger.info("Vacuuming " + aFiles.size() + " expired file(s) from the database");
+        }
+        for (FileItem oFile : aFiles) {
+            oFile.delete(ds, pathFileStore);
+        }
+
+        // Delete password requests older than 2 days
         try {
-            dbConn = datasource.getConnection();
+            Connection dbConn = ds.getConnection();
+            Statement st = dbConn.createStatement();
+            int i = st.executeUpdate("DELETE FROM PasswordReset where dateRequest < ( now() - INTERVAL 2 DAY )");
 
-            // Delete expired users
-            ArrayList<UserItem> aUsers = (ArrayList<UserItem>) getExpiredUsers(dbConn);
-            if (aUsers.size() > 0) {
-                logger.info("Vacuuming " + aUsers.size() + " expired user(s) from the database");
+            if (i > 0) {
+                logger.info("Vacuuming " + Integer.toString(i) + " entries from password reset table");
             }
-            for (UserItem user : aUsers) {
-                user.delete(dbConn, pathFileStore);
-            }
-
-            // Delete expired files
-            ArrayList<FileItem> aFiles = (ArrayList<FileItem>) getExpiredFiles(dbConn);
-            if (aFiles.size() > 0) {
-                logger.info("Vacuuming " + aFiles.size() + " expired file(s) from the database");
-            }
-            for (FileItem oFile : aFiles) {
-                oFile.delete(dbConn, pathFileStore);
-            }
-
-            // Delete password requests older than 2 days
-            try {
-                Statement st = dbConn.createStatement();
-                int i = st.executeUpdate("DELETE FROM PasswordReset where dateRequest < ( now() - INTERVAL 2 DAY )");
-
-                if (i > 0) {
-                    logger.info("Vacuuming " + Integer.toString(i) + " entries from password reset table");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
+            st.close();
+            dbConn.close();
         } catch (SQLException e) {
-            logger.severe("Unable to connect to database " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
+            e.printStackTrace();
         }
     }
 
-    private ArrayList<UserItem> getExpiredUsers(Connection dbConn) {
+    private ArrayList<UserItem> getExpiredUsers(DataSource ds) {
         ArrayList<UserItem> aUsers = new ArrayList<UserItem>();
         try {
+            Connection dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from UserItems where dateExpiration<now() order by uid");
             ResultSet rs = st.executeQuery();
 
@@ -139,15 +129,19 @@ public class VacuumCleaner extends HttpServlet {
                 user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
                 aUsers.add(user);
             }
+
+            st.close();
+            dbConn.close();
         } catch (SQLException e) {
-            logger.info("Exception: " + e.toString());
+            logger.warning(e.toString());
         }
         return aUsers;
     }
 
-    private ArrayList<FileItem> getExpiredFiles(Connection dbConn) {
+    private ArrayList<FileItem> getExpiredFiles(DataSource ds) {
         ArrayList<FileItem> aFiles = new ArrayList<FileItem>();
         try {
+            Connection dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from FileItems where dateExpiration<now() order by fid");
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
@@ -164,8 +158,10 @@ public class VacuumCleaner extends HttpServlet {
                 file.setEnabled(rs.getBoolean("enabled"));
                 aFiles.add(file);
             }
+            st.close();
+            dbConn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.warning(e.toString());
         }
         return aFiles;
     }

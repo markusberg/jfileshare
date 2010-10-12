@@ -40,7 +40,7 @@ import com.sectra.jfileshare.utils.Helpers;
 
 public class UserViewServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserViewServlet.class.getName());
     private String smtpServer;
@@ -55,7 +55,7 @@ public class UserViewServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
             smtpServer = context.getInitParameter("SMTP_SERVER").toString();
@@ -86,52 +86,41 @@ public class UserViewServlet extends HttpServlet {
         UserItem oUser = null;
         UserItem oCurrentUser = (UserItem) session.getAttribute("user");
 
-        Connection dbConn = null;
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
         try {
-            dbConn = datasource.getConnection();
+            iUid = Integer.parseInt(req.getPathInfo().replaceAll("/", ""));
+            logger.info("Requesting uid: " + iUid);
+        } catch (NumberFormatException n) {
+            iUid = 0;
+        } catch (NullPointerException n) {
+            iUid = 0;
+        }
 
-            try {
-                iUid = Integer.parseInt(req.getPathInfo().replaceAll("/", ""));
-                logger.info("Requesting uid: " + iUid);
-            } catch (NumberFormatException n) {
-                iUid = 0;
-            } catch (NullPointerException n) {
-                iUid = 0;
+        if (iUid == 0) {
+            iUid = oCurrentUser.getUid();
+        }
+        oUser = new UserItem(ds, iUid);
+
+        if (oUser.getUid() == -1) {
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+            req.setAttribute("message_warning", "User not found (" + iUid + ")");
+        } else {
+            if (iUid != oCurrentUser.getUid()) {
+                req.setAttribute("tab", oUser.getUsername());
             }
 
-            if (iUid == 0) {
-                iUid = oCurrentUser.getUid();
-            }
-            oUser = new UserItem(dbConn, iUid);
+            req.setAttribute("oUser", oUser);
+            req.setAttribute("aFiles", oUser.getFiles(ds));
+            req.setAttribute("aUsers", oUser.getChildren(ds));
+            disp = app.getRequestDispatcher("/templates/UserView.jsp");
+        }
 
-            if (oUser.getUid() == -1) {
-                disp = app.getRequestDispatcher("/templates/404.jsp");
-                req.setAttribute("message_warning", "User not found (" + iUid + ")");
-            } else {
-                if (iUid != oCurrentUser.getUid()) {
-                    req.setAttribute("tab", oUser.getUsername());
-                }
-
-                req.setAttribute("oUser", oUser);
-                req.setAttribute("aFiles", oUser.getFiles(dbConn));
-                req.setAttribute("aUsers", oUser.getChildren(dbConn));
-                disp = app.getRequestDispatcher("/templates/UserView.jsp");
-            }
-        } catch (SQLException e) {
+        if (1 == 0) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/blank.jsp");
-            logger.severe("Unable to connect to database " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
         }
 
         disp.forward(req, resp);
@@ -149,64 +138,51 @@ public class UserViewServlet extends HttpServlet {
             int iFid = Integer.parseInt(req.getParameter("iFid"));
             String emailRecipient = req.getParameter("emailRecipient");
 
-            Connection dbConn = null;
             FileItem oFile = null;
             ArrayList<String> errors = new ArrayList<String>();
 
+            oFile = new FileItem(ds, iFid);
+
+            if (oFile.getFid() == -1) {
+                errors.add("The file was not found");
+            }
+            // Email address sanity check
+            InternetAddress emailValidated = new InternetAddress();
             try {
-                dbConn = datasource.getConnection();
-                oFile = new FileItem(dbConn, iFid);
+                emailValidated = new InternetAddress(emailRecipient);
+                emailValidated.validate();
+            } catch (AddressException e) {
+                errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
+            }
 
-                if (oFile.getFid() == -1) {
-                    errors.add("The file was not found");
+            if (errors.size() > 0) {
+                String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                for (String emsg : errors) {
+                    errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                 }
-                // Email address sanity check
-                InternetAddress emailValidated = new InternetAddress();
-                try {
-                    emailValidated = new InternetAddress(emailRecipient);
-                    emailValidated.validate();
-                } catch (AddressException e) {
-                    errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
-                }
-
-                if (errors.size() > 0) {
-                    String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                    for (String emsg : errors) {
-                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+                errormessage = errormessage.concat("</ul>\n");
+                req.setAttribute("message_critical", errormessage);
+            } else {
+                // Everything checks out. Let's send the email notification
+                if (urlPrefix.equals("")) {
+                    // We need to figure out the absolute path to the servlet
+                    String httpScheme = req.getScheme();
+                    String serverName = req.getServerName();
+                    Integer serverPort = (Integer) req.getServerPort();
+                    if (serverPort == 80) {
+                        serverPort = null;
                     }
-                    errormessage = errormessage.concat("</ul>\n");
-                    req.setAttribute("message_critical", errormessage);
+
+                    urlPrefix = httpScheme + "://"
+                            + serverName
+                            + (serverPort != null ? ":" + serverPort.toString() : "")
+                            + req.getContextPath();
+                    logger.info("No url prefix specified. Calculating: " + urlPrefix);
+                }
+                if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
+                    req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
                 } else {
-                    // Everything checks out. Let's send the email notification
-                    if (urlPrefix.equals("")) {
-                        // We need to figure out the absolute path to the servlet
-                        String httpScheme = req.getScheme();
-                        String serverName = req.getServerName();
-                        Integer serverPort = (Integer) req.getServerPort();
-                        if (serverPort == 80) {
-                            serverPort = null;
-                        }
-
-                        urlPrefix = httpScheme + "://"
-                                + serverName
-                                + (serverPort != null ? ":" + serverPort.toString() : "")
-                                + req.getContextPath();
-                        logger.info("No url prefix specified. Calculating: " + urlPrefix);
-                    }
-                    if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
-                        req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
-                    } else {
-                        req.setAttribute("message_warning", "Failed to send email notification.");
-                    }
-                }
-            } catch (SQLException e) {
-                logger.severe("Unable to connect to database " + e.toString());
-            } finally {
-                if (dbConn != null) {
-                    try {
-                        dbConn.close();
-                    } catch (SQLException e) {
-                    }
+                    req.setAttribute("message_warning", "Failed to send email notification.");
                 }
             }
         }

@@ -105,67 +105,57 @@ public class PasswordResetServlet extends HttpServlet {
                 && req.getParameter("action").equals("PasswordResetRequest")) {
             String username = req.getParameter("username");
 
-            UserItem oUser = null;
-            Connection dbConn = null;
-            try {
-                dbConn = datasource.getConnection();
-                oUser = new UserItem(dbConn, username);
-                String emailAddress = "";
-                pathContext = req.getContextPath();
+            UserItem oUser = new UserItem(datasource, username);
+            String emailAddress = "";
+            pathContext = req.getContextPath();
 
-                if (urlPrefix.equals("")) {
-                    // We need to figure out the absolute path to the servlet
-                    String httpScheme = req.getScheme();
-                    String serverName = req.getServerName();
-                    Integer serverPort = (Integer) req.getServerPort();
-                    if (serverPort == 80) {
-                        serverPort = null;
-                    }
-
-                    urlPrefix = httpScheme + "://"
-                            + serverName
-                            + (serverPort != null ? ":" + serverPort.toString() : "");
-                    logger.info("No url prefix specified. Calculating: " + urlPrefix);
+            if (urlPrefix.equals("")) {
+                // We need to figure out the absolute path to the servlet
+                String httpScheme = req.getScheme();
+                String serverName = req.getServerName();
+                Integer serverPort = (Integer) req.getServerPort();
+                if (serverPort == 80) {
+                    serverPort = null;
                 }
 
+                urlPrefix = httpScheme + "://"
+                        + serverName
+                        + (serverPort != null ? ":" + serverPort.toString() : "");
+                logger.info("No url prefix specified. Calculating: " + urlPrefix);
+            }
 
-                if (oUser.getUid() == -1) {
-                    // username does not exist in database
-                    emailAddress = username + "@sectra.se";
-                } else {
-                    emailAddress = oUser.getEmail();
-                }
 
-                if (!emailAddress.equals("")) {
-                    try {
-                        InternetAddress emailRecipient = new InternetAddress(emailAddress);
-                        emailRecipient.validate();
-                        String key = Sha512Crypt.Sha512_crypt(emailAddress, null, 0);
-                        key = key.substring(key.length() - 50, key.length());
-                        if (sendResetInstructions(emailRecipient, key)) {
-                            if (oUser.getUid() == -1) {
-                                req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
-                            } else {
-                                req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + oUser.getUsername() + "\".");
-                            }
-                            StoreRecoveryKey(username, emailAddress, key);
+            if (oUser.getUid() == -1) {
+                // username does not exist in database
+                emailAddress = username + "@sectra.se";
+            } else {
+                emailAddress = oUser.getEmail();
+            }
+
+            if (!emailAddress.equals("")) {
+                try {
+                    InternetAddress emailRecipient = new InternetAddress(emailAddress);
+                    emailRecipient.validate();
+                    String key = Sha512Crypt.Sha512_crypt(emailAddress, null, 0);
+                    key = key.substring(key.length() - 50, key.length());
+                    if (sendResetInstructions(emailRecipient, key)) {
+                        if (oUser.getUid() == -1) {
+                            req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
                         } else {
-                            req.setAttribute("message_critical", "Unable to send email. Instructions on how to reset your password could not be sent to you");
+                            req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + oUser.getUsername() + "\".");
                         }
-                    } catch (AddressException e) {
-                        req.setAttribute("message_critical", "Unable to send email. \"" + Helpers.htmlSafe(emailAddress) + "\" doesn't validate as a real email address");
+                        StoreRecoveryKey(username, emailAddress, key);
+                    } else {
+                        req.setAttribute("message_critical", "Unable to send email. Instructions on how to reset your password could not be sent to you");
                     }
+                } catch (AddressException e) {
+                    req.setAttribute("message_critical", "Unable to send email. \"" + Helpers.htmlSafe(emailAddress) + "\" doesn't validate as a real email address");
                 }
-            } catch (SQLException e) {
-                logger.severe("Unable to connect to database " + e.toString());
+            }
+
+
+            if (1 == 0) {
                 req.setAttribute("message_critical", "Unable to connect to database");
-            } finally {
-                if (dbConn != null) {
-                    try {
-                        dbConn.close();
-                    } catch (SQLException e) {
-                    }
-                }
             }
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
@@ -176,52 +166,41 @@ public class PasswordResetServlet extends HttpServlet {
             // Validate passwords
             RequestDispatcher disp;
             ServletContext app = getServletContext();
-            Connection dbConn = null;
-
             TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());
 
-            try {
-                dbConn = datasource.getConnection();
-                ArrayList<String> errors = new ArrayList<String>();
-                UserItem oUser = new UserItem(dbConn, (String) UserInfo.get("username"));
+            ArrayList<String> errors = new ArrayList<String>();
+            UserItem oUser = new UserItem(datasource, (String) UserInfo.get("username"));
 
-                String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
-                String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                errors.addAll(oUser.validatePassword(password1, password2));
+            String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+            String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+            errors.addAll(oUser.validatePassword(password1, password2));
 
-                if (errors.size() > 0) {
-                    String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                    for (String emsg : errors) {
-                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
-                    }
-                    errormessage = errormessage.concat("</ul>\n");
-                    req.setAttribute("message_critical", errormessage);
-                    req.setAttribute("username", UserInfo.get("username"));
-                    req.setAttribute("key", UserInfo.get("key"));
-                    disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
-                } else {
-                    oUser.setUsername((String) UserInfo.get("username"));
-                    oUser.setEmail((String) UserInfo.get("emailaddress"));
-                    if (oUser.getUid() == -1) {
-                        // Account didn't exist prior to pwreset attempt.
-                        // Thus, this is a 
-                        // Sectra Corporate user
-                        oUser.setUserType(oUser.TYPE_INTERNAL);
-                    }
-                    oUser.save(dbConn);
-                    req.setAttribute("message", "Password for user <strong>" + (String) UserInfo.get("username") + "</strong> has been reset. You can now login with your newly selected password.");
-                    this.DropRecoveryKey((String) UserInfo.get("key"));
+            if (errors.size() > 0) {
+                String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                for (String emsg : errors) {
+                    errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                 }
-            } catch (SQLException e) {
+                errormessage = errormessage.concat("</ul>\n");
+                req.setAttribute("message_critical", errormessage);
+                req.setAttribute("username", UserInfo.get("username"));
+                req.setAttribute("key", UserInfo.get("key"));
+                disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
+            } else {
+                oUser.setUsername((String) UserInfo.get("username"));
+                oUser.setEmail((String) UserInfo.get("emailaddress"));
+                if (oUser.getUid() == -1) {
+                    // Account didn't exist prior to pwreset attempt.
+                    // Thus, this is a
+                    // Sectra Corporate user
+                    oUser.setUserType(oUser.TYPE_INTERNAL);
+                }
+                oUser.save(datasource);
+                req.setAttribute("message", "Password for user <strong>" + (String) UserInfo.get("username") + "</strong> has been reset. You can now login with your newly selected password.");
+                this.DropRecoveryKey((String) UserInfo.get("key"));
+            }
+
+            if (1 == 0) {
                 req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-                logger.severe("Unable to connect to database " + e.toString());
-            } finally {
-                if (dbConn != null) {
-                    try {
-                        dbConn.close();
-                    } catch (SQLException e) {
-                    }
-                }
             }
             disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
             disp.forward(req, resp);
@@ -334,9 +313,9 @@ public class PasswordResetServlet extends HttpServlet {
      * @param key
      * @return
      */
-    private TreeMap<String,String> retrieveUserInfo(String key) {
+    private TreeMap<String, String> retrieveUserInfo(String key) {
         Connection dbConn = null;
-        TreeMap<String,String> UserInfo = new TreeMap<String,String>();
+        TreeMap<String, String> UserInfo = new TreeMap<String, String>();
         try {
             // Strip the leading slash from key
             key = key.substring(1);

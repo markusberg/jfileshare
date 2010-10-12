@@ -9,7 +9,6 @@
   <Parameter name="SMTP_SERVER_PORT" override="false" value="25"/>
   <Parameter name="SMTP_SENDER" override="false" value="noreply@sectra.se"/>
   <Parameter name="URL_PREFIX" override="false" value=""/>
-
   <!-- maxActive: Maximum number of dB connections in pool. Make sure you  2147483648
          configure your mysqld max_connections large enough to handle
          all of your db connections. Set to -1 for no limit.

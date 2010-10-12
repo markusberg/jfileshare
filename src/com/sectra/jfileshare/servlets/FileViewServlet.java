@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 
 public class FileViewServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileViewServlet.class.getName());
 
@@ -34,7 +34,7 @@ public class FileViewServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -48,44 +48,34 @@ public class FileViewServlet extends HttpServlet {
         String md5sum = PathInfo.split("_SECTRA_")[0];
         int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
 
-        Connection dbConn = null;
-        FileItem oFile = null;
+        logger.info("Access requested to file: " + iFid);
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        try {
-            dbConn = datasource.getConnection();
-            oFile = new FileItem(dbConn, iFid);
+        FileItem oFile = new FileItem(ds, iFid);
+        logger.info("Fetched file: " + oFile.getFid());
 
-            if (oFile.getFid() != -1) {
-                if (oFile.getMd5sum().equals(md5sum)) {
-                    req.setAttribute("tab", "File");
-                    disp = app.getRequestDispatcher("/templates/FileView.jsp");
-                    req.setAttribute("oFile", oFile);
-                } else {
-                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-                    req.setAttribute("message_warning", "File exists, but requires complete address");
-                }
+        if (oFile.getFid() != -1) {
+            if (oFile.getMd5sum().equals(md5sum)) {
+                req.setAttribute("tab", "File");
+                disp = app.getRequestDispatcher("/templates/FileView.jsp");
+                req.setAttribute("oFile", oFile);
             } else {
-                logger.info("File not found");
-                req.setAttribute("message_warning", "The requested file is not found");
-                disp = app.getRequestDispatcher("/templates/404.jsp");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+                req.setAttribute("message_warning", "File exists, but requires complete address");
             }
-        } catch (SQLException e) {
+        } else {
+            logger.info("File not found");
+            req.setAttribute("message_warning", "The requested file is not found");
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        }
+        if (1 == 0) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-            logger.severe("Unable to connect to database " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
         }
 
-        disp.forward(req, resp);
+        disp.forward( req, resp);
     }
 
     @Override

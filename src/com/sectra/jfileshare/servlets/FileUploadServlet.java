@@ -44,13 +44,13 @@ import org.apache.commons.fileupload.util.Streams;
 // import com.sectra.jfileshare.objects.UserItem;
 public class FileUploadServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private String pathTemp;
     private String pathStore;
     private int daysFileRetention;
     private static final Logger logger =
             Logger.getLogger(FileUploadServlet.class.getName());
-    private static long filesizeMax;
+    private long filesizeMax;
 
     @Override
     public void init(ServletConfig config)
@@ -59,7 +59,7 @@ public class FileUploadServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
             pathTemp = context.getInitParameter("PATH_TEMP").toString();
@@ -173,22 +173,10 @@ public class FileUploadServlet extends HttpServlet {
                     oFile.setPwPlainText(pwPlainText);
                 }
                 oFile.setDaysToKeep(daysFileRetention);
+                oFile.save(ds);
 
-                Connection dbConn = null;
-                try {
-                    dbConn = datasource.getConnection();
-
-                    oFile.save(dbConn);
-                } catch (SQLException e) {
+                if (1 == 0) {
                     req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-                    logger.severe("Unable to connect to database " + e.toString());
-                } finally {
-                    if (dbConn != null) {
-                        try {
-                            dbConn.close();
-                        } catch (SQLException e) {
-                        }
-                    }
                 }
 
                 File tempfile = new File(this.pathTemp, Integer.toString(oCurrentUser.getUid()));
@@ -236,5 +224,4 @@ public class FileUploadServlet extends HttpServlet {
         }
         return hexString.toString();
     }
-
 }

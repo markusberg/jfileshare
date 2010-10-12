@@ -57,9 +57,11 @@ public class UserItem {
     public UserItem() {
     }
 
-    public UserItem(Connection conn, int uid) {
+    public UserItem(DataSource ds, int uid) {
+        Connection dbConn = null;
         try {
-            PreparedStatement st = conn.prepareStatement("select * from UserItems left outer join viewUserFiles using (uid) left outer join viewUserChildren using (uid) where uid=?");
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select * from UserItems left outer join viewUserFiles using (uid) left outer join viewUserChildren using (uid) where uid=?");
             st.setInt(1, uid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
@@ -75,13 +77,23 @@ public class UserItem {
                 setSumFilesize(rs.getDouble("sumFilesize"));
                 setSumChildren(rs.getInt("sumChildren"));
             }
+            st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
-    public UserItem(Connection dbConn, String username) {
+    public UserItem(DataSource ds, String username) {
+        Connection dbConn = null;
         try {
+            dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from UserItems where username=?");
             st.setString(1, username);
             ResultSet rs = st.executeQuery();
@@ -95,9 +107,18 @@ public class UserItem {
                 setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
             }
+            st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
+
     }
 
     public String getUsername() {
@@ -221,30 +242,13 @@ public class UserItem {
         return false;
     }
 
-    public boolean save(DataSource datasource) {
+    public boolean save(DataSource ds) {
         Connection dbConn = null;
         try {
-            dbConn = datasource.getConnection();
-            this.save(dbConn);
-        } catch (SQLException e) {
-            logger.severe("Unable to connect to database: " + e.toString());
-            return false;
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-        return true;
-    }
-
-    public boolean save(Connection conn) {
-        PreparedStatement st = null;
-        try {
+            dbConn = ds.getConnection();
+            PreparedStatement st;
             if (this.uid == -1) {
-                st = conn.prepareStatement("insert into UserItems values(NULL,?,?,?,?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
+                st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
                 st.setString(3, this.pwHash);
@@ -256,7 +260,7 @@ public class UserItem {
                     st.setInt(6, this.creatoruid);
                 }
             } else {
-                st = conn.prepareStatement("update UserItems set usertype=?,username=?,password=?,email=?,dateExpiration=? where uid=?");
+                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,password=?,email=?,dateExpiration=? where uid=?");
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
                 st.setString(3, this.pwHash);
@@ -275,8 +279,15 @@ public class UserItem {
             st.close();
             return true;
         } catch (SQLException e) {
-            logger.severe(e.toString());
+            logger.severe("Unable to connect to database: " + e.toString());
             return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
@@ -285,34 +296,43 @@ public class UserItem {
      * @param dbConn Database to delete user from
      * @param pathFileStore Physical on-disk path to the filestore
      */
-    public void delete(Connection dbConn, String pathFileStore) {
-        if (this.uid != -1) {
-            ArrayList<FileItem> aFiles = this.getFiles(dbConn);
-            if (aFiles.size() > 0) {
-                // Delete all files belonging to this user
-                logger.info("Deleting " + aFiles.size() + " file(s) belonging to " + this.getUserInfo());
-                // Iterator<FileItem> it = aFiles.iterator();
-                for (FileItem oFile : aFiles) {
-                    // Delete the files on disk
-                    // CASCADE DELETE will take care of the database
-                    File fileondisk = new File(pathFileStore + "/" + oFile.getFid());
-                    fileondisk.delete();
-                }
-            } else {
-                logger.info("No files owned by user " + this.getUserInfo());
+    public void delete(DataSource ds, String pathFileStore) {
+        Connection dbConn = null;
+        ArrayList<FileItem> aFiles = this.getFiles(ds);
+        if (aFiles.size() > 0) {
+            // Delete all files belonging to this user
+            logger.info("Deleting " + aFiles.size() + " file(s) belonging to " + this.getUserInfo());
+            // Iterator<FileItem> it = aFiles.iterator();
+            for (FileItem oFile : aFiles) {
+                // Delete the files on disk
+                // CASCADE DELETE will take care of the database
+                File fileondisk = new File(pathFileStore + "/" + oFile.getFid());
+                fileondisk.delete();
             }
+        } else {
+            logger.info("No files owned by user " + this.getUserInfo());
+        }
 
-            try {
-                // CASCADE SET NULL will automatically orphan any children
-                PreparedStatement st = dbConn.prepareStatement("delete from UserItems where uid=?");
-                st.setInt(1, this.uid);
-                st.executeUpdate();
-                st.close();
-                logger.info("User " + this.getUserInfo() + " has now been deleted");
-            } catch (SQLException e) {
-                logger.warning(e.toString());
+        try {
+            dbConn = ds.getConnection();
+            // CASCADE SET NULL will automatically orphan any children
+            PreparedStatement st = dbConn.prepareStatement("delete from UserItems where uid=?");
+            st.setInt(1, this.uid);
+            st.executeUpdate();
+            st.close();
+
+            logger.info("User " + this.getUserInfo() + " has now been deleted");
+        } catch (SQLException e) {
+            logger.warning(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
             }
         }
+
     }
 
     /**
@@ -334,14 +354,25 @@ public class UserItem {
         return (int) daysLeft;
     }
 
-    public boolean saveLastLogin(Connection dbConn) {
+    public boolean saveLastLogin(DataSource ds) {
+        Connection dbConn = null;
         try {
-            PreparedStatement psLastLogin = dbConn.prepareStatement("UPDATE UserItems set dateLastLogin=now() where uid=" + this.uid);
-            psLastLogin.executeUpdate();
+            dbConn = ds.getConnection();
+            PreparedStatement ps = dbConn.prepareStatement("UPDATE UserItems set dateLastLogin=now() where uid=?");
+            ps.setInt(1, this.uid);
+            ps.executeUpdate();
+            ps.close();
             return true;
         } catch (SQLException e) {
             logger.warning("Error saving last login: " + e.toString());
             return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 
@@ -365,10 +396,12 @@ public class UserItem {
         return false;
     }
 
-    public ArrayList<UserItem> getChildren(Connection conn) {
+    public ArrayList<UserItem> getChildren(DataSource ds) {
         ArrayList<UserItem> aChildren = new ArrayList<UserItem>();
+        Connection dbConn = null;
         try {
-            PreparedStatement st = conn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where creator=? ORDER BY sumFilesize DESC");
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where creator=? ORDER BY sumFilesize DESC");
             st.setInt(1, this.getUid());
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -390,17 +423,27 @@ public class UserItem {
                 user.setSumChildren(rs.getInt("sumChildren"));
                 aChildren.add(user);
             }
+            st.close();
         } catch (SQLException e) {
             logger.severe("Exception: " + e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
         logger.info("Found " + aChildren.size() + " children to user " + this.getUserInfo());
         return aChildren;
     }
 
-    public ArrayList<FileItem> getFiles(Connection conn) {
+    public ArrayList<FileItem> getFiles(DataSource ds) {
         ArrayList<FileItem> aFiles = new ArrayList<FileItem>();
+        Connection dbConn = null;
         try {
-            PreparedStatement st = conn.prepareStatement("select FileItems.* from FileItems where FileItems.owner=? order by FileItems.size DESC;");
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.owner=? order by FileItems.size DESC;");
             st.setInt(1, this.getUid());
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -427,9 +470,18 @@ public class UserItem {
                 file.setOwnerUid(rs.getInt("FileItems.owner"));
                 aFiles.add(file);
             }
+            st.close();
         } catch (SQLException e) {
             logger.warning("Exception: " + e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
+
         logger.info("Found " + aFiles.size() + " files owned by user " + this.getUserInfo());
         return aFiles;
     }

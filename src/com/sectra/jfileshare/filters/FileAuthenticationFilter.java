@@ -17,8 +17,6 @@ import javax.naming.NamingException;
 import java.io.IOException;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -29,7 +27,7 @@ import com.sectra.jfileshare.objects.FileItem;
 public class FileAuthenticationFilter implements Filter {
 
     private FilterConfig filterconfig;
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileAuthenticationFilter.class.getName());
 
@@ -39,7 +37,7 @@ public class FileAuthenticationFilter implements Filter {
         this.filterconfig = filterConfig;
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
         } catch (NamingException e) {
             logger.severe(e.toString());
             throw new ServletException(e);
@@ -48,7 +46,7 @@ public class FileAuthenticationFilter implements Filter {
 
     @Override
     public void destroy() {
-        datasource = null;
+        ds = null;
     }
 
     @Override
@@ -61,21 +59,9 @@ public class FileAuthenticationFilter implements Filter {
         String md5sum = PathInfo.split("_SECTRA_")[0];
         int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
 
-        Connection dbConn = null;
-        FileItem oFile = null;
-        try {
-            dbConn = datasource.getConnection();
-            oFile = new FileItem(dbConn, iFid);
-        } catch (SQLException e) {
-            logger.warning("Unable to connect to database" + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
+        FileItem oFile = new FileItem(ds, iFid);
+        logger.info(oFile.getName());
+
         UserItem oUser = new UserItem();
         if (session.getAttribute("user") != null) {
             oUser = (UserItem) session.getAttribute("user");
@@ -84,6 +70,10 @@ public class FileAuthenticationFilter implements Filter {
             logger.info("downloads left: " + Integer.toString(oFile.getDownloads()));
         }
 
+
+        // filterChain.doFilter(servletRequest, servletResponse);
+
+        
         if (oFile.getFid() == -1 || !oFile.getMd5sum().equals(md5sum)) {
             logger.info("File not found in database");
             req.setAttribute("message_critical", "File not found");

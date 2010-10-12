@@ -30,7 +30,7 @@ import javax.sql.DataSource;
 
 public class UserEditServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserEditServlet.class.getName());
     private String pathFileStore;
@@ -43,7 +43,7 @@ public class UserEditServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
             ServletContext context = getServletContext();
             pathFileStore = context.getInitParameter("PATH_STORE").toString();
             defaultDaysUntilExpiration = Integer.parseInt(context.getInitParameter("DAYS_USER_EXPIRATION").toString());
@@ -71,7 +71,7 @@ public class UserEditServlet extends HttpServlet {
                 throw new NullPointerException();
             }
             iUid = Integer.parseInt(sUid);
-            oUser = getUser(iUid);
+            oUser = new UserItem(ds, iUid);
         } catch (NullPointerException e) {
             oUser = oCurrentUser;
         }
@@ -124,7 +124,7 @@ public class UserEditServlet extends HttpServlet {
 
             Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
 
-            UserItem oUser = getUser(iUid);
+            UserItem oUser = new UserItem(ds, iUid);
 
             if (oUser.getUid() == -1) {
                 logger.info("Attempting to modify nonexistent user");
@@ -139,8 +139,8 @@ public class UserEditServlet extends HttpServlet {
             } else if (req.getServletPath().equals("/user/delete")) {
                 Connection dbConn = null;
                 try {
-                    dbConn = datasource.getConnection();
-                    oUser.delete(dbConn, pathFileStore);
+                    dbConn = ds.getConnection();
+                    oUser.delete(ds, pathFileStore);
                 } catch (SQLException e) {
                     logger.severe("Unable to connect to database: " + e.toString());
                 } finally {
@@ -168,7 +168,7 @@ public class UserEditServlet extends HttpServlet {
                 if (oCurrentUser.isAdmin()) {
                     requestedUsername = (String) req.getParameter("username");
                     if (!requestedUsername.equals(oUser.getUsername())) {
-                        UserItem tempuser = (UserItem) getUser(requestedUsername);
+                        UserItem tempuser = new UserItem(ds, requestedUsername);
                         if (requestedUsername.length() < 2) {
                             errors.add("The username is too short");
                         } else if (tempuser.getUid() != -1) {
@@ -236,7 +236,7 @@ public class UserEditServlet extends HttpServlet {
                     }
                     oUser.setUserType(requestedUsertype);
 
-                    if (oUser.save(datasource)) {
+                    if (oUser.save(ds)) {
                         req.setAttribute("message", "Your changes have been saved");
                         req.setAttribute("validatedPassword1", "");
                         req.setAttribute("validatedPassword2", "");
@@ -254,43 +254,5 @@ public class UserEditServlet extends HttpServlet {
             disp = app.getRequestDispatcher(jspForward);
             disp.forward(req, resp);
         }
-    }
-
-    private UserItem getUser(int iUid) {
-        UserItem oUser = null;
-        Connection dbConn = null;
-        try {
-            dbConn = datasource.getConnection();
-            oUser = new UserItem(dbConn, iUid);
-        } catch (SQLException e) {
-            logger.severe("Unable to connect to database: " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-        return oUser;
-    }
-
-    private UserItem getUser(String username) {
-        UserItem oUser = null;
-        Connection dbConn = null;
-        try {
-            dbConn = datasource.getConnection();
-            oUser = new UserItem(dbConn, username);
-        } catch (SQLException e) {
-            logger.severe("Unable to connect to database: " + e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-        return oUser;
     }
 }

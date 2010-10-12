@@ -17,9 +17,6 @@ import javax.naming.NamingException;
 import javax.naming.Context;
 import javax.sql.DataSource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 
 import java.io.IOException;
@@ -29,7 +26,7 @@ import com.sectra.jfileshare.objects.UserItem;
 public class LoginFilter implements Filter {
 
     private FilterConfig filterconfig;
-    private DataSource datasource = null;
+    private DataSource ds = null;
     private static final Logger logger =
             Logger.getLogger(LoginFilter.class.getName());
 
@@ -40,7 +37,7 @@ public class LoginFilter implements Filter {
         try {
             this.filterconfig = config;
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
         } catch (NamingException e) {
             logger.severe(e.toString());
             throw new ServletException(e);
@@ -49,7 +46,7 @@ public class LoginFilter implements Filter {
 
     @Override
     public void destroy() {
-        datasource = null;
+        ds = null;
     }
 
     @Override
@@ -74,7 +71,6 @@ public class LoginFilter implements Filter {
     }
 
     private boolean CheckUser(HttpServletRequest req, HttpSession session) {
-        Connection dbConn = null;
         // First check if we are already logged in
         if (session.getAttribute("user") != null) {
             return true;
@@ -86,27 +82,17 @@ public class LoginFilter implements Filter {
             String pwPlaintext = req.getParameter("login_password");
 
             if (username != null && pwPlaintext != null) {
-                try {
-                    dbConn = datasource.getConnection();
-                    UserItem oUser = new UserItem(dbConn, username);
-                    if (oUser.getUid() == -1 || !oUser.authenticated(pwPlaintext)) {
-                        req.setAttribute("message_warning", "Non-existent user or incorrect password");
-                    } else {
-                        logger.info("User " + oUser.getUserInfo() + " is now logged in");
-                        oUser.saveLastLogin(dbConn);
-                        session.setAttribute("user", oUser);
-                        return true;
-                    }
-                } catch (SQLException e) {
+                UserItem oUser = new UserItem(ds, username);
+                if (oUser.getUid() == -1 || !oUser.authenticated(pwPlaintext)) {
+                    req.setAttribute("message_warning", "Non-existent user or incorrect password");
+                } else {
+                    logger.info("User " + oUser.getUserInfo() + " is now logged in");
+                    oUser.saveLastLogin(ds);
+                    session.setAttribute("user", oUser);
+                    return true;
+                }
+                if (1 == 0) {
                     req.setAttribute("message_critical", "Unable to connect to the database. Please contact the system administrator.");
-                    logger.severe("Unable to connect to database " + e.toString());
-                } finally {
-                    if (dbConn != null) {
-                        try {
-                            dbConn.close();
-                        } catch (SQLException e) {
-                        }
-                    }
                 }
             }
         }

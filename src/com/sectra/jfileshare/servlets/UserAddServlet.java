@@ -4,9 +4,6 @@ import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
@@ -87,79 +84,67 @@ public class UserAddServlet extends HttpServlet {
                 req.setAttribute("message_warning", "You do not have access to create users");
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             } else {
-                Connection dbConn = null;
-                try {
-                    dbConn = datasource.getConnection();
+                ArrayList<String> errors = new ArrayList<String>();
 
-                    ArrayList<String> errors = new ArrayList<String>();
+                // Check username uniqueness
+                String username = req.getParameter("username") == null ? "" : req.getParameter("username");
+                UserItem oUser = new UserItem(datasource, username);
+                errors.addAll(oUser.validateUserName(username));
 
-                    // Check username uniqueness
-                    String username = req.getParameter("username") == null ? "" : req.getParameter("username");
-                    UserItem oUser = new UserItem(dbConn, username);
-                    errors.addAll(oUser.validateUserName(username));
+                // Validate email address
+                errors.addAll(oUser.validateEmailAddress(req.getParameter("email")));
 
-                    // Validate email address
-                    errors.addAll(oUser.validateEmailAddress(req.getParameter("email")));
-
-                    // Validate the amount of time account will be active
-                    Integer daysUntilExpiration = this.daysUserExpiration;
-                    if (req.getParameter("daysUserExpiration") != null) {
-                        Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
-                        if (UserItem.dayMap.containsKey(requestedExpiration)) {
-                            daysUntilExpiration = requestedExpiration;
-                        }
+                // Validate the amount of time account will be active
+                Integer daysUntilExpiration = this.daysUserExpiration;
+                if (req.getParameter("daysUserExpiration") != null) {
+                    Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
+                    if (UserItem.dayMap.containsKey(requestedExpiration)) {
+                        daysUntilExpiration = requestedExpiration;
                     }
-                    req.setAttribute("daysUntilExpiration", daysUntilExpiration);
+                }
+                req.setAttribute("daysUntilExpiration", daysUntilExpiration);
 
-                    // See if the expiration-box is checked
-                    if (req.getParameter("bExpiration") != null
-                            && req.getParameter("bExpiration").equals("true")) {
-                        req.setAttribute("bExpiration", "true");
-                        oUser.setDaysUntilExpiration(daysUntilExpiration);
-                    } else {
-                        req.setAttribute("bExpiration", "false");
+                // See if the expiration-box is checked
+                if (req.getParameter("bExpiration") != null
+                        && req.getParameter("bExpiration").equals("true")) {
+                    req.setAttribute("bExpiration", "true");
+                    oUser.setDaysUntilExpiration(daysUntilExpiration);
+                } else {
+                    req.setAttribute("bExpiration", "false");
+                }
+
+                // Validate passwords
+                String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+                String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+                errors.addAll(oUser.validatePassword(password1, password2));
+
+                // If oCurrentUser is an admin, set the requested user type
+                if (oCurrentUser.isAdmin()) {
+                    int usertype = Integer.parseInt(req.getParameter("usertype"));
+                    oUser.setUserType(usertype);
+                }
+
+                if (errors.size() > 0) {
+                    String errormessage = "User creation failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                    for (String emsg : errors) {
+                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                     }
+                    errormessage = errormessage.concat("</ul>\n");
+                    req.setAttribute("message_critical", errormessage);
+                    disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
+                } else {
+                    // Set the creator, username, and save the user
+                    oUser.setCreatorUid(oCurrentUser.getUid());
+                    oUser.setUsername(username);
 
-                    // Validate passwords
-                    String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
-                    String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                    errors.addAll(oUser.validatePassword(password1, password2));
-
-                    // If oCurrentUser is an admin, set the requested user type
-                    if (oCurrentUser.isAdmin()) {
-                        int usertype = Integer.parseInt(req.getParameter("usertype"));
-                        oUser.setUserType(usertype);
-                    }
-
-                    if (errors.size() > 0) {
-                        String errormessage = "User creation failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                        for (String emsg : errors) {
-                            errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
-                        }
-                        errormessage = errormessage.concat("</ul>\n");
-                        req.setAttribute("message_critical", errormessage);
-                        disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
-                    } else {
-                        // Set the creator, username, and save the user
-                        oUser.setCreatorUid(oCurrentUser.getUid());
-                        oUser.setUsername(username);
-
-                        oUser.save(dbConn);
-                        req.setAttribute("message", "User created");
-                        disp = app.getRequestDispatcher("/templates/Blank.jsp");
-                    }
-                } catch (SQLException e) {
+                    oUser.save(datasource);
+                    req.setAttribute("message", "User created");
+                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
+                }
+                if (1 == 0) {
                     req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
                     req.setAttribute("tab", "Error");
                     disp = app.getRequestDispatcher("/templates/blank.jsp");
-                    logger.severe("Unable to connect to database " + e.toString());
-                } finally {
-                    if (dbConn != null) {
-                        try {
-                            dbConn.close();
-                        } catch (SQLException e) {
-                        }
-                    }
                 }
             }
             disp.forward(req, resp);
