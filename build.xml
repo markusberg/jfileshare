@@ -78,14 +78,28 @@
   For more information about the Manager web application, and the functionality
   of these tasks, see <http://localhost:8080/tomcat-docs/manager-howto.html>.
 
-
-
-  <taskdef name="deploy"   classname="org.apache.catalina.ant.DeployTask"/>
-  <taskdef name="list"     classname="org.apache.catalina.ant.ListTask"/>
-  <taskdef name="reload"   classname="org.apache.catalina.ant.ReloadTask"/>
-  <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask"/>
-
 -->
+
+<path id="catalina.classpath">
+   <fileset dir="${catalina.home}/server/lib" includes="catalina-ant.jar" />
+</path>
+
+  <taskdef name="deploy"   classname="org.apache.catalina.ant.DeployTask">
+    <classpath refid="catalina.classpath"/>
+  </taskdef>
+  <taskdef name="list"     classname="org.apache.catalina.ant.ListTask">
+    <classpath refid="catalina.classpath"/>
+  </taskdef>
+
+  <taskdef name="reload"   classname="org.apache.catalina.ant.ReloadTask">
+    <classpath refid="catalina.classpath"/>
+  </taskdef>
+
+  <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask">
+    <classpath refid="catalina.classpath"/>
+  </taskdef>
+
+
 
 
 <!--  ==================== Compilation Control Options ==================== -->
