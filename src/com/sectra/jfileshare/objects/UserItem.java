@@ -293,7 +293,7 @@ public class UserItem {
 
     /**
      * Delete the user and all files belonging to user
-     * @param dbConn Database to delete user from
+     * @param ds DataSource to use
      * @param pathFileStore Physical on-disk path to the filestore
      */
     public void delete(DataSource ds, String pathFileStore) {
