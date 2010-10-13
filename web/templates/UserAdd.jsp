@@ -18,28 +18,29 @@
             <table id="singleentry">
                 <tr>
                     <th>Username:</th>
-                    <td><input type="text" class="textentry" name="username" value="<%=Helpers.htmlSafe(request.getParameter("username"))%>"/></td>
+                    <td><input type="text" class="textentry" name="username" 
+                               value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedUsername"))%>" /></td>
                 </tr>
                 <tr>
                     <th>Email:</th>
-                    <td><input type="text" class="textentry" name="email" value="<%=Helpers.htmlSafe(request.getParameter("email"))%>" /></td>
+                    <td><input type="text" class="textentry" name="email"
+                               value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedEmail"))%>" /></td>
                 </tr>
                 <tr>
                     <th>Password:</th>
-                    <td><input type="password" class="textentry" name="password1" value="<%=Helpers.htmlSafe(request.getParameter("password1"))%>" /></td>
+                    <td><input type="password" class="textentry" name="password1"
+                               value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>" /></td>
                 </tr>
                 <tr>
                     <th>Verify password:</th>
-                    <td><input type="password" class="textentry" name="password2" value="<%=Helpers.htmlSafe(request.getParameter("password2"))%>" /></td>
+                    <td><input type="password" class="textentry" name="password2"
+                               value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword2"))%>" /></td>
                 </tr>
 
                 <tr>
                     <%
-                                boolean bExpiration = true;
-                                if (request.getAttribute("bExpiration") != null
-                                        && request.getAttribute("bExpiration").toString().equals("false")) {
-                                    bExpiration = false;
-                                }
+                                boolean bExpiration = (Boolean) request.getAttribute("validatedBExpiration");
+                                int daysUntilExpiration = (Integer) request.getAttribute("validatedDaysUntilExpiration");
                     %>
                     <th>Expiration:</th>
                     <td><input id="bExpiration" type="checkbox" name="bExpiration" value="true"<%=bExpiration ? " checked=\"checked\"" : ""%> onchange="ToggleVisibility('ExpirationBlock', 'table-row-group');"/></td>
@@ -51,17 +52,11 @@
                             <strong>Account expires in:</strong>
                             <select name="daysUserExpiration">
                                 <%
-                                            Integer daysUntilExpiration = (Integer) Integer.parseInt(getServletContext().getInitParameter("DAYS_USER_EXPIRATION").toString());
-                                            if (request.getAttribute("daysUntilExpiration") != null) {
-                                                daysUntilExpiration = (Integer) request.getAttribute("daysUntilExpiration");
-                                            }
-                                            out.print(daysUntilExpiration);
-                                            for (Integer day : UserItem.dayMap.keySet()) {
+                                            for (Integer day : UserItem.DAY_MAP.keySet()) {
                                                 out.print("<option value=\"" + day + "\"");
                                                 out.print(day.equals(daysUntilExpiration) ? " selected=\"selected\"" : "");
-                                                out.print(">" + UserItem.dayMap.get(day) + "</option>\n");
+                                                out.print(">" + UserItem.DAY_MAP.get(day) + "</option>\n");
                                             }
-
                                 %>
                             </select>
                             <br />
@@ -72,15 +67,15 @@
                 <%
                             com.sectra.jfileshare.objects.UserItem oCurrentUser = (UserItem) session.getAttribute("user");
                             if (oCurrentUser.isAdmin()) {
-                                Integer usertype = request.getParameter("usertype") == null ? oCurrentUser.TYPE_EXTERNAL : Integer.parseInt(request.getParameter("usertype"));
+                                Integer usertype = (Integer) request.getAttribute("validatedUsertype");
                 %>
                 <tr>
                     <th>User Type:</th>
                     <td>
                         <select name="usertype">
-                            <option value="<%=oCurrentUser.TYPE_ADMIN%>"<%=usertype.equals(oCurrentUser.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
-                            <option value="<%=oCurrentUser.TYPE_INTERNAL%>"<%=usertype.equals(oCurrentUser.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>Sectra corporate</option>
-                            <option value="<%=oCurrentUser.TYPE_EXTERNAL%>"<%=usertype.equals(oCurrentUser.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
+                            <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
+                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>Sectra corporate</option>
+                            <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>
                     </td>
                 </tr>

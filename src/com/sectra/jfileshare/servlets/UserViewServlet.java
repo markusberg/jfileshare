@@ -27,9 +27,6 @@ import javax.naming.NamingException;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -80,32 +77,43 @@ public class UserViewServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
-
-        int iUid = 0;
-
-        UserItem oUser = null;
         UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        try {
-            iUid = Integer.parseInt(req.getPathInfo().replaceAll("/", ""));
-            logger.info("Requesting uid: " + iUid);
-        } catch (NumberFormatException n) {
-            iUid = 0;
-        } catch (NullPointerException n) {
-            iUid = 0;
-        }
+        String reqUid = req.getPathInfo();
+        int iUid;
 
-        if (iUid == 0) {
+        try {
+            reqUid = reqUid.replaceAll("/", "");
+            if (reqUid.equals("")) {
+                iUid = oCurrentUser.getUid();
+            } else {
+                iUid = Integer.parseInt(reqUid);
+            }
+            logger.info("Requesting uid: " + reqUid);
+        } catch (NumberFormatException n) {
+            iUid = -1;
+        } catch (NullPointerException n) {
             iUid = oCurrentUser.getUid();
         }
-        oUser = new UserItem(ds, iUid);
 
-        if (oUser.getUid() == -1) {
+        UserItem oUser = new UserItem(ds, iUid);
+
+        if (oUser.getUid() == -2) {
+            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
+            req.setAttribute("tab", "Error");
+            disp = app.getRequestDispatcher("/templates/Blank.jsp");
+        } else if (oUser.getUid() == -1) {
             disp = app.getRequestDispatcher("/templates/404.jsp");
-            req.setAttribute("message_warning", "User not found (" + iUid + ")");
+            req.setAttribute("message_warning", "User not found (" + reqUid + ")");
+        } else if (!(oCurrentUser.isAdmin()
+                || oUser.getUidCreator() == oCurrentUser.getUid()
+                || oUser.getUid() == oCurrentUser.getUid())) {
+            // logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
+            // logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
+            req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
+            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
             if (iUid != oCurrentUser.getUid()) {
                 req.setAttribute("tab", oUser.getUsername());
@@ -116,13 +124,6 @@ public class UserViewServlet extends HttpServlet {
             req.setAttribute("aUsers", oUser.getChildren(ds));
             disp = app.getRequestDispatcher("/templates/UserView.jsp");
         }
-
-        if (1 == 0) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/blank.jsp");
-        }
-
         disp.forward(req, resp);
     }
 
@@ -138,51 +139,52 @@ public class UserViewServlet extends HttpServlet {
             int iFid = Integer.parseInt(req.getParameter("iFid"));
             String emailRecipient = req.getParameter("emailRecipient");
 
-            FileItem oFile = null;
             ArrayList<String> errors = new ArrayList<String>();
+            FileItem oFile = new FileItem(ds, iFid);
 
-            oFile = new FileItem(ds, iFid);
-
-            if (oFile.getFid() == -1) {
-                errors.add("The file was not found");
-            }
-            // Email address sanity check
-            InternetAddress emailValidated = new InternetAddress();
-            try {
-                emailValidated = new InternetAddress(emailRecipient);
-                emailValidated.validate();
-            } catch (AddressException e) {
-                errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
-            }
-
-            if (errors.size() > 0) {
-                String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                for (String emsg : errors) {
-                    errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+            if (oCurrentUser.isAdmin()
+                    || oFile.getOwnerUid() != oCurrentUser.getUid()) {
+                if (oFile.getFid() == -1) {
+                    errors.add("The file was not found");
                 }
-                errormessage = errormessage.concat("</ul>\n");
-                req.setAttribute("message_critical", errormessage);
-            } else {
-                // Everything checks out. Let's send the email notification
-                if (urlPrefix.equals("")) {
-                    // We need to figure out the absolute path to the servlet
-                    String httpScheme = req.getScheme();
-                    String serverName = req.getServerName();
-                    Integer serverPort = (Integer) req.getServerPort();
-                    if (serverPort == 80) {
-                        serverPort = null;
+                // Email address sanity check
+                InternetAddress emailValidated = new InternetAddress();
+                try {
+                    emailValidated = new InternetAddress(emailRecipient);
+                    emailValidated.validate();
+                } catch (AddressException e) {
+                    errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
+                }
+
+                if (errors.size() > 0) {
+                    String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                    for (String emsg : errors) {
+                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                     }
-
-                    urlPrefix = httpScheme + "://"
-                            + serverName
-                            + (serverPort != null ? ":" + serverPort.toString() : "")
-                            + req.getContextPath();
-                    logger.info("No url prefix specified. Calculating: " + urlPrefix);
-                }
-                if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
-                    req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
+                    errormessage = errormessage.concat("</ul>\n");
+                    req.setAttribute("message_critical", errormessage);
                 } else {
-                    req.setAttribute("message_warning", "Failed to send email notification.");
+                    // Everything checks out. Let's send the email notification
+                    if (urlPrefix.equals("")) {
+                        // We need to figure out the absolute path to the servlet
+                        String httpScheme = req.getScheme();
+                        String serverName = req.getServerName();
+                        Integer serverPort = (Integer) req.getServerPort();
+                        if (serverPort == 80) {
+                            serverPort = null;
+                        }
+
+                        urlPrefix = httpScheme + "://"
+                                + serverName
+                                + (serverPort != null ? ":" + serverPort.toString() : "")
+                                + req.getContextPath();
+                        logger.info("No url prefix specified. Calculating: " + urlPrefix);
+                    }
+                    if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
+                        req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
+                    } else {
+                        req.setAttribute("message_warning", "Failed to send email notification.");
+                    }
                 }
             }
         }

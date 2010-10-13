@@ -32,7 +32,7 @@ public class UserItem {
     private Timestamp dateCreation;
     private Timestamp dateLastLogin;
     private Timestamp dateExpiration = null;
-    private Integer creatoruid = null;
+    private Integer uidCreator = null;
     private double sumFilesize;
     private int sumFiles = 0;
     private int sumChildren = 0;
@@ -43,7 +43,7 @@ public class UserItem {
     /**
      * Integer to string mapping of expiration dates
      */
-    public static Map<Integer, String> dayMap = new TreeMap<Integer, String>() {
+    public static Map<Integer, String> DAY_MAP = new TreeMap<Integer, String>() {
 
         {
             put(new Integer(15), "15 days");
@@ -73,6 +73,7 @@ public class UserItem {
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
                 setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
+                setUidCreator(rs.getInt("UserItems.uidCreator"));
                 setSumFiles(rs.getInt("sumFiles"));
                 setSumFilesize(rs.getDouble("sumFilesize"));
                 setSumChildren(rs.getInt("sumChildren"));
@@ -106,6 +107,7 @@ public class UserItem {
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
                 setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
+                setUidCreator(rs.getInt("UserItems.uidCreator"));
             }
             st.close();
         } catch (SQLException e) {
@@ -196,12 +198,12 @@ public class UserItem {
         this.dateExpiration = expiration;
     }
 
-    public int getCreatorUid() {
-        return this.creatoruid == null ? -1 : this.creatoruid;
+    public int getUidCreator() {
+        return this.uidCreator == null ? -1 : this.uidCreator;
     }
 
-    public void setCreatorUid(int creatoruid) {
-        this.creatoruid = creatoruid;
+    public void setUidCreator(Integer uidCreator) {
+        this.uidCreator = uidCreator;
     }
 
     public double getSumFilesize() {
@@ -254,10 +256,10 @@ public class UserItem {
                 st.setString(3, this.pwHash);
                 st.setString(4, this.email);
                 st.setTimestamp(5, this.dateExpiration);
-                if (this.creatoruid == null) {
+                if (this.uidCreator == null) {
                     st.setNull(6, java.sql.Types.NULL);
                 } else {
-                    st.setInt(6, this.creatoruid);
+                    st.setInt(6, this.uidCreator);
                 }
             } else {
                 st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,password=?,email=?,dateExpiration=? where uid=?");
@@ -401,7 +403,7 @@ public class UserItem {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where creator=? ORDER BY sumFilesize DESC");
+            PreparedStatement st = dbConn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where uidCreator=? ORDER BY sumFilesize DESC");
             st.setInt(1, this.getUid());
             st.execute();
             ResultSet rs = st.getResultSet();

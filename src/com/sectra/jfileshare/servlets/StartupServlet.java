@@ -85,14 +85,18 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "alter table UserItems drop foreign key `UserItems_ibfk_1`");
                 alterDatabase(dbConn, "alter table UserItems drop foreign key `UserItems_ibfk_2`");
                 alterDatabase(dbConn, "alter table UserItems drop key `usertype`");
-                alterDatabase(dbConn, "alter table UserItems add constraint foreign key (`creator`) references `UserItems`(`uid`) on delete set NULL");
+                alterDatabase(dbConn, "alter table UserItems drop key `creator`");
+
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN creator uidCreator int(5) DEFAULT NULL");
+                alterDatabase(dbConn, "alter table UserItems add constraint foreign key (`uidCreator`) references `UserItems`(`uid`) on delete set NULL");
+                
                 alterDatabase(dbConn, "update UserItems set dateLastLogin=null where password=\"****NO*PASSORD*SET***\"");
                 alterDatabase(dbConn, "update UserItems set password=null where password=\"****NO*PASSORD*SET***\"");
 
                 alterDatabase(dbConn, "drop table UserTypeItems");
                 alterDatabase(dbConn, "drop table test");
 
-                // Fix character encodings
+                // Fix character encodings 
                 alterDatabase(dbConn, "alter database jfileshare character set=utf8");
                 alterDatabase(dbConn, "alter table DownloadLogs CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table UserItems CONVERT TO CHARACTER SET utf8");
@@ -101,7 +105,7 @@ public class StartupServlet extends HttpServlet {
 
                 // create views
                 alterDatabase(dbConn, "create VIEW viewUserFiles as select owner as uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by owner");
-                alterDatabase(dbConn, "create VIEW viewUserChildren as select creator as uid, count(uid) as sumChildren from UserItems where creator is not null group by creator");
+                alterDatabase(dbConn, "create VIEW viewUserChildren as select uidCreator as uid, count(uid) as sumChildren from UserItems where uidCreator is not null group by uidCreator");
 
                 // create table for password reset/recovery
                 alterDatabase(dbConn, "CREATE TABLE `PasswordReset` ("

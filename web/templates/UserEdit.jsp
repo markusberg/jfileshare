@@ -54,7 +54,7 @@
                             // Only allow setting expiration on users you own
                             // or if you're an administrator
                             // i.e. not yourself unless you're an admin
-                            if (oCurrentUser.isAdmin() || oCurrentUser.getUid() == oUser.getCreatorUid()) {
+                            if (oCurrentUser.isAdmin() || oCurrentUser.getUid() == oUser.getUidCreator()) {
                 %>
                 <tr>
                     <th>Expiration:</th>
@@ -89,9 +89,9 @@
                     <th>User Type:</th>
                     <td>
                         <select name="usertype">
-                            <option value="<%=oCurrentUser.TYPE_ADMIN%>"<%=usertype.equals(oCurrentUser.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
-                            <option value="<%=oCurrentUser.TYPE_INTERNAL%>"<%=usertype.equals(oCurrentUser.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>Sectra internal</option>
-                            <option value="<%=oCurrentUser.TYPE_EXTERNAL%>"<%=usertype.equals(oCurrentUser.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
+                            <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
+                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>Sectra internal</option>
+                            <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>
                     </td>
                 </tr>

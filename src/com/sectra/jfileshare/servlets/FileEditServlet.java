@@ -4,8 +4,6 @@ import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.logging.Logger;
 

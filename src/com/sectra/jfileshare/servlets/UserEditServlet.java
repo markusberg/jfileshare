@@ -33,8 +33,8 @@ public class UserEditServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserEditServlet.class.getName());
-    private String pathFileStore;
-    private Integer defaultDaysUntilExpiration;
+    private String PATH_FILE_STORE;
+    private Integer DAYS_UNTIL_EXPIRATION;
 
     @Override
     public void init(ServletConfig config)
@@ -45,8 +45,8 @@ public class UserEditServlet extends HttpServlet {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
             ServletContext context = getServletContext();
-            pathFileStore = context.getInitParameter("PATH_STORE").toString();
-            defaultDaysUntilExpiration = Integer.parseInt(context.getInitParameter("DAYS_USER_EXPIRATION").toString());
+            PATH_FILE_STORE = context.getInitParameter("PATH_STORE").toString();
+            DAYS_UNTIL_EXPIRATION = Integer.parseInt(context.getInitParameter("DAYS_USER_EXPIRATION").toString());
 
         } catch (NamingException e) {
             throw new ServletException(e);
@@ -81,7 +81,7 @@ public class UserEditServlet extends HttpServlet {
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
             jspForward = "/templates/404.jsp";
         } else if (oUser.getUid() != oCurrentUser.getUid()
-                && oUser.getCreatorUid() != oCurrentUser.getUid()
+                && oUser.getUidCreator() != oCurrentUser.getUid()
                 && !oCurrentUser.isAdmin()) {
             logger.info(oCurrentUser.getUserInfo() + " has insufficient access to modify user " + oUser.getUserInfo());
             req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
@@ -99,7 +99,7 @@ public class UserEditServlet extends HttpServlet {
             req.setAttribute("validatedPassword1", "");
             req.setAttribute("validatedPassword2", "");
             req.setAttribute("validatedBExpiration", oUser.getDateExpiration() == null ? false : true);
-            req.setAttribute("validatedDaysUntilExpiration", oUser.getDateExpiration() == null ? defaultDaysUntilExpiration : oUser.getDaysUntilExpiration());
+            req.setAttribute("validatedDaysUntilExpiration", oUser.getDateExpiration() == null ? DAYS_UNTIL_EXPIRATION : oUser.getDaysUntilExpiration());
             req.setAttribute("validatedUsertype", oUser.getUserType());
 
             jspForward = "/templates/UserEdit.jsp";
@@ -131,7 +131,7 @@ public class UserEditServlet extends HttpServlet {
                 req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
                 jspForward = "/templates/404.jsp";
             } else if (oUser.getUid() != oCurrentUser.getUid()
-                    && oUser.getCreatorUid() != oCurrentUser.getUid()
+                    && oUser.getUidCreator() != oCurrentUser.getUid()
                     && !oCurrentUser.isAdmin()) {
                 logger.info("Insufficient access to modify user");
                 req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
@@ -140,7 +140,7 @@ public class UserEditServlet extends HttpServlet {
                 Connection dbConn = null;
                 try {
                     dbConn = ds.getConnection();
-                    oUser.delete(ds, pathFileStore);
+                    oUser.delete(ds, PATH_FILE_STORE);
                 } catch (SQLException e) {
                     logger.severe("Unable to connect to database: " + e.toString());
                 } finally {
@@ -194,9 +194,9 @@ public class UserEditServlet extends HttpServlet {
 
                 // Validate expiration
                 Boolean requestedBExpiration = oUser.getDateExpiration() == null ? false : true;
-                Integer requestedDaysUntilExpiration = defaultDaysUntilExpiration;
+                Integer requestedDaysUntilExpiration = DAYS_UNTIL_EXPIRATION;
                 if (oCurrentUser.isAdmin()
-                        || oCurrentUser.getUid() == oUser.getCreatorUid()) {
+                        || oCurrentUser.getUid() == oUser.getUidCreator()) {
                     if (req.getParameter("bExpiration") != null
                             && req.getParameter("bExpiration").equals("true")) {
                         requestedBExpiration = true;
@@ -204,8 +204,10 @@ public class UserEditServlet extends HttpServlet {
                         requestedBExpiration = false;
                     }
                     requestedDaysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
-                    if (requestedDaysUntilExpiration < 1 || requestedDaysUntilExpiration > 365) {
-                        requestedDaysUntilExpiration = defaultDaysUntilExpiration;
+                    if (requestedDaysUntilExpiration < 1) {
+                        requestedDaysUntilExpiration = DAYS_UNTIL_EXPIRATION;
+                    } else if (requestedDaysUntilExpiration > 365) {
+                        requestedDaysUntilExpiration = 365;
                     }
                 }
                 req.setAttribute("validatedBExpiration", requestedBExpiration);
