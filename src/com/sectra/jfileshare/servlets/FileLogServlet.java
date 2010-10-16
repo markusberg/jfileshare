@@ -52,15 +52,17 @@ public class FileLogServlet extends HttpServlet {
         String PathInfo = req.getPathInfo().substring(1);
 
         int iFid = Integer.parseInt(PathInfo);
-        Connection dbConn = null;
-        FileItem oFile = null;
 
         ServletContext app = getServletContext();
         RequestDispatcher disp = null;
 
-        oFile = new FileItem(ds, iFid);
+        FileItem oFile = new FileItem(ds, iFid);
 
-        if (oFile.getFid() == -1) {
+        if (oFile.getFid() == -2) {
+            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
+            req.setAttribute("tab", "Error");
+            disp = app.getRequestDispatcher("/templates/blank.jsp");
+        } else if (oFile.getFid() == -1) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
@@ -71,18 +73,13 @@ public class FileLogServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
             req.setAttribute("oFile", oFile);
-            ArrayList aDownloadLog = oFile.getLogs(dbConn);
+            ArrayList aDownloadLog = oFile.getLogs(ds);
             req.setAttribute("aDownloadLog", aDownloadLog);
             if (aDownloadLog.size() == 0) {
                 req.setAttribute("message", "This file (" + oFile.getName() + ") has never been downloaded");
             }
             req.setAttribute("tab", "File log");
             disp = app.getRequestDispatcher("/templates/FileLog.jsp");
-        }
-        if (1 == 0) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/blank.jsp");
         }
         disp.forward(req, resp);
     }

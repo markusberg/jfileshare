@@ -385,11 +385,12 @@ public class FileItem {
 
     }
 
-    public ArrayList<DownloadLog> getLogs(Connection conn) {
+    public ArrayList<DownloadLog> getLogs(DataSource ds) {
         ArrayList<DownloadLog> logs = new ArrayList<DownloadLog>();
-
+        Connection dbConn = null;
         try {
-            PreparedStatement st = conn.prepareStatement("SELECT * FROM DownloadLogs WHERE fid=? order by time DESC");
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("SELECT * FROM DownloadLogs WHERE fid=? order by time DESC");
             st.setInt(1, this.fid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
@@ -398,6 +399,13 @@ public class FileItem {
             }
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
         return logs;
     }
