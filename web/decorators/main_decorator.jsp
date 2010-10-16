@@ -76,9 +76,7 @@
 
     <body>
         <div id="container">
-            <div id="header">
-                <img src="<%= request.getContextPath()%>/images/sectralogo.gif" alt="sectralogo" />
-            </div>
+            <!-- img src="<%= request.getContextPath()%>/images/logo.png" id="logotype" alt="Logotype" / -->
             <div>
                 <ul id="Menu">
                     <%
