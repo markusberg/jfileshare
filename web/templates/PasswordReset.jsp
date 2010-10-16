@@ -41,9 +41,10 @@
 
         <form action="<%= request.getContextPath()%>/passwordreset" method="post">
             <p>Use this form if you've forgotten your password.
-                If you're a Sectra corporate user, simply enter your regular
-                login username. An email with instructions
-                will be sent to the address registered in the database.
+                If you're a Sectra corporate user, your username is the same as 
+                your regular login username.
+            </p>
+            <p>Instructions will be sent to your email address.
             </p>
             <p>Your username: <input type="text" name="username" id="FocusMe" />
                 <input type="submit" value="Reset my password" />
