@@ -45,7 +45,7 @@ public class FileItem {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.owner=UserItems.uid and FileItems.fid=?");
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.uid=UserItems.uid and FileItems.fid=?");
             st.setInt(1, fid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {

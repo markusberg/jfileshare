@@ -72,19 +72,27 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN type type varchar(100) NOT NULL");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN size size double NOT NULL DEFAULT 0");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN md5sum md5sum varchar(255) NOT NULL");
+                alterDatabase(dbConn, "update FileItems SET downloads=null where downloads=-1");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN password pwHash varchar(255) NULL DEFAULT NULL");
 
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN ddate dateCreation timestamp NOT NULL default CURRENT_TIMESTAMP");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN expiration dateExpiration timestamp NULL default NULL");
-                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN owner owner int(5) NOT NULL");
+
+                // owner -> uid and all dependecies
+                alterDatabase(dbConn, "alter table FileItems drop foreign key `FileItems_ibfk_1`");
+                alterDatabase(dbConn, "alter table FileItems drop key `owner`");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN owner uid int(5) NOT NULL");
+                alterDatabase(dbConn, "alter table FileItems add constraint foreign key (`uid`) references `UserItems`(`uid`) on delete cascade");
+
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN enabled enabled tinyint(1) NOT NULL default 1");
 
-                alterDatabase(dbConn, "alter table FileItems drop foreign key `FileItems_ibfk_1`");
-                alterDatabase(dbConn, "alter table FileItems add constraint foreign key (`owner`) references `UserItems`(`uid`) on delete cascade");
                 alterDatabase(dbConn, "alter table FileItems drop key `md5sum`");
                 alterDatabase(dbConn, "update FileItems set dateExpiration=null where permanent != 1");
                 alterDatabase(dbConn, "alter table FileItems drop column permanent");
 
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN uid uid int(5) NOT NULL AUTO_INCREMENT");
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN usertype usertype int(2) NOT NULL DEFAULT 1");
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN username username varchar(255) NOT NULL");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN password pwHash varchar(255) NULL DEFAULT NULL");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN created dateCreation timestamp default CURRENT_TIMESTAMP");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN lastlogin dateLastLogin timestamp NULL default NULL");
@@ -114,7 +122,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "update FileItems set name='Beräkning.zip' where fid=21");
 
                 // create views
-                alterDatabase(dbConn, "create VIEW viewUserFiles as select owner as uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by owner");
+                alterDatabase(dbConn, "create VIEW viewUserFiles as select uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by uid");
                 alterDatabase(dbConn, "create VIEW viewUserChildren as select uidCreator as uid, count(uid) as sumChildren from UserItems where uidCreator is not null group by uidCreator");
 
                 // create table for password reset/recovery
