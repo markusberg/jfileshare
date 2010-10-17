@@ -62,11 +62,7 @@ public class FileEditServlet extends HttpServlet {
         int iFid = Integer.parseInt(PathInfo);
         FileItem oFile = new FileItem(ds, iFid);
 
-        if (oFile.getFid() == -2) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/blank.jsp");
-        } else if (isAuthenticated(oFile, req)) {
+        if (isAuthenticated(oFile, req)) {
             req.setAttribute("oFile", oFile);
             if (req.getServletPath().equals("/file/edit")) {
                 req.setAttribute("tab", "Edit file");
@@ -97,11 +93,7 @@ public class FileEditServlet extends HttpServlet {
             int iFid = Integer.parseInt(PathInfo);
             FileItem oFile = new FileItem(ds, iFid);
 
-            if (oFile.getFid() == -2) {
-                req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-                req.setAttribute("tab", "Error");
-                disp = app.getRequestDispatcher("/templates/blank.jsp");
-            } else if (isAuthenticated(oFile, req)) {
+            if (isAuthenticated(oFile, req)) {
                 if (req.getServletPath().equals("/file/edit")) {
                     req.setAttribute("tab", "Edit file");
                     req.setAttribute("message", "Your changes to this file have been saved");
@@ -156,7 +148,7 @@ public class FileEditServlet extends HttpServlet {
         HttpSession session = req.getSession();
         UserItem oCurrentUser = (UserItem) session.getAttribute("user");
 
-        if (oFile.getFid() == -1) {
+        if (oFile.getFid() == null) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             return false;

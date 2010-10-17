@@ -80,9 +80,9 @@ public class UserEditServlet extends HttpServlet {
             logger.info("Attempting to modify nonexistent user");
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
             jspForward = "/templates/404.jsp";
-        } else if (oUser.getUid() != oCurrentUser.getUid()
-                && oUser.getUidCreator() != oCurrentUser.getUid()
-                && !oCurrentUser.isAdmin()) {
+        } else if (!(oUser.getUid().equals(oCurrentUser.getUid())
+                || oUser.getUidCreator().equals(oCurrentUser.getUid())
+                || oCurrentUser.isAdmin())) {
             logger.info(oCurrentUser.getUserInfo() + " has insufficient access to modify user " + oUser.getUserInfo());
             req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
             jspForward = "/templates/AccessDenied.jsp";
@@ -130,9 +130,9 @@ public class UserEditServlet extends HttpServlet {
                 logger.info("Attempting to modify nonexistent user");
                 req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
                 jspForward = "/templates/404.jsp";
-            } else if (oUser.getUid() != oCurrentUser.getUid()
-                    && oUser.getUidCreator() != oCurrentUser.getUid()
-                    && !oCurrentUser.isAdmin()) {
+            } else if (!(oUser.getUid().equals(oCurrentUser.getUid())
+                    || oUser.getUidCreator().equals(oCurrentUser.getUid())
+                    || oCurrentUser.isAdmin())) {
                 logger.info("Insufficient access to modify user");
                 req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
                 jspForward = "/templates/AccessDenied.jsp";
@@ -228,7 +228,7 @@ public class UserEditServlet extends HttpServlet {
                     req.setAttribute("message_critical", errormessage);
                 } else {
                     // Set the parameters and save the user
-                    
+
                     oUser.setUsername(requestedUsername);
                     oUser.setEmail(requestedEmail);
                     if (requestedBExpiration) {

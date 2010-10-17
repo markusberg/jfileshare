@@ -123,6 +123,10 @@
         <servlet-class>com.sectra.jfileshare.servlets.PasswordResetServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>LinkCompatibility</servlet-name>
+        <servlet-class>com.sectra.jfileshare.servlets.LinkCompatibilityServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>Startup</servlet-name>
         <servlet-class>com.sectra.jfileshare.servlets.StartupServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -186,20 +190,12 @@
         <url-pattern>/passwordreset/*</url-pattern>
     </servlet-mapping>
     <!-- Compatibility URL:s with older version of jfileshare -->
-    <filter-mapping>
-        <filter-name>fileAuth</filter-name>
-        <url-pattern>/download/view/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>fileAuth</filter-name>
-        <url-pattern>/download/get/*</url-pattern>
-    </filter-mapping>
     <servlet-mapping>
-        <servlet-name>FileView</servlet-name>
+        <servlet-name>LinkCompatibility</servlet-name>
         <url-pattern>/download/view/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>FileDownload</servlet-name>
+        <servlet-name>LinkCompatibility</servlet-name>
         <url-pattern>/download/get/*</url-pattern>
     </servlet-mapping>
 </web-app>

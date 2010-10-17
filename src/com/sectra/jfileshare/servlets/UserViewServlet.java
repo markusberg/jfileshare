@@ -100,7 +100,7 @@ public class UserViewServlet extends HttpServlet {
 
         UserItem oUser = new UserItem(ds, iUid);
 
-        if (oUser.getUid() == -2) {
+        if (oUser.getUid() != null && oUser.getUid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
@@ -108,10 +108,10 @@ public class UserViewServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/404.jsp");
             req.setAttribute("message_warning", "User not found (" + reqUid + ")");
         } else if (!(oCurrentUser.isAdmin()
-                || oUser.getUidCreator() == oCurrentUser.getUid()
-                || oUser.getUid() == oCurrentUser.getUid())) {
-            // logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
-            // logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
+                || oUser.getUidCreator().equals(oCurrentUser.getUid())
+                || oUser.getUid().equals(oCurrentUser.getUid()))) {
+            logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
+            logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
             req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
