@@ -3,8 +3,6 @@ package com.sectra.jfileshare.servlets;
 import com.sectra.jfileshare.objects.FileItem;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -55,7 +53,11 @@ public class FileViewServlet extends HttpServlet {
         FileItem oFile = new FileItem(ds, iFid);
         logger.info("Fetched file: " + oFile.getFid());
 
-        if (oFile.getFid() != -1) {
+        if (oFile.getFid() == -2) {
+            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
+            req.setAttribute("tab", "Error");
+            disp = app.getRequestDispatcher("/templates/Blank.jsp");
+        } else if (oFile.getFid() != null) {
             if (oFile.getMd5sum().equals(md5sum)) {
                 req.setAttribute("tab", "File");
                 disp = app.getRequestDispatcher("/templates/FileView.jsp");
@@ -69,13 +71,8 @@ public class FileViewServlet extends HttpServlet {
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
         }
-        if (1 == 0) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        }
 
-        disp.forward( req, resp);
+        disp.forward(req, resp);
     }
 
     @Override

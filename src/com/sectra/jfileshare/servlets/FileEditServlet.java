@@ -32,8 +32,8 @@ public class FileEditServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileEditServlet.class.getName());
-    private String pathFileStore;
-    private int daysFileRetention;
+    private String PATH_FILE_STORE;
+    private int DAYS_FILE_RETENTION;
 
     @Override
     public void init(ServletConfig config)
@@ -45,8 +45,8 @@ public class FileEditServlet extends HttpServlet {
             ds = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
-            pathFileStore = context.getInitParameter("PATH_STORE").toString();
-            daysFileRetention = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
+            PATH_FILE_STORE = context.getInitParameter("PATH_STORE").toString();
+            DAYS_FILE_RETENTION = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -62,7 +62,11 @@ public class FileEditServlet extends HttpServlet {
         int iFid = Integer.parseInt(PathInfo);
         FileItem oFile = new FileItem(ds, iFid);
 
-        if (isAuthenticated(oFile, req)) {
+        if (oFile.getFid() == -2) {
+            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
+            req.setAttribute("tab", "Error");
+            disp = app.getRequestDispatcher("/templates/blank.jsp");
+        } else if (isAuthenticated(oFile, req)) {
             req.setAttribute("oFile", oFile);
             if (req.getServletPath().equals("/file/edit")) {
                 req.setAttribute("tab", "Edit file");
@@ -73,11 +77,6 @@ public class FileEditServlet extends HttpServlet {
             }
         } else {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-        }
-        if (1 == 0) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/blank.jsp");
         }
         disp.forward(req, resp);
 
@@ -98,7 +97,11 @@ public class FileEditServlet extends HttpServlet {
             int iFid = Integer.parseInt(PathInfo);
             FileItem oFile = new FileItem(ds, iFid);
 
-            if (isAuthenticated(oFile, req)) {
+            if (oFile.getFid() == -2) {
+                req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
+                req.setAttribute("tab", "Error");
+                disp = app.getRequestDispatcher("/templates/blank.jsp");
+            } else if (isAuthenticated(oFile, req)) {
                 if (req.getServletPath().equals("/file/edit")) {
                     req.setAttribute("tab", "Edit file");
                     req.setAttribute("message", "Your changes to this file have been saved");
@@ -113,43 +116,36 @@ public class FileEditServlet extends HttpServlet {
                             && req.getParameter("bPermanent").equals("true")) {
                         oFile.setDateExpiration(null);
                     } else {
-                        oFile.setDaysToKeep(daysFileRetention);
+                        oFile.setDaysToKeep(DAYS_FILE_RETENTION);
                     }
 
+                    Integer iDownloads = null;
                     if (req.getParameter("iDownloads") != null
                             && !req.getParameter("iDownloads").equals("")) {
-                        int iDownloads = new Integer(req.getParameter("iDownloads"));
-                        logger.info("downloads limited to: " + iDownloads);
-                        oFile.setDownloads(iDownloads);
-                    } else {
-                        oFile.setDownloads(-1);
+                        iDownloads = new Integer(req.getParameter("iDownloads"));
                     }
+                    oFile.setDownloads(iDownloads);
 
-                    if (req.getParameter("bUsePw") == null) {
-                        oFile.setPwHash("");
+                    if (req.getParameter("bUsePw") == null
+                            || req.getParameter("bUsePw").equals("")) {
+                        oFile.setPwHash(null);
                     } else if (req.getParameter("bUsePw").equals("true")
                             && req.getParameter("sPassword") != null
                             && !req.getParameter("sPassword").equals("")) {
                         oFile.setPwPlainText(req.getParameter("sPassword"));
                     }
 
-
                     oFile.save(ds);
                     req.setAttribute("oFile", oFile);
                     disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
                 } else {
                     req.setAttribute("tab", "Delete file");
-                    oFile.delete(ds, pathFileStore);
+                    oFile.delete(ds, PATH_FILE_STORE);
                     req.setAttribute("message", "File " + oFile.getName() + " was successfully deleted");
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");
                 }
             } else {
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-            }
-            if (1 == 0) {
-                req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-                req.setAttribute("tab", "Error");
-                disp = app.getRequestDispatcher("/templates/blank.jsp");
             }
 
             disp.forward(req, resp);

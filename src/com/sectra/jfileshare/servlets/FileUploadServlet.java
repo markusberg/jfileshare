@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 
-import java.sql.SQLException;
-import java.sql.Connection;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -45,12 +42,12 @@ import org.apache.commons.fileupload.util.Streams;
 public class FileUploadServlet extends HttpServlet {
 
     private DataSource ds;
-    private String pathTemp;
-    private String pathStore;
-    private int daysFileRetention;
+    private String PATH_TEMP;
+    private String PATH_STORE;
+    private int DAYS_FILE_RETENTION;
     private static final Logger logger =
             Logger.getLogger(FileUploadServlet.class.getName());
-    private long filesizeMax;
+    private long FILE_SIZE_MAX;
 
     @Override
     public void init(ServletConfig config)
@@ -62,10 +59,10 @@ public class FileUploadServlet extends HttpServlet {
             ds = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
-            pathTemp = context.getInitParameter("PATH_TEMP").toString();
-            pathStore = context.getInitParameter("PATH_STORE").toString();
-            daysFileRetention = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
-            filesizeMax = Long.valueOf(context.getInitParameter("FILESIZE_MAX").toString());
+            PATH_TEMP = context.getInitParameter("PATH_TEMP").toString();
+            PATH_STORE = context.getInitParameter("PATH_STORE").toString();
+            DAYS_FILE_RETENTION = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
+            FILE_SIZE_MAX = Long.valueOf(context.getInitParameter("FILESIZE_MAX").toString());
 
         } catch (NamingException e) {
             throw new ServletException(e);
@@ -91,10 +88,10 @@ public class FileUploadServlet extends HttpServlet {
             HttpSession session = req.getSession();
 
             // keep files of up to 10 MiB in memory 10485760
-            FileItemFactory factory = new DiskFileItemFactory(10485760, new File(this.pathTemp));
+            FileItemFactory factory = new DiskFileItemFactory(10485760, new File(this.PATH_TEMP));
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(filesizeMax);
-            logger.info("Max filesize: " + FileItem.humanReadable(filesizeMax));
+            upload.setSizeMax(FILE_SIZE_MAX);
+            logger.info("Max filesize: " + FileItem.humanReadable(FILE_SIZE_MAX));
             UserItem oCurrentUser = (UserItem) session.getAttribute("user");
 
             // set file upload progress listener
@@ -140,7 +137,7 @@ public class FileUploadServlet extends HttpServlet {
                         oFile.setOwnerUid(oCurrentUser.getUid());
 
                         try {
-                            outfile = new FileOutputStream(this.pathTemp + "/" + Integer.toString(oCurrentUser.getUid()));
+                            outfile = new FileOutputStream(this.PATH_TEMP + "/" + Integer.toString(oCurrentUser.getUid()));
 
                             logger.info("Calculating md5 sum");
                             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -172,15 +169,15 @@ public class FileUploadServlet extends HttpServlet {
                 if (usepw && !pwPlainText.equals("")) {
                     oFile.setPwPlainText(pwPlainText);
                 }
-                oFile.setDaysToKeep(daysFileRetention);
+                oFile.setDaysToKeep(DAYS_FILE_RETENTION);
                 oFile.save(ds);
 
                 if (1 == 0) {
                     req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
                 }
 
-                File tempfile = new File(this.pathTemp, Integer.toString(oCurrentUser.getUid()));
-                File finalfile = new File(this.pathStore, Integer.toString(oFile.getFid()));
+                File tempfile = new File(this.PATH_TEMP, Integer.toString(oCurrentUser.getUid()));
+                File finalfile = new File(this.PATH_STORE, Integer.toString(oFile.getFid()));
                 boolean success = tempfile.renameTo(finalfile);
 
                 if (success) {
@@ -192,7 +189,7 @@ public class FileUploadServlet extends HttpServlet {
                 }
                 session.setAttribute("uploadListener", null);
             } catch (SizeLimitExceededException e) {
-                req.setAttribute("message_critical", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(filesizeMax) + ".");
+                req.setAttribute("message_critical", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(FILE_SIZE_MAX) + ".");
             } catch (FileUploadException e) {
                 req.setAttribute("message_critical", "Unable to upload file");
                 e.printStackTrace();

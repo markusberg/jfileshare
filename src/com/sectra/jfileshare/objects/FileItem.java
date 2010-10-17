@@ -21,16 +21,16 @@ import javax.sql.DataSource;
 
 public class FileItem {
 
-    private int fid = -1;
+    private Integer fid;
     private String name;
     private String type;
-    private double size = 0d;
+    private Double size;
     private String md5sum;
-    private int downloads = -1;
-    private String pwHash = "";
+    private Integer downloads;
+    private String pwHash;
     private Timestamp dateCreation;
     private Timestamp dateExpiration;
-    private int ownerUid;
+    private Integer ownerUid;
     private String ownerUsername;
     private String ownerEmail;
     private boolean allowTinyUrl = false;
@@ -58,15 +58,20 @@ public class FileItem {
                 setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
                 setDownloads(rs.getInt("FileItems.downloads"));
                 if (rs.wasNull()) {
-                    setDownloads(-1);
+                    setDownloads(null);
                 }
-                setPwHash(rs.getString("FileItems.password"));
+
+                setPwHash(rs.getString("FileItems.pwHash"));
                 setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
                 setDateExpiration(rs.getTimestamp("dateExpiration"));
+                if (rs.wasNull()) {
+                    setDateExpiration(null);
+                }
 
-                this.ownerUid = rs.getInt("UserItems.uid");
-                this.ownerUsername = rs.getString("UserItems.username");
-                this.ownerEmail = rs.getString("UserItems.email");
+                setOwnerUid(rs.getInt("UserItems.uid"));
+                setOwnerUsername(rs.getString("UserItems.username"));
+                setOwnerEmail(rs.getString("UserItems.email"));
+
             }
             st.close();
         } catch (SQLException e) {
@@ -94,7 +99,7 @@ public class FileItem {
         return dateExpiration == null ? true : false;
     }
 
-    public int getFid() {
+    public Integer getFid() {
         return fid;
     }
 
@@ -119,7 +124,7 @@ public class FileItem {
     }
 
     public double getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(double size) {
@@ -134,11 +139,11 @@ public class FileItem {
         this.md5sum = md5sum;
     }
 
-    public int getDownloads() {
-        return downloads;
+    public Integer getDownloads() {
+        return this.downloads;
     }
 
-    public void setDownloads(int iDownloads) {
+    public void setDownloads(Integer iDownloads) {
         this.downloads = iDownloads;
     }
 
@@ -179,8 +184,16 @@ public class FileItem {
         return ownerUid;
     }
 
+    public void setOwnerUsername(String username) {
+        this.ownerUsername = username;
+    }
+
     public String getOwnerUsername() {
         return ownerUsername;
+    }
+
+    public void setOwnerEmail(String email) {
+        this.ownerEmail = email;
     }
 
     public String getOwnerEmail() {
@@ -213,24 +226,27 @@ public class FileItem {
         try {
             dbConn = ds.getConnection();
 
-            if (this.fid == -1) {
+            if (this.fid == null) {
                 st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1, this.name);
                 st.setString(2, this.type);
                 st.setDouble(3, this.size);
                 st.setString(4, this.md5sum);
-                if (this.downloads == -1) {
+                if (this.downloads == null) {
                     st.setNull(5, java.sql.Types.INTEGER);
                 } else {
                     st.setInt(5, this.downloads);
                 }
-                if (this.pwHash != null) {
-                    st.setString(6, this.pwHash);
-                } else {
+                if (this.pwHash == null) {
                     st.setNull(6, java.sql.Types.VARCHAR);
+                } else {
+                    st.setString(6, this.pwHash);
                 }
-                st.setTimestamp(7, this.dateExpiration);
-
+                if (this.dateExpiration == null) {
+                    st.setNull(7, java.sql.Types.TIMESTAMP);
+                } else {
+                    st.setTimestamp(7, this.dateExpiration);
+                }
                 st.setInt(8, this.ownerUid);
                 st.setBoolean(9, this.enabled);
                 st.setBoolean(10, this.allowTinyUrl);
@@ -240,8 +256,12 @@ public class FileItem {
                     this.fid = rs.getInt(1);
                 }
             } else {
-                st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,password=?,allowTinyUrl=? where fid=?");
-                st.setInt(1, this.downloads);
+                st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,pwHash=?,allowTinyUrl=? where fid=?");
+                if (this.downloads == null) {
+                    st.setNull(1, java.sql.Types.INTEGER);
+                } else {
+                    st.setInt(1, this.downloads);
+                }
                 if (dateExpiration == null) {
                     st.setNull(2, java.sql.Types.TIMESTAMP);
                 } else {
@@ -338,23 +358,14 @@ public class FileItem {
      */
     public boolean authenticated(String pwProvided) {
         if (this.pwHash.length() < 20) {
-            String pwCrypt = Jcrypt.crypt(pwHash, pwProvided);
-            if (pwCrypt.equals(pwHash)) {
-                return true;
-            }
-        } else {
-            if (Sha512Crypt.verifyPassword(pwProvided, this.pwHash)) {
-                return true;
-            }
+            String pwCrypt = Jcrypt.crypt(this.pwHash, pwProvided);
+            return pwCrypt.equals(this.pwHash);
         }
-        logger.info("Incorrect file password for file " + this.fid);
-        return false;
+
+        return Sha512Crypt.verifyPassword(pwProvided, this.pwHash);
     }
 
-    public int getDaysUntilExpiration() {
-        if (dateExpiration == null) {
-            return -1;
-        }
+    public Integer getDaysUntilExpiration() {
         double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
         long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
         return (int) daysLeft;

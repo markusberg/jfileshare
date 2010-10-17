@@ -67,15 +67,25 @@ public class StartupServlet extends HttpServlet {
             ResultSet rs = st.getResultSet();
             if (rs.next()) {
                 logger.info("Need to update database");
-                alterDatabase(dbConn, "alter table FileItems add column allowTinyUrl tinyint(1) default 0");
+                alterDatabase(dbConn, "alter table FileItems add column allowTinyUrl tinyint(1) NOT NULL default 0");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN name name varchar(255) NOT NULL");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN type type varchar(100) NOT NULL");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN size size double NOT NULL DEFAULT 0");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN md5sum md5sum varchar(255) NOT NULL");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN password pwHash varchar(255) NULL DEFAULT NULL");
+
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN ddate dateCreation timestamp NOT NULL default CURRENT_TIMESTAMP");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN expiration dateExpiration timestamp NULL default NULL");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN owner owner int(5) NOT NULL");
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN enabled enabled tinyint(1) NOT NULL default 1");
+
                 alterDatabase(dbConn, "alter table FileItems drop foreign key `FileItems_ibfk_1`");
                 alterDatabase(dbConn, "alter table FileItems add constraint foreign key (`owner`) references `UserItems`(`uid`) on delete cascade");
                 alterDatabase(dbConn, "alter table FileItems drop key `md5sum`");
                 alterDatabase(dbConn, "update FileItems set dateExpiration=null where permanent != 1");
                 alterDatabase(dbConn, "alter table FileItems drop column permanent");
 
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN password pwHash varchar(255) NULL DEFAULT NULL");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN created dateCreation timestamp default CURRENT_TIMESTAMP");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN lastlogin dateLastLogin timestamp NULL default NULL");
                 alterDatabase(dbConn, "alter table UserItems ADD COLUMN dateExpiration timestamp NULL default NULL AFTER daystoexpire");
@@ -89,9 +99,9 @@ public class StartupServlet extends HttpServlet {
 
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN creator uidCreator int(5) DEFAULT NULL");
                 alterDatabase(dbConn, "alter table UserItems add constraint foreign key (`uidCreator`) references `UserItems`(`uid`) on delete set NULL");
-                
-                alterDatabase(dbConn, "update UserItems set dateLastLogin=null where password=\"****NO*PASSORD*SET***\"");
-                alterDatabase(dbConn, "update UserItems set password=null where password=\"****NO*PASSORD*SET***\"");
+
+                alterDatabase(dbConn, "update UserItems set dateLastLogin=null where pwHash=\"****NO*PASSORD*SET***\"");
+                alterDatabase(dbConn, "update UserItems set pwHash=null where pwHash=\"****NO*PASSORD*SET***\"");
 
                 alterDatabase(dbConn, "drop table UserTypeItems");
                 alterDatabase(dbConn, "drop table test");

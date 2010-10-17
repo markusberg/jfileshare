@@ -30,7 +30,7 @@ import javax.sql.DataSource;
 
 public class UserAdminServlet extends HttpServlet {
 
-    private DataSource datasource;
+    private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserAdminServlet.class.getName());
 
@@ -41,7 +41,7 @@ public class UserAdminServlet extends HttpServlet {
 
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
-            datasource = (DataSource) env.lookup("jdbc/jfileshare");
+            ds = (DataSource) env.lookup("jdbc/jfileshare");
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -76,7 +76,7 @@ public class UserAdminServlet extends HttpServlet {
         Connection dbConn = null;
 
         try {
-            dbConn = datasource.getConnection();
+            dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("SELECT * FROM UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) ORDER BY sumFilesize DESC");
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -87,7 +87,7 @@ public class UserAdminServlet extends HttpServlet {
                 user.setUid(rs.getInt("UserItems.uid"));
 
                 user.setUsername(rs.getString("UserItems.username"));
-                user.setPwHash(rs.getString("UserItems.password"));
+                user.setPwHash(rs.getString("UserItems.pwHash"));
                 user.setEmail(rs.getString("UserItems.email"));
                 user.setUserType(rs.getInt("UserItems.usertype"));
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));

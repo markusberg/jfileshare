@@ -45,9 +45,9 @@ public class PasswordResetServlet extends HttpServlet {
     private DataSource datasource = null;
     private static final Logger logger =
             Logger.getLogger(PasswordResetServlet.class.getName());
-    private String smtpServer = "localhost";
-    private String smtpServerPort = "25";
-    private InternetAddress smtpSender;
+    private String SMTP_SERVER = "localhost";
+    private String SMTP_SERVER_PORT = "25";
+    private InternetAddress SMTP_SENDER;
     private String urlPrefix;
     private String pathContext;
 
@@ -60,16 +60,16 @@ public class PasswordResetServlet extends HttpServlet {
             datasource = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
-            smtpServer = context.getInitParameter("SMTP_SERVER").toString();
-            smtpServer = smtpServer.equals("") ? "localhost" : smtpServer;
+            SMTP_SERVER = context.getInitParameter("SMTP_SERVER").toString();
+            SMTP_SERVER = SMTP_SERVER.equals("") ? "localhost" : SMTP_SERVER;
 
-            smtpServerPort = context.getInitParameter("SMTP_SERVER_PORT").toString();
-            smtpServerPort = smtpServerPort.equals("") ? "25" : smtpServerPort;
+            SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
+            SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
 
             urlPrefix = context.getInitParameter("URL_PREFIX").toString();
 
-            smtpSender = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
-            smtpSender.validate();
+            SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
+            SMTP_SENDER.validate();
 
         } catch (NamingException e) {
             logger.severe("Throwing exception: " + e.toString());
@@ -125,7 +125,7 @@ public class PasswordResetServlet extends HttpServlet {
             }
 
 
-            if (oUser.getUid() == -1) {
+            if (oUser.getUid() == null) {
                 // username does not exist in database
                 emailAddress = username + "@sectra.se";
             } else {
@@ -139,7 +139,7 @@ public class PasswordResetServlet extends HttpServlet {
                     String key = Sha512Crypt.Sha512_crypt(emailAddress, null, 0);
                     key = key.substring(key.length() - 50, key.length());
                     if (sendResetInstructions(emailRecipient, key)) {
-                        if (oUser.getUid() == -1) {
+                        if (oUser.getUid() == null) {
                             req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
                         } else {
                             req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + oUser.getUsername() + "\".");
@@ -188,7 +188,7 @@ public class PasswordResetServlet extends HttpServlet {
             } else {
                 oUser.setUsername((String) UserInfo.get("username"));
                 oUser.setEmail((String) UserInfo.get("emailaddress"));
-                if (oUser.getUid() == -1) {
+                if (oUser.getUid() == null) {
                     // Account didn't exist prior to pwreset attempt.
                     // Thus, this is a
                     // Sectra Corporate user
@@ -212,15 +212,15 @@ public class PasswordResetServlet extends HttpServlet {
 
     private boolean sendResetInstructions(InternetAddress emailRecipient, String key) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", smtpServer);
-        props.put("mail.smtp.port", smtpServerPort);
+        props.put("mail.smtp.host", SMTP_SERVER);
+        props.put("mail.smtp.port", SMTP_SERVER_PORT);
         Session session = Session.getInstance(props, null);
 
         try {
             MimeMessage msg = new MimeMessage(session);
             msg.setFrom(emailRecipient);
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-            msg.setSender(smtpSender);
+            msg.setSender(SMTP_SENDER);
 
             msg.setSubject("Reset Password Instructions");
 

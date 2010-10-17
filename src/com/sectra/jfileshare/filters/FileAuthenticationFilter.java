@@ -62,33 +62,29 @@ public class FileAuthenticationFilter implements Filter {
         FileItem oFile = new FileItem(ds, iFid);
         logger.info(oFile.getName());
 
-        UserItem oUser = new UserItem();
+        UserItem oCurrentUser = null;
         if (session.getAttribute("user") != null) {
-            oUser = (UserItem) session.getAttribute("user");
+            oCurrentUser = (UserItem) session.getAttribute("user");
         }
-        if (oFile.getDownloads() > -1) {
+        if (oFile.getDownloads() != null) {
             logger.info("downloads left: " + Integer.toString(oFile.getDownloads()));
         }
-
-
-        // filterChain.doFilter(servletRequest, servletResponse);
-
         
-        if (oFile.getFid() == -1 || !oFile.getMd5sum().equals(md5sum)) {
+        if (oFile.getFid() == null || !oFile.getMd5sum().equals(md5sum)) {
             logger.info("File not found in database");
             req.setAttribute("message_critical", "File not found");
             filterconfig.getServletContext().getRequestDispatcher("/templates/404.jsp").forward(servletRequest, servletResponse);
-        } else if (!isAuthRequired(oUser, oFile)) {
+        } else if (oCurrentUser != null && !isAuthRequired(oCurrentUser, oFile)) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else if (!oFile.isEnabled()) {
             logger.info("File found, but it's disabled");
             req.setAttribute("message_critical", "The requested file has been disabled by it's owner");
             filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(servletRequest, servletResponse);
-        } else if (oFile.getDownloads() == 0) {
+        } else if (oFile.getDownloads() != null && oFile.getDownloads() == 0) {
             logger.info("File found, but has reached max number of downloads");
             req.setAttribute("message_critical", "The requested file exists, but it has reached its limit on number of downloads. If you require access to this file, please contact the file owner.");
             filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(servletRequest, servletResponse);
-        } else if (oFile.getPwHash().equals("")) {
+        } else if (oFile.getPwHash() == null) {
             logger.info("File does not require authentication");
             filterChain.doFilter(servletRequest, servletResponse);
         } else if (!authenticated(oFile, session, req)) {

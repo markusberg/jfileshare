@@ -17,8 +17,8 @@
         <td class="number"><%=FileItem.humanReadable( file.getSize() )%></td>
         
         <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days" %></td>
-        <td><%= file.getDownloads() == -1 ? "unlimited" : file.getDownloads() %></td>
-        <td><%= file.getPwHash() != null && file.getPwHash().length() > 0 ? "yes" : "no" %></td>
+        <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads() %></td>
+        <td><%= file.getPwHash() == null ? "no" : "yes" %></td>
         <td><form action="<%= request.getContextPath() %>/user/view/<%= file.getOwnerUid() %>" method="post">
             <input type="hidden" name="action" value="donotify" />
             <input type="hidden" name="iFid" value="<%=file.getFid()%>" />

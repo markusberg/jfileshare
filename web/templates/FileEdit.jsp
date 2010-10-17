@@ -59,7 +59,7 @@
                 </tr>
                 <tr>
                     <th>Downloads allowed: </th>
-                    <td><input style="width: 4em; text-align: right;" type="text" name="iDownloads" value="<%= oFile.getDownloads() == -1 ? "" : oFile.getDownloads()%>" />
+                    <td><input style="width: 4em; text-align: right;" type="text" name="iDownloads" value="<%= oFile.getDownloads() == null ? "" : oFile.getDownloads()%>" />
                         <span class="note">Integer to specify maximum number of allowed downloads or leave blank for no limit</span>
                     </td>
                 </tr>

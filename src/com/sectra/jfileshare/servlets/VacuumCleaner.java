@@ -30,7 +30,7 @@ public class VacuumCleaner extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
-    private String pathFileStore;
+    private String PATH_FILE_STORE;
     private long VACUUM_INTERVAL = 1000 * 60 * 10;
     private Timer timer = null;
 
@@ -42,7 +42,7 @@ public class VacuumCleaner extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            pathFileStore = getServletContext().getInitParameter("PATH_STORE").toString();
+            PATH_FILE_STORE = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -82,7 +82,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.info("Vacuuming " + aUsers.size() + " expired user(s) from the database");
         }
         for (UserItem user : aUsers) {
-            user.delete(ds, pathFileStore);
+            user.delete(ds, PATH_FILE_STORE);
         }
 
         // Delete expired files
@@ -91,7 +91,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.info("Vacuuming " + aFiles.size() + " expired file(s) from the database");
         }
         for (FileItem oFile : aFiles) {
-            oFile.delete(ds, pathFileStore);
+            oFile.delete(ds, PATH_FILE_STORE);
         }
 
         // Delete password requests older than 2 days
@@ -121,7 +121,7 @@ public class VacuumCleaner extends HttpServlet {
                 UserItem user = new UserItem();
                 user.setUid(rs.getInt("UserItems.uid"));
                 user.setUsername(rs.getString("UserItems.username"));
-                user.setPwHash(rs.getString("UserItems.password"));
+                user.setPwHash(rs.getString("UserItems.pwHash"));
                 user.setEmail(rs.getString("UserItems.email"));
                 user.setUserType(rs.getInt("UserItems.usertype"));
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -152,7 +152,7 @@ public class VacuumCleaner extends HttpServlet {
                 file.setSize(rs.getDouble("size"));
                 file.setMd5sum(rs.getString("md5sum"));
                 file.setDownloads(rs.getInt("downloads"));
-                file.setPwHash(rs.getString("password"));
+                file.setPwHash(rs.getString("pwHash"));
                 file.setDateCreation(rs.getTimestamp("dateCreation"));
                 file.setDateExpiration(rs.getTimestamp("dateExpiration"));
                 file.setEnabled(rs.getBoolean("enabled"));

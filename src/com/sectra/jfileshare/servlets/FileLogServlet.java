@@ -19,8 +19,6 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -62,7 +60,7 @@ public class FileLogServlet extends HttpServlet {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/blank.jsp");
-        } else if (oFile.getFid() == -1) {
+        } else if (oFile.getFid() == null) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");

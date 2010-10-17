@@ -27,15 +27,15 @@ public class UserItem {
     private String username;
     private String pwHash;
     private String email;
-    private int uid = -1;
-    private int usertype = TYPE_EXTERNAL;
+    private Integer uid;
+    private Integer usertype = TYPE_EXTERNAL;
     private Timestamp dateCreation;
     private Timestamp dateLastLogin;
-    private Timestamp dateExpiration = null;
-    private Integer uidCreator = null;
-    private double sumFilesize;
-    private int sumFiles = 0;
-    private int sumChildren = 0;
+    private Timestamp dateExpiration;
+    private Integer uidCreator;
+    private Double sumFilesize;
+    private int sumFiles;
+    private int sumChildren;
     public static final int TYPE_ADMIN = 1;
     public static final int TYPE_INTERNAL = 2;
     public static final int TYPE_EXTERNAL = 3;
@@ -67,7 +67,7 @@ public class UserItem {
             while (rs.next()) {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
-                setPwHash(rs.getString("UserItems.password"));
+                setPwHash(rs.getString("UserItems.pwHash"));
                 setEmail(rs.getString("UserItems.email"));
                 setUserType(rs.getInt("UserItems.usertype"));
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -101,7 +101,7 @@ public class UserItem {
             while (rs.next()) {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
-                setPwHash(rs.getString("UserItems.password"));
+                setPwHash(rs.getString("UserItems.pwHash"));
                 setEmail(rs.getString("UserItems.email"));
                 setUserType(rs.getInt("UserItems.usertype"));
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -131,8 +131,8 @@ public class UserItem {
         this.username = username;
     }
 
-    public void setPwHash(String password) {
-        this.pwHash = password;
+    public void setPwHash(String pwHash) {
+        this.pwHash = pwHash;
     }
 
     public void setPwPlainText(String pwPlainText) {
@@ -140,15 +140,15 @@ public class UserItem {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public int getUid() {
-        return uid;
+    public Integer getUid() {
+        return this.uid;
     }
 
     public void setUid(int uid) {
@@ -198,8 +198,8 @@ public class UserItem {
         this.dateExpiration = expiration;
     }
 
-    public int getUidCreator() {
-        return this.uidCreator == null ? -1 : this.uidCreator;
+    public Integer getUidCreator() {
+        return this.uidCreator;
     }
 
     public void setUidCreator(Integer uidCreator) {
@@ -249,7 +249,7 @@ public class UserItem {
         try {
             dbConn = ds.getConnection();
             PreparedStatement st;
-            if (this.uid == -1) {
+            if (this.uid == null) {
                 st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
@@ -262,7 +262,7 @@ public class UserItem {
                     st.setInt(6, this.uidCreator);
                 }
             } else {
-                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,password=?,email=?,dateExpiration=? where uid=?");
+                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,pwHash=?,email=?,dateExpiration=? where uid=?");
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
                 st.setString(3, this.pwHash);
@@ -272,7 +272,7 @@ public class UserItem {
             }
 
             st.executeUpdate();
-            if (this.uid == -1) {
+            if (this.uid == null) {
                 ResultSet rs = st.getGeneratedKeys();
                 while (rs.next()) {
                     this.uid = rs.getInt(1);
@@ -346,11 +346,7 @@ public class UserItem {
         setDateExpiration(new Timestamp(System.currentTimeMillis() + millis));
     }
 
-    public int getDaysUntilExpiration() {
-        if (dateExpiration == null) {
-            return -1;
-        }
-
+    public Integer getDaysUntilExpiration() {
         double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
         long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
         return (int) daysLeft;
@@ -385,8 +381,8 @@ public class UserItem {
      */
     public boolean authenticated(String pwProvided) {
         if (this.pwHash.length() < 20) {
-            String pwCrypt = Jcrypt.crypt(pwHash, pwProvided);
-            if (pwCrypt.equals(pwHash)) {
+            String pwCrypt = Jcrypt.crypt(this.pwHash, pwProvided);
+            if (pwCrypt.equals(this.pwHash)) {
                 return true;
             }
         } else {
@@ -414,7 +410,7 @@ public class UserItem {
                 user.setUid(rs.getInt("UserItems.uid"));
 
                 user.setUsername(rs.getString("UserItems.username"));
-                user.setPwHash(rs.getString("UserItems.password"));
+                user.setPwHash(rs.getString("UserItems.pwHash"));
                 user.setEmail(rs.getString("UserItems.email"));
                 user.setUserType(rs.getInt("UserItems.usertype"));
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -461,14 +457,17 @@ public class UserItem {
                 file.setEnabled(rs.getBoolean("FileItems.enabled"));
                 file.setDownloads(rs.getInt("FileItems.downloads"));
                 if (rs.wasNull()) {
-                    file.setDownloads(-1);
+                    file.setDownloads(null);
                 }
-                file.setPwHash(rs.getString("FileItems.password"));
+                file.setPwHash(rs.getString("FileItems.pwHash"));
                 if (rs.wasNull()) {
                     file.setPwHash(null);
                 }
                 file.setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
                 file.setDateExpiration(rs.getTimestamp("FileItems.dateExpiration"));
+                if (rs.wasNull()) {
+                    file.setDateExpiration(null);
+                }
                 file.setOwnerUid(rs.getInt("FileItems.owner"));
                 aFiles.add(file);
             }
@@ -542,7 +541,7 @@ public class UserItem {
         if (username.equals("")) {
             errors.add("Username is empty");
         } else {
-            if (this.getUid() != -1) {
+            if (this.getUid() != null) {
                 errors.add("Username is already taken");
             }
         }

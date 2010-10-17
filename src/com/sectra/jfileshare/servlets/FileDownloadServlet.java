@@ -7,9 +7,6 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 
-import java.sql.SQLException;
-import java.sql.Connection;
-
 import java.util.logging.Logger;
 
 import javax.naming.Context;

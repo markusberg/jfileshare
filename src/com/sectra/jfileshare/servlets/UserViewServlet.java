@@ -40,9 +40,9 @@ public class UserViewServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserViewServlet.class.getName());
-    private String smtpServer;
-    private String smtpServerPort;
-    private InternetAddress smtpSender;
+    private String SMTP_SERVER;
+    private String SMTP_SERVER_PORT;
+    private InternetAddress SMTP_SENDER;
     private String urlPrefix;
 
     @Override
@@ -55,16 +55,16 @@ public class UserViewServlet extends HttpServlet {
             ds = (DataSource) env.lookup("jdbc/jfileshare");
 
             ServletContext context = getServletContext();
-            smtpServer = context.getInitParameter("SMTP_SERVER").toString();
-            smtpServer = smtpServer.equals("") ? "localhost" : smtpServer;
+            SMTP_SERVER = context.getInitParameter("SMTP_SERVER").toString();
+            SMTP_SERVER = SMTP_SERVER.equals("") ? "localhost" : SMTP_SERVER;
 
-            smtpServerPort = context.getInitParameter("SMTP_SERVER_PORT").toString();
-            smtpServerPort = smtpServerPort.equals("") ? "25" : smtpServerPort;
+            SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
+            SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
 
             urlPrefix = context.getInitParameter("URL_PREFIX").toString();
 
-            smtpSender = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
-            smtpSender.validate();
+            SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
+            SMTP_SENDER.validate();
 
         } catch (NamingException e) {
             throw new ServletException(e);
@@ -104,7 +104,7 @@ public class UserViewServlet extends HttpServlet {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (oUser.getUid() == -1) {
+        } else if (oUser.getUid() == null) {
             disp = app.getRequestDispatcher("/templates/404.jsp");
             req.setAttribute("message_warning", "User not found (" + reqUid + ")");
         } else if (!(oCurrentUser.isAdmin()
@@ -193,15 +193,15 @@ public class UserViewServlet extends HttpServlet {
 
     private boolean sendEmailNotification(FileItem oFile, UserItem oCurrentUser, InternetAddress emailRecipient) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", smtpServer);
-        props.put("mail.smtp.port", smtpServerPort);
+        props.put("mail.smtp.host", SMTP_SERVER);
+        props.put("mail.smtp.port", SMTP_SERVER_PORT);
         Session session = Session.getInstance(props, null);
 
         try {
             MimeMessage msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(oCurrentUser.getEmail()));
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-            msg.setSender(smtpSender);
+            msg.setSender(SMTP_SENDER);
             msg.setSubject("File " + oFile.getName() + " available for download");
 
             MimeMultipart mp = new MimeMultipart();

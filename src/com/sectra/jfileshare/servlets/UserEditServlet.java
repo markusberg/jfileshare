@@ -76,7 +76,7 @@ public class UserEditServlet extends HttpServlet {
             oUser = oCurrentUser;
         }
 
-        if (oUser.getUid() == -1) {
+        if (oUser.getUid() == null) {
             logger.info("Attempting to modify nonexistent user");
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
             jspForward = "/templates/404.jsp";
@@ -126,7 +126,7 @@ public class UserEditServlet extends HttpServlet {
 
             UserItem oUser = new UserItem(ds, iUid);
 
-            if (oUser.getUid() == -1) {
+            if (oUser.getUid() == null) {
                 logger.info("Attempting to modify nonexistent user");
                 req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
                 jspForward = "/templates/404.jsp";
@@ -171,7 +171,7 @@ public class UserEditServlet extends HttpServlet {
                         UserItem tempuser = new UserItem(ds, requestedUsername);
                         if (requestedUsername.length() < 2) {
                             errors.add("The username is too short");
-                        } else if (tempuser.getUid() != -1) {
+                        } else if (tempuser.getUid() != null) {
                             errors.add("That username already exists");
                         }
                     }
