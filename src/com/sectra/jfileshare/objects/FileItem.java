@@ -378,7 +378,7 @@ public class FileItem {
      * @return Human readable file size, e.g. "4.02 GiB"
      */
     public static String humanReadable(double filesize) {
-        DecimalFormat df = new DecimalFormat("0.##");
+        DecimalFormat df = new DecimalFormat("0.#");
 
         if (filesize < 4096) {
             return (int) filesize + " B";

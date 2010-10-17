@@ -28,7 +28,7 @@
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>
-                    <td><%= oFile.getName()%></td>
+                    <td><a href="<%= oFile.getURL(request.getContextPath()) %>"><%= oFile.getName()%></a></td>
                 </tr>
                 <tr>
                     <th>Content-Type: </th>
@@ -37,13 +37,6 @@
                 <tr>
                     <th>Md5sum: </th>
                     <td><%= oFile.getMd5sum()%></td>
-                </tr>
-                <tr>
-                    <th>URL: </th>
-                    <%
-                                    String urlThisFile = "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/file/view/" + oFile.getMd5sum() + "_SECTRA_" + oFile.getFid();
-                    %>
-                    <td><a href="<%=urlThisFile%>"><%=urlThisFile%></a></td>
                 </tr>
                 <tr>
                     <th>Enabled: </th>
