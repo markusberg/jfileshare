@@ -212,18 +212,18 @@ public class UserViewServlet extends HttpServlet {
                     + "the following file available for download:\n"
                     + "Filename: " + oFile.getName() + "\n"
                     + "Filesize: " + FileItem.humanReadable(oFile.getSize()) + "\n\n"
-                    + oFile.getURL(urlPrefix));
+                    + oFile.getURL(urlPrefix), "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
-                    + "<p>" + oCurrentUser.getUsername() + " has made the following "
-                    + "file available for download:</p>"
-                    + "<table>"
-                    + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + oFile.getName() + "</td></tr>"
-                    + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>"
-                    + "</table>"
-                    + "<p><a href=\"" + oFile.getURL(urlPrefix) + "\">" + oFile.getURL(urlPrefix) + "</a>"
-                    + "</p>", "text/html");
+                    + "<p>" + oCurrentUser.getUsername() + " has made the following \n"
+                    + "file available for download:</p>\n"
+                    + "<table>\n"
+                    + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + oFile.getName() + "</td></tr>\n"
+                    + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>\n"
+                    + "</table>\n"
+                    + "<p><a href=\"" + oFile.getURL(urlPrefix) + "\">" + oFile.getURL(urlPrefix) + "</a>\n"
+                    + "</p>\n", "text/html; charset=utf-8");
 
             /* Possibly attach image to make it look nicer
             mbp3 = new MimeBodyPart();
@@ -238,6 +238,7 @@ public class UserViewServlet extends HttpServlet {
 
             mp.addBodyPart(mbp1);
             mp.addBodyPart(mbp2);
+
             // mp.addBodyPart(mbp3);
 
             msg.setContent(mp);
