@@ -23,7 +23,7 @@
     <%
                 if (session.getAttribute("user") != null) {
                     UserItem user = (UserItem) session.getAttribute("user");
-                    if (user.isAdmin() || user.getUid() == oFile.getOwnerUid()) {
+                    if (user.isAdmin() || user.getUid().equals(oFile.getOwnerUid())) {
     %>
     <tr class="admin">
         <th>File expiration: </th>

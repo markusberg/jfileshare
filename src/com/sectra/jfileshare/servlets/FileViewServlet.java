@@ -45,11 +45,6 @@ public class FileViewServlet extends HttpServlet {
         Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
 
-        /*
-        String PathInfo = req.getPathInfo().substring(1);
-        String md5sum = PathInfo.split("_SECTRA_")[0];
-        int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
-*/
         logger.info("Access requested to file: " + iFid);
         ServletContext app = getServletContext();
         RequestDispatcher disp;
@@ -57,24 +52,23 @@ public class FileViewServlet extends HttpServlet {
         FileItem oFile = new FileItem(ds, iFid);
         logger.info("Fetched file: " + oFile.getFid());
 
-        if (oFile.getFid() == -2) {
+        if (oFile.getFid() != null && oFile.getFid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (oFile.getFid() != null) {
-            if (oFile.getMd5sum().equals(md5sum)) {
-                req.setAttribute("tab", "File");
-                disp = app.getRequestDispatcher("/templates/FileView.jsp");
-                req.setAttribute("oFile", oFile);
-            } else {
-                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-                req.setAttribute("message_warning", "File exists, but requires complete address");
-            }
-        } else {
+        } else if (oFile.getFid() == null) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
+        } else if (oFile.getMd5sum().equals(md5sum)) {
+            req.setAttribute("tab", "File");
+            disp = app.getRequestDispatcher("/templates/FileView.jsp");
+            req.setAttribute("oFile", oFile);
+        } else {
+            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            req.setAttribute("message_warning", "File exists, but requires complete address");
         }
+
 
         disp.forward(req, resp);
     }

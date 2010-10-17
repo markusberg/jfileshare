@@ -176,12 +176,12 @@ public class FileItem {
         this.dateExpiration = expiration;
     }
 
-    public void setOwnerUid(int iUid) {
+    public void setOwnerUid(Integer iUid) {
         this.ownerUid = iUid;
     }
 
-    public int getOwnerUid() {
-        return ownerUid;
+    public Integer getOwnerUid() {
+        return this.ownerUid;
     }
 
     public void setOwnerUsername(String username) {
@@ -189,7 +189,7 @@ public class FileItem {
     }
 
     public String getOwnerUsername() {
-        return ownerUsername;
+        return this.ownerUsername;
     }
 
     public void setOwnerEmail(String email) {
@@ -197,7 +197,7 @@ public class FileItem {
     }
 
     public String getOwnerEmail() {
-        return ownerEmail;
+        return this.ownerEmail;
     }
 
     public String getURL(String urlPrefix) {
@@ -205,7 +205,7 @@ public class FileItem {
     }
 
     public boolean getAllowTinyUrl() {
-        return allowTinyUrl;
+        return this.allowTinyUrl;
     }
 
     public void setAllowTinyUrl(boolean allowTinyUrl) {

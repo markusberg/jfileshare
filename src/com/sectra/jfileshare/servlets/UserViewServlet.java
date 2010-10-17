@@ -82,7 +82,7 @@ public class UserViewServlet extends HttpServlet {
         RequestDispatcher disp;
 
         String reqUid = req.getPathInfo();
-        int iUid;
+        Integer iUid;
 
         try {
             reqUid = reqUid.replaceAll("/", "");
@@ -110,12 +110,12 @@ public class UserViewServlet extends HttpServlet {
         } else if (!(oCurrentUser.isAdmin()
                 || oUser.getUidCreator().equals(oCurrentUser.getUid())
                 || oUser.getUid().equals(oCurrentUser.getUid()))) {
-            logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
-            logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
+            // logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
+            // logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
             req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
-            if (iUid != oCurrentUser.getUid()) {
+            if (!oCurrentUser.getUid().equals(iUid)) {
                 req.setAttribute("tab", oUser.getUsername());
             }
 
@@ -143,8 +143,8 @@ public class UserViewServlet extends HttpServlet {
             FileItem oFile = new FileItem(ds, iFid);
 
             if (oCurrentUser.isAdmin()
-                    || oFile.getOwnerUid() != oCurrentUser.getUid()) {
-                if (oFile.getFid() == -1) {
+                    || oFile.getOwnerUid().equals(oCurrentUser.getUid())) {
+                if (oFile.getFid() == null) {
                     errors.add("The file was not found");
                 }
                 // Email address sanity check

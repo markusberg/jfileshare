@@ -171,7 +171,7 @@ public class FileEditServlet extends HttpServlet {
         if (oUser.isAdmin()) {
             logger.info("Administrator access to edit file " + oFile.getFid());
             return true;
-        } else if (oFile.getOwnerUid() == oUser.getUid()) {
+        } else if (oFile.getOwnerUid().equals(oUser.getUid())) {
             logger.info("Owner access to edit file " + oFile.getFid());
             return true;
         }

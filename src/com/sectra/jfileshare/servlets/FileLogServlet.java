@@ -56,7 +56,7 @@ public class FileLogServlet extends HttpServlet {
 
         FileItem oFile = new FileItem(ds, iFid);
 
-        if (oFile.getFid() == -2) {
+        if (oFile.getFid() != null && oFile.getFid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/blank.jsp");
@@ -64,8 +64,8 @@ public class FileLogServlet extends HttpServlet {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
-        } else if (!oCurrentUser.isAdmin()
-                && oFile.getOwnerUid() != oCurrentUser.getUid()) {
+        } else if (!(oCurrentUser.isAdmin()
+                || oFile.getOwnerUid().equals(oCurrentUser.getUid()))) {
             // Neither admin nor owner
             req.setAttribute("message_critical", "You don't have access to view the logs of this file");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
