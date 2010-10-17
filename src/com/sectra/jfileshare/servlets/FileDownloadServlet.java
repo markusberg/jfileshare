@@ -50,13 +50,10 @@ public class FileDownloadServlet extends HttpServlet {
         // checking and authentication already. We can jump right into
         // serving the file.
 
-        String PathInfo = req.getPathInfo().substring(1);
-        String md5sum = PathInfo.split("_SECTRA_")[0];
-        int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
+        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        String md5sum = req.getParameter("md5");
 
-        FileItem oFile = null;
-
-        oFile = new FileItem(ds, iFid);
+        FileItem oFile = new FileItem(ds, iFid);
 
         File fileOnDisk = new File(pathFileStore + "/" + Integer.toString(oFile.getFid()));
 

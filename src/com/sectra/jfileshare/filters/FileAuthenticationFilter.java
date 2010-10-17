@@ -55,9 +55,8 @@ public class FileAuthenticationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpSession session = req.getSession();
 
-        String PathInfo = req.getPathInfo().substring(1);
-        String md5sum = PathInfo.split("_SECTRA_")[0];
-        int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
+        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        String md5sum = req.getParameter("md5");
 
         FileItem oFile = new FileItem(ds, iFid);
         logger.info(oFile.getName());

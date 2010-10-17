@@ -16,7 +16,7 @@
                 FileItem oFile = (FileItem) request.getAttribute("oFile");
         %>
         <%@include file="/WEB-INF/jspf/SingleFile.jspf"%>
-        <p><a href="<%= request.getContextPath()%>/file/download/<%=oFile.getMd5sum()%>_SECTRA_<%=oFile.getFid()%>">Download file</a></p>
+        <p><a href="<%= request.getContextPath()%>/file/download/<%=oFile.getFid()%>?md5=<%=oFile.getMd5sum()%>">Download file</a></p>
         <%
             }
         %>

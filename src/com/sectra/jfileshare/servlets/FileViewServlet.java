@@ -42,10 +42,14 @@ public class FileViewServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        String md5sum = req.getParameter("md5");
+
+        /*
         String PathInfo = req.getPathInfo().substring(1);
         String md5sum = PathInfo.split("_SECTRA_")[0];
         int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
-
+*/
         logger.info("Access requested to file: " + iFid);
         ServletContext app = getServletContext();
         RequestDispatcher disp;

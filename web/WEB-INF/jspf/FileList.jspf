@@ -25,7 +25,7 @@
             <input type="text" name="emailRecipient" />
             <input type="submit" name="submit" value="Notify" /></form>
         </td>
-        <td><a href="<%= request.getContextPath() %>/file/view/<%= file.getMd5sum() %>_SECTRA_<%= file.getFid() %>">url</a></td>
+        <td><a href="<%= request.getContextPath() %>/file/view/<%= file.getFid() %><%= file.getAllowTinyUrl() ? "" : "?md5=" + file.getMd5sum() %>">url</a></td>
         <td><a href="<%= request.getContextPath() %>/file/edit/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/pencil.gif" alt="edit" /></a></td>
         <td><a href="<%= request.getContextPath() %>/file/log/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_log.png" alt="delete" width="15" height="15" /></a></td>
         <td><a href="<%= request.getContextPath() %>/file/delete/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>

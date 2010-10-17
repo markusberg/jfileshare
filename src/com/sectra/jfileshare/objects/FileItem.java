@@ -201,7 +201,7 @@ public class FileItem {
     }
 
     public String getURL(String urlPrefix) {
-        return urlPrefix + "/file/view/" + this.getMd5sum() + "_SECTRA_" + this.getFid();
+        return urlPrefix + "/file/view/" + this.getFid() + "?md5=" + this.getMd5sum();
     }
 
     public boolean getAllowTinyUrl() {
