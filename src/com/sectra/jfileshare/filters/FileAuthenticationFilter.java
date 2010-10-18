@@ -110,7 +110,7 @@ public class FileAuthenticationFilter implements Filter {
         if (oUser.isAdmin()) {
             logger.info("Administrator access to file " + oFile.getFid());
             return false;
-        } else if (oFile.getOwnerUid() == oUser.getUid()) {
+        } else if (oFile.getOwnerUid().equals(oUser.getUid())) {
             logger.info("Owner access to file " + oFile.getFid());
             return false;
         }
