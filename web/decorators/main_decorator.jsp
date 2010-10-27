@@ -17,6 +17,16 @@
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css" type="text/css" />
         <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js"></script>
 
+        <%
+                    // Add javascript for session timeout
+                    if (!request.getServletPath().equals("/logout")) {
+        %>
+        <script type="text/javascript">
+            var logoutTimeout = setTimeout(function() {window.location="<%= request.getContextPath()%>/logout?reason=inactivity";}, 1000*60*30);
+        </script>
+        <%
+                    }
+        %>
         <decorator:head />
     </head>
 
@@ -45,7 +55,7 @@
 
                     tablist.add(new Tab("Home",
                             "/user/view",
-                            (request.getServletPath().equals("/user/view") || request.getServletPath().equals("/file/delete") ) && tabExplicit.equals(""),
+                            (request.getServletPath().equals("/user/view") || request.getServletPath().equals("/file/delete")) && tabExplicit.equals(""),
                             true));
 
                     tablist.add(new Tab("Upload",

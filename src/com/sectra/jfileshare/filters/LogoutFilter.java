@@ -40,6 +40,9 @@ public class LogoutFilter implements Filter {
             request.setAttribute("message", "You are now logged out");
             // request.setAttribute("tab", "Logout");
         }
+        if (request.getParameter("reason") != null && request.getParameter("reason").equals("inactivity")) {
+            request.setAttribute("message", "You have been logged out due to inactivity");
+        }
         filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(servletRequest, servletResponse);
     }
 
