@@ -18,8 +18,10 @@
         <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js"></script>
 
         <%
+                    UserItem user = (UserItem) session.getAttribute("user");
+
                     // Add javascript for session timeout
-                    if (!request.getServletPath().equals("/logout")) {
+                    if (!(user == null || request.getServletPath().equals("/logout"))) {
         %>
         <script type="text/javascript">
             var logoutTimeout = setTimeout(function() {window.location="<%= request.getContextPath()%>/logout?reason=inactivity";}, 1000*60*30);
@@ -37,7 +39,7 @@
 
                 tabExplicit = request.getAttribute("tab") == null ? "" : request.getAttribute("tab").toString();
 
-                if (session.getAttribute("user") == null) {
+                if (user == null) {
                     /**
                      * Not logged in. Add a login tab, and select it
                      * unless there's an explicitly defined tab
@@ -51,8 +53,6 @@
                             request.getServletPath().equals("/passwordreset"),
                             true));
                 } else {
-                    UserItem user = (UserItem) session.getAttribute("user");
-
                     tablist.add(new Tab("Home",
                             "/user/view",
                             (request.getServletPath().equals("/user/view") || request.getServletPath().equals("/file/delete")) && tabExplicit.equals(""),
