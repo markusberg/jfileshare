@@ -547,5 +547,26 @@ public class UserItem {
         }
         return errors;
     }
+
+    /**
+     * Does the user enjoy edit rights to the specified file
+     * @param oFile
+     * @return
+     */
+    public boolean hasEditAccessTo(FileItem oFile) {
+        if (oFile.getFid() == null) {
+            logger.info("File not found");
+            return false;
+        } else if (this.isAdmin()) {
+            logger.info("Administrator access to delete file " + oFile.getFid());
+            return true;
+        } else if (oFile.getOwnerUid().equals(this.getUid())) {
+            logger.info("Owner access to delete file " + oFile.getFid());
+            return true;
+        }
+        logger.info("User " + this.getUserInfo() + " does not have edit access to file " + oFile.getFid());
+        return false;
+    }
+
 }
 

@@ -66,7 +66,7 @@ public class LoginFilter implements Filter {
             // User not logged in or login error.
             // Save the url and divert to the login page.
             req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()));
-            filterconfig.getServletContext().getRequestDispatcher("/templates/Login.jsp").forward(request, response);
+            filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }
 

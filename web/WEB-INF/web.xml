@@ -5,6 +5,7 @@
       This is jfileshare. A webbapp for sharing large (or small) files with
       others over the internet. It was written by Zoran Pucar.
       Converted to Tomcat and Ant by Markus Berg [markus.berg@sectra.se]
+      Completely rewritten by Markus Berg [markus.berg@sectra.se]
     </description>
     <!-- Filter definitions -->
     <filter>
@@ -79,6 +80,10 @@
     </filter-mapping>
     <!-- Servlet definitions -->
     <servlet>
+        <servlet-name>FileDelete</servlet-name>
+        <servlet-class>com.sectra.jfileshare.servlets.FileDeleteServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>FileDownload</servlet-name>
         <servlet-class>com.sectra.jfileshare.servlets.FileDownloadServlet</servlet-class>
     </servlet>
@@ -122,6 +127,7 @@
         <servlet-name>PasswordReset</servlet-name>
         <servlet-class>com.sectra.jfileshare.servlets.PasswordResetServlet</servlet-class>
     </servlet>
+    <!-- "Special" servlets -->
     <servlet>
         <servlet-name>LinkCompatibility</servlet-name>
         <servlet-class>com.sectra.jfileshare.servlets.LinkCompatibilityServlet</servlet-class>
@@ -138,16 +144,16 @@
     </servlet>
     <!-- Servlet mappings -->
     <servlet-mapping>
+        <servlet-name>FileDelete</servlet-name>
+        <url-pattern>/file/delete/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FileDownload</servlet-name>
         <url-pattern>/file/download/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FileEdit</servlet-name>
         <url-pattern>/file/edit/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>FileEdit</servlet-name>
-        <url-pattern>/file/delete/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FileLog</servlet-name>

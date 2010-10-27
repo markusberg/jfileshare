@@ -32,7 +32,6 @@ public class FileEditServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileEditServlet.class.getName());
-    private String PATH_FILE_STORE;
     private int DAYS_FILE_RETENTION;
 
     @Override
@@ -43,10 +42,7 @@ public class FileEditServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-
-            ServletContext context = getServletContext();
-            PATH_FILE_STORE = context.getInitParameter("PATH_STORE").toString();
-            DAYS_FILE_RETENTION = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
+            DAYS_FILE_RETENTION = Integer.parseInt(getServletContext().getInitParameter("DAYS_FILE_RETENTION").toString());
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -62,15 +58,17 @@ public class FileEditServlet extends HttpServlet {
         int iFid = Integer.parseInt(PathInfo);
         FileItem oFile = new FileItem(ds, iFid);
 
-        if (isAuthenticated(oFile, req)) {
+        HttpSession session = req.getSession();
+        UserItem User = (UserItem) session.getAttribute("user");
+
+        if (oFile.getFid() == null) {
+            req.setAttribute("message_critical", "File does not exist");
+            req.setAttribute("tab", "404");
+            disp = app.getRequestDispatcher("/templates/Blank.jsp");
+        } else if (User.hasEditAccessTo(oFile)) {
             req.setAttribute("oFile", oFile);
-            if (req.getServletPath().equals("/file/edit")) {
-                req.setAttribute("tab", "Edit file");
-                disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
-            } else {
-                req.setAttribute("tab", "Delete file");
-                disp = app.getRequestDispatcher("/templates/FileDelete.jsp");
-            }
+            req.setAttribute("tab", "Edit file");
+            disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
         } else {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         }
@@ -89,93 +87,58 @@ public class FileEditServlet extends HttpServlet {
             ServletContext app = getServletContext();
             RequestDispatcher disp;
 
-            String PathInfo = req.getPathInfo().substring(1);
-            int iFid = Integer.parseInt(PathInfo);
+            int iFid = Integer.parseInt(req.getPathInfo().substring(1));
             FileItem oFile = new FileItem(ds, iFid);
 
-            if (isAuthenticated(oFile, req)) {
-                if (req.getServletPath().equals("/file/edit")) {
-                    req.setAttribute("tab", "Edit file");
-                    req.setAttribute("message", "Your changes to this file have been saved");
-                    if (req.getParameter("bEnabled") != null
-                            && req.getParameter("bEnabled").equals("true")) {
-                        oFile.setEnabled(true);
-                    } else {
-                        oFile.setEnabled(false);
-                    }
+            HttpSession session = req.getSession();
+            UserItem User = (UserItem) session.getAttribute("user");
 
-                    if (req.getParameter("bPermanent") != null
-                            && req.getParameter("bPermanent").equals("true")) {
-                        oFile.setDateExpiration(null);
-                    } else {
-                        oFile.setDaysToKeep(DAYS_FILE_RETENTION);
-                    }
-
-                    Integer iDownloads = null;
-                    if (req.getParameter("iDownloads") != null
-                            && !req.getParameter("iDownloads").equals("")) {
-                        iDownloads = new Integer(req.getParameter("iDownloads"));
-                    }
-                    oFile.setDownloads(iDownloads);
-
-                    if (req.getParameter("bUsePw") == null
-                            || req.getParameter("bUsePw").equals("")) {
-                        oFile.setPwHash(null);
-                    } else if (req.getParameter("bUsePw").equals("true")
-                            && req.getParameter("sPassword") != null
-                            && !req.getParameter("sPassword").equals("")) {
-                        oFile.setPwPlainText(req.getParameter("sPassword"));
-                    }
-
-                    oFile.save(ds);
-                    req.setAttribute("oFile", oFile);
-                    disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
+            if (oFile.getFid() == null) {
+                req.setAttribute("message_critical", "File does not exist");
+                req.setAttribute("tab", "404");
+                disp = app.getRequestDispatcher("/templates/Blank.jsp");
+            } else if (User.hasEditAccessTo(oFile)) {
+                req.setAttribute("tab", "Edit file");
+                req.setAttribute("message", "Your changes to this file have been saved");
+                if (req.getParameter("bEnabled") != null
+                        && req.getParameter("bEnabled").equals("true")) {
+                    oFile.setEnabled(true);
                 } else {
-                    req.setAttribute("tab", "Delete file");
-                    oFile.delete(ds, PATH_FILE_STORE);
-                    req.setAttribute("message", "File " + oFile.getName() + " was successfully deleted");
-                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
+                    oFile.setEnabled(false);
                 }
+
+                if (req.getParameter("bPermanent") != null
+                        && req.getParameter("bPermanent").equals("true")) {
+                    oFile.setDateExpiration(null);
+                } else {
+                    oFile.setDaysToKeep(DAYS_FILE_RETENTION);
+                }
+
+                Integer iDownloads = null;
+                if (req.getParameter("iDownloads") != null
+                        && !req.getParameter("iDownloads").equals("")) {
+                    iDownloads = new Integer(req.getParameter("iDownloads"));
+                }
+                oFile.setDownloads(iDownloads);
+
+                if (req.getParameter("bUsePw") == null
+                        || req.getParameter("bUsePw").equals("")) {
+                    oFile.setPwHash(null);
+                } else if (req.getParameter("bUsePw").equals("true")
+                        && req.getParameter("sPassword") != null
+                        && !req.getParameter("sPassword").equals("")) {
+                    oFile.setPwPlainText(req.getParameter("sPassword"));
+                }
+
+                oFile.save(ds);
+                req.setAttribute("oFile", oFile);
+                disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
             } else {
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             }
 
             disp.forward(req, resp);
         }
-    }
-
-    private boolean isAuthenticated(FileItem oFile, HttpServletRequest req) {
-        HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-
-        if (oFile.getFid() == null) {
-            logger.info("File not found");
-            req.setAttribute("message_warning", "The requested file is not found");
-            return false;
-        } else if (!isAllowedFileEdit(oCurrentUser, oFile)) {
-            logger.info("User " + oCurrentUser.getUserInfo() + " does not have edit access to file " + oFile.getFid());
-            req.setAttribute("message_critical", "You do not have access to edit this file");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Check if user is authorized to edit the file
-     *
-     * @param oUser
-     * @param oFile
-     * @return
-     */
-    private boolean isAllowedFileEdit(UserItem oUser, FileItem oFile) {
-        if (oUser.isAdmin()) {
-            logger.info("Administrator access to edit file " + oFile.getFid());
-            return true;
-        } else if (oFile.getOwnerUid().equals(oUser.getUid())) {
-            logger.info("Owner access to edit file " + oFile.getFid());
-            return true;
-        }
-        return false;
     }
 }
 

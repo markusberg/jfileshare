@@ -24,11 +24,8 @@
                 /* Define the tabs in the GUI */
                 ArrayList<Tab> tablist = new ArrayList<Tab>();
                 String tabExplicit;
-                if (request.getServletPath().equals("/index.jsp")) {
-                    tabExplicit = "Welcome";
-                } else {
-                    tabExplicit = request.getAttribute("tab") == null ? "" : request.getAttribute("tab").toString();
-                }
+
+                tabExplicit = request.getAttribute("tab") == null ? "" : request.getAttribute("tab").toString();
 
                 if (session.getAttribute("user") == null) {
                     /**
@@ -48,7 +45,7 @@
 
                     tablist.add(new Tab("Home",
                             "/user/view",
-                            request.getServletPath().equals("/user/view") && tabExplicit.equals(""),
+                            (request.getServletPath().equals("/user/view") || request.getServletPath().equals("/file/delete") ) && tabExplicit.equals(""),
                             true));
 
                     tablist.add(new Tab("Upload",
@@ -76,7 +73,6 @@
 
     <body>
         <div id="container">
-            <!-- img src="<%= request.getContextPath()%>/images/logo.png" id="logotype" alt="Logotype" / -->
             <div>
                 <ul id="Menu">
                     <%

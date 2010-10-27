@@ -8,32 +8,35 @@
         <th>Notify a recipient</th>
     </tr>
     <%
-        boolean even = false;
+                boolean even = false;
 
-        for (FileItem file : aFiles) {
-            %>
-    <tr class="<%=even ? "even" : "odd" %>">
+                for (FileItem file : aFiles) {
+    %>
+    <tr class="<%=even ? "even" : "odd"%>">
         <td><%=file.getName()%></td>
-        <td class="number"><%=FileItem.humanReadable( file.getSize() )%></td>
-        
-        <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days" %></td>
-        <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads() %></td>
-        <td><%= file.getPwHash() == null ? "no" : "yes" %></td>
-        <td><form action="<%= request.getContextPath() %>/user/view/<%= file.getOwnerUid() %>" method="post">
-            <input type="hidden" name="action" value="donotify" />
-            <input type="hidden" name="iFid" value="<%=file.getFid()%>" />
-            <input type="text" name="emailRecipient" />
-            <input type="submit" name="submit" value="Notify" /></form>
+        <td class="number"><%=FileItem.humanReadable(file.getSize())%></td>
+
+        <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days"%></td>
+        <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads()%></td>
+        <td><%= file.getPwHash() == null ? "no" : "yes"%></td>
+        <td><form action="<%= request.getContextPath()%>/user/view/<%= file.getOwnerUid()%>" method="post">
+                <input type="hidden" name="action" value="donotify" />
+                <input type="hidden" name="iFid" value="<%=file.getFid()%>" />
+                <input type="text" name="emailRecipient" />
+                <input type="submit" name="submit" value="Notify" /></form>
         </td>
-        <td><a href="<%= file.getURL(request.getContextPath()) %>">url</a></td>
-        <td><a href="<%= request.getContextPath() %>/file/edit/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/pencil.gif" alt="edit" /></a></td>
-        <td><a href="<%= request.getContextPath() %>/file/log/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_log.png" alt="delete" width="15" height="15" /></a></td>
-        <td><a href="<%= request.getContextPath() %>/file/delete/<%= file.getFid() %>"><img src="<%= request.getContextPath() %>/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
+        <td><a href="<%= file.getURL(request.getContextPath())%>">url</a></td>
+        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/stock_log.png" alt="delete" width="15" height="15" /></a></td>
+        <td><form action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post">
+                <input type="image" value="Delete file" src="<%= request.getContextPath()%>/images/stock_delete.png" style="width:15px; height:15px;"/>
+            </form>
+        </td>
     </tr>
-    
+
     <%
-            even = !even;
-        }
+                    even = !even;
+                }
     %>
 
 </table>

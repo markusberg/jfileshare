@@ -43,7 +43,7 @@ public class UserViewServlet extends HttpServlet {
     private String SMTP_SERVER;
     private String SMTP_SERVER_PORT;
     private InternetAddress SMTP_SENDER;
-    private String urlPrefix;
+    private String URL_PREFIX;
 
     @Override
     public void init(ServletConfig config)
@@ -61,7 +61,7 @@ public class UserViewServlet extends HttpServlet {
             SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
             SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
 
-            urlPrefix = context.getInitParameter("URL_PREFIX").toString();
+            URL_PREFIX = context.getInitParameter("URL_PREFIX").toString();
 
             SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
             SMTP_SENDER.validate();
@@ -165,7 +165,7 @@ public class UserViewServlet extends HttpServlet {
                     req.setAttribute("message_critical", errormessage);
                 } else {
                     // Everything checks out. Let's send the email notification
-                    if (urlPrefix.equals("")) {
+                    if (URL_PREFIX.equals("")) {
                         // We need to figure out the absolute path to the servlet
                         String httpScheme = req.getScheme();
                         String serverName = req.getServerName();
@@ -174,11 +174,11 @@ public class UserViewServlet extends HttpServlet {
                             serverPort = null;
                         }
 
-                        urlPrefix = httpScheme + "://"
+                        URL_PREFIX = httpScheme + "://"
                                 + serverName
                                 + (serverPort != null ? ":" + serverPort.toString() : "")
                                 + req.getContextPath();
-                        logger.info("No url prefix specified. Calculating: " + urlPrefix);
+                        logger.info("No url prefix specified. Calculating: " + URL_PREFIX);
                     }
                     if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
                         req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
@@ -212,7 +212,7 @@ public class UserViewServlet extends HttpServlet {
                     + "the following file available for download:\n"
                     + "Filename: " + oFile.getName() + "\n"
                     + "Filesize: " + FileItem.humanReadable(oFile.getSize()) + "\n\n"
-                    + oFile.getURL(urlPrefix), "utf-8");
+                    + oFile.getURL(URL_PREFIX), "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
@@ -222,7 +222,7 @@ public class UserViewServlet extends HttpServlet {
                     + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + oFile.getName() + "</td></tr>\n"
                     + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>\n"
                     + "</table>\n"
-                    + "<p><a href=\"" + oFile.getURL(urlPrefix) + "\">" + oFile.getURL(urlPrefix) + "</a>\n"
+                    + "<p><a href=\"" + oFile.getURL(URL_PREFIX) + "\">" + oFile.getURL(URL_PREFIX) + "</a>\n"
                     + "</p>\n", "text/html; charset=utf-8");
 
             /* Possibly attach image to make it look nicer

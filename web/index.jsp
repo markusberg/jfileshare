@@ -1,15 +1,42 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
+
     <head>
-        <title>Welcome to SECTRA fileshare</title>
+        <title>Login</title>
+
+        <script type="text/javascript">
+            function setfocus() {
+                domUsername = document.getElementById("username");
+                domUsername.focus();
+            }
+            window.onload=setfocus;
+        </script>
     </head>
 
     <body>
-        <div id="messagebox_warning">This facility is intended for registered users
-            only. If you are registered, you are welcome to
-            <a href="<%= request.getContextPath()%>/user/view">login</a>.</div>
+        <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
 
+        <p>Welcome to the Sectra File Sharing facility. This web application
+            is intended for registered users
+            only. If you're a Sectra corporate user, or if you already have an
+            account you are welcome to login:</p>
+
+        <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern") %>" method="post">
+            <table>
+                <tr>
+                    <td>Username: </td><td><input type="text" class="textentry" name="login_username" id="username" /></td>
+                </tr>
+                <tr>
+                    <td>Password: </td><td><input type="password" class="textentry" name="login_password" /></td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <input type="hidden" name="action" value="login" />
+                        <input type="submit" name="submit" value="Login" />
+                    </td>
+                </tr>
+            </table>
+        </form>
     </body>
-
 </html>
 

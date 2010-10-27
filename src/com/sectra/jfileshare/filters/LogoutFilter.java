@@ -38,9 +38,9 @@ public class LogoutFilter implements Filter {
             request.getSession().removeAttribute("uploadListener");
             // request.setAttribute("address", request.getContextPath());
             request.setAttribute("message", "You are now logged out");
-            request.setAttribute("tab", "Logout");
+            // request.setAttribute("tab", "Logout");
         }
-        filterconfig.getServletContext().getRequestDispatcher("/templates/Blank.jsp").forward(servletRequest, servletResponse);
+        filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(servletRequest, servletResponse);
     }
 
     @Override
