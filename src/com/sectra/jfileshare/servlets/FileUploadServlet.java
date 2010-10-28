@@ -37,6 +37,7 @@ import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.IOUtils;
 
 // import com.sectra.jfileshare.objects.UserItem;
 public class FileUploadServlet extends HttpServlet {
@@ -91,7 +92,7 @@ public class FileUploadServlet extends HttpServlet {
             FileItemFactory factory = new DiskFileItemFactory(10485760, new File(this.PATH_TEMP));
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setSizeMax(FILE_SIZE_MAX);
-            logger.info("Max filesize: " + FileItem.humanReadable(FILE_SIZE_MAX));
+            // logger.info("Max filesize: " + FileItem.humanReadable(FILE_SIZE_MAX));
             UserItem oCurrentUser = (UserItem) session.getAttribute("user");
 
             // set file upload progress listener
@@ -108,15 +109,16 @@ public class FileUploadServlet extends HttpServlet {
 
                 /* iterate over all uploaded items */
                 FileItemIterator it = upload.getItemIterator(req);
-                FileOutputStream outfile = null;
+                FileOutputStream filestream = null;
 
                 while (it.hasNext()) {
                     FileItemStream item = it.next();
                     String name = item.getFieldName();
-                    InputStream stream = item.openStream();
+                    InputStream instream = item.openStream();
+                    DigestOutputStream outstream = null;
 
                     if (item.isFormField()) {
-                        String value = Streams.asString(stream);
+                        String value = Streams.asString(instream);
                         // logger.info(name + " : " + value);
                         /* not the file upload. Maybe the password field? */
                         if (name.equals("usepw")
@@ -129,7 +131,7 @@ public class FileUploadServlet extends HttpServlet {
                             logger.info("Uploaded file has password set");
                             pwPlainText = value;
                         }
-                        stream.close();
+                        instream.close();
                     } else {
                         // This is the file you're looking for
                         oFile.setName(item.getName());
@@ -137,29 +139,26 @@ public class FileUploadServlet extends HttpServlet {
                         oFile.setOwnerUid(oCurrentUser.getUid());
 
                         try {
-                            outfile = new FileOutputStream(this.PATH_TEMP + "/" + Integer.toString(oCurrentUser.getUid()));
+                            filestream = new FileOutputStream(this.PATH_TEMP + "/" + Integer.toString(oCurrentUser.getUid()));
 
                             logger.info("Calculating md5 sum");
                             MessageDigest md = MessageDigest.getInstance("MD5");
-                            DigestOutputStream din = new DigestOutputStream(outfile, md);
+                            outstream = new DigestOutputStream(filestream, md);
+                            long filesize = IOUtils.copyLarge(instream, outstream);
 
-                            int c;
-                            byte[] argle = new byte[4096];
-                            long size = 0L;
-                            while ((c = stream.read(argle)) != -1) {
-                                din.write(argle, 0, c);
-                                size += c;
-                            }
-                            md = din.getMessageDigest();
+                            md = outstream.getMessageDigest();
                             oFile.setMd5sum(toHex(md.digest()));
-                            oFile.setSize(size);
+                            oFile.setSize(filesize);
 
                         } finally {
-                            if (stream != null) {
-                                stream.close();
+                            if (outstream != null) {
+                                outstream.close();
                             }
-                            if (outfile != null) {
-                                outfile.close();
+                            if (filestream != null) {
+                                filestream.close();
+                            }
+                            if (instream != null) {
+                                instream.close();
                             }
                         }
 
@@ -170,22 +169,15 @@ public class FileUploadServlet extends HttpServlet {
                     oFile.setPwPlainText(pwPlainText);
                 }
                 oFile.setDaysToKeep(DAYS_FILE_RETENTION);
-                oFile.save(ds);
 
-                if (1 == 0) {
-                    req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-                }
-
-                File tempfile = new File(this.PATH_TEMP, Integer.toString(oCurrentUser.getUid()));
-                File finalfile = new File(this.PATH_STORE, Integer.toString(oFile.getFid()));
-                boolean success = tempfile.renameTo(finalfile);
-
-                if (success) {
+                if (!oFile.save(ds)) {
+                    req.setAttribute("message_critical", "Unable to contact the database");
+                } else {
+                    File tempfile = new File(this.PATH_TEMP, Integer.toString(oCurrentUser.getUid()));
+                    File finalfile = new File(this.PATH_STORE, Integer.toString(oFile.getFid()));
+                    tempfile.renameTo(finalfile);
                     logger.info("User " + oCurrentUser.getUid() + " storing file \"" + oFile.getName() + "\" in the filestore");
                     req.setAttribute("message", "File \"" + oFile.getName() + "\" uploaded successfully");
-                } else {
-                    logger.info("Failed to move uploaded file to filestore");
-                    req.setAttribute("message_critical", "Unable to store the file in the filestore");
                 }
                 session.setAttribute("uploadListener", null);
             } catch (SizeLimitExceededException e) {
@@ -196,6 +188,8 @@ public class FileUploadServlet extends HttpServlet {
             } catch (Exception e) {
                 req.setAttribute("message_critical", "Unable to upload file");
                 e.printStackTrace();
+            } finally {
+                session.setAttribute("uploadListener", null);
             }
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/FileUpload.jsp");
