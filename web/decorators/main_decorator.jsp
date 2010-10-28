@@ -19,12 +19,17 @@
 
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
-
                     // Add javascript for session timeout
-                    if (!(user == null || request.getServletPath().equals("/logout"))) {
+                    if (user != null) {
         %>
         <script type="text/javascript">
-            var logoutTimeout = setTimeout(function() {window.location="<%= request.getContextPath()%>/logout?reason=inactivity";}, 1000*60*30);
+            function renewSessionTimeout(idTimeout) {
+                if (idTimeout!=null) {
+                    clearTimeout(idTimeout);
+                }
+                return setTimeout(function() { window.location="<%=request.getContextPath()%>/logout?reason=inactivity"; }, 1000*60*30);
+            }
+            var logoutTimer = renewSessionTimeout(null);
         </script>
         <%
                     }
