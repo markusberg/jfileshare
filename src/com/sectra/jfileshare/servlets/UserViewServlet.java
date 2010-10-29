@@ -44,6 +44,7 @@ public class UserViewServlet extends HttpServlet {
     private String SMTP_SERVER_PORT;
     private InternetAddress SMTP_SENDER;
     private String URL_PREFIX;
+    private String pathContext;
 
     @Override
     public void init(ServletConfig config)
@@ -135,6 +136,7 @@ public class UserViewServlet extends HttpServlet {
 
             HttpSession session = req.getSession();
             UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+            pathContext = req.getContextPath();
 
             int iFid = Integer.parseInt(req.getParameter("iFid"));
             String emailRecipient = req.getParameter("emailRecipient");
@@ -176,8 +178,7 @@ public class UserViewServlet extends HttpServlet {
 
                         URL_PREFIX = httpScheme + "://"
                                 + serverName
-                                + (serverPort != null ? ":" + serverPort.toString() : "")
-                                + req.getContextPath();
+                                + (serverPort != null ? ":" + serverPort.toString() : "");
                         logger.info("No url prefix specified. Calculating: " + URL_PREFIX);
                     }
                     if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
@@ -212,7 +213,7 @@ public class UserViewServlet extends HttpServlet {
                     + "the following file available for download:\n"
                     + "Filename: " + oFile.getName() + "\n"
                     + "Filesize: " + FileItem.humanReadable(oFile.getSize()) + "\n\n"
-                    + oFile.getURL(URL_PREFIX), "utf-8");
+                    + oFile.getURL(URL_PREFIX + pathContext), "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
@@ -222,7 +223,7 @@ public class UserViewServlet extends HttpServlet {
                     + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + oFile.getName() + "</td></tr>\n"
                     + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>\n"
                     + "</table>\n"
-                    + "<p><a href=\"" + oFile.getURL(URL_PREFIX) + "\">" + oFile.getURL(URL_PREFIX) + "</a>\n"
+                    + "<p><a href=\"" + oFile.getURL(URL_PREFIX + pathContext) + "\">" + oFile.getURL(URL_PREFIX + pathContext) + "</a>\n"
                     + "</p>\n", "text/html; charset=utf-8");
 
             /* Possibly attach image to make it look nicer
