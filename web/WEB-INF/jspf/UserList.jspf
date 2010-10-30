@@ -38,7 +38,7 @@
         <td class="number"><%= FileItem.humanReadable(childuser.getSumFilesize())%></td>
         <td><a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>">url</a></td>
         <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/stock_delete.png" alt="delete" width="13" height="13"/></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
     </tr>
 
     <%
