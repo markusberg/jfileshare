@@ -5,9 +5,6 @@ import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
@@ -33,7 +30,6 @@ public class UserEditServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserEditServlet.class.getName());
-    private String PATH_FILE_STORE;
     private Integer DAYS_UNTIL_EXPIRATION;
 
     @Override
@@ -44,10 +40,7 @@ public class UserEditServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            ServletContext context = getServletContext();
-            PATH_FILE_STORE = context.getInitParameter("PATH_STORE").toString();
-            DAYS_UNTIL_EXPIRATION = Integer.parseInt(context.getInitParameter("DAYS_USER_EXPIRATION").toString());
-
+            DAYS_UNTIL_EXPIRATION = Integer.parseInt(getServletContext().getInitParameter("DAYS_USER_EXPIRATION").toString());
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -61,9 +54,9 @@ public class UserEditServlet extends HttpServlet {
         RequestDispatcher disp;
         String jspForward = "";
         HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+        UserItem CurrentUser = (UserItem) session.getAttribute("user");
 
-        UserItem oUser;
+        UserItem User;
         Integer iUid = null;
         try {
             String sUid = req.getPathInfo().substring(1);
@@ -71,36 +64,29 @@ public class UserEditServlet extends HttpServlet {
                 throw new NullPointerException();
             }
             iUid = Integer.parseInt(sUid);
-            oUser = new UserItem(ds, iUid);
+            User = new UserItem(ds, iUid);
         } catch (NullPointerException e) {
-            oUser = oCurrentUser;
+            User = CurrentUser;
         }
 
-        if (oUser.getUid() == null) {
+        if (User.getUid() == null) {
             logger.info("Attempting to modify nonexistent user");
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
             jspForward = "/templates/404.jsp";
-        } else if (!(oUser.getUid().equals(oCurrentUser.getUid())
-                || oUser.getUidCreator().equals(oCurrentUser.getUid())
-                || oCurrentUser.isAdmin())) {
-            logger.info(oCurrentUser.getUserInfo() + " has insufficient access to modify user " + oUser.getUserInfo());
-            req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
+        } else if (!CurrentUser.hasEditAccessTo(User)) {
+            req.setAttribute("message_critical", "You do not have access to edit user " + User.getUserInfo());
             jspForward = "/templates/AccessDenied.jsp";
-        } else if (req.getServletPath().equals("/user/delete")) {
-            req.setAttribute("oUser", oUser);
-            req.setAttribute("tab", "Delete user");
-            jspForward = "/templates/UserDelete.jsp";
         } else {
-            req.setAttribute("oUser", oUser);
+            req.setAttribute("oUser", User);
             req.setAttribute("tab", "Edit user");
 
-            req.setAttribute("validatedUsername", oUser.getUsername());
-            req.setAttribute("validatedEmail", oUser.getEmail());
+            req.setAttribute("validatedUsername", User.getUsername());
+            req.setAttribute("validatedEmail", User.getEmail());
             req.setAttribute("validatedPassword1", "");
             req.setAttribute("validatedPassword2", "");
-            req.setAttribute("validatedBExpiration", oUser.getDateExpiration() == null ? false : true);
-            req.setAttribute("validatedDaysUntilExpiration", oUser.getDateExpiration() == null ? DAYS_UNTIL_EXPIRATION : oUser.getDaysUntilExpiration());
-            req.setAttribute("validatedUsertype", oUser.getUserType());
+            req.setAttribute("validatedBExpiration", User.getDateExpiration() == null ? false : true);
+            req.setAttribute("validatedDaysUntilExpiration", User.getDateExpiration() == null ? DAYS_UNTIL_EXPIRATION : User.getDaysUntilExpiration());
+            req.setAttribute("validatedUsertype", User.getUserType());
 
             jspForward = "/templates/UserEdit.jsp";
         }
@@ -120,54 +106,28 @@ public class UserEditServlet extends HttpServlet {
 
             String jspForward = "";
             HttpSession session = req.getSession();
-            UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-
+            UserItem CurrentUser = (UserItem) session.getAttribute("user");
             Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
+            UserItem User = new UserItem(ds, iUid);
 
-            UserItem oUser = new UserItem(ds, iUid);
-
-            if (oUser.getUid() == null) {
+            if (User.getUid() == null) {
                 logger.info("Attempting to modify nonexistent user");
                 req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
                 jspForward = "/templates/404.jsp";
-            } else if (!(oUser.getUid().equals(oCurrentUser.getUid())
-                    || oUser.getUidCreator().equals(oCurrentUser.getUid())
-                    || oCurrentUser.isAdmin())) {
-                logger.info("Insufficient access to modify user");
-                req.setAttribute("message_critical", "You do not have access to modify user " + oUser.getUserInfo());
+            } else if (!CurrentUser.hasEditAccessTo(User)) {
+                req.setAttribute("message_critical", "You do not have access to modify user " + User.getUserInfo());
                 jspForward = "/templates/AccessDenied.jsp";
-            } else if (req.getServletPath().equals("/user/delete")) {
-                Connection dbConn = null;
-                try {
-                    dbConn = ds.getConnection();
-                    oUser.delete(ds, PATH_FILE_STORE);
-                } catch (SQLException e) {
-                    logger.severe("Unable to connect to database: " + e.toString());
-                } finally {
-                    if (dbConn != null) {
-                        try {
-                            dbConn.close();
-                        } catch (SQLException e) {
-                        }
-                    }
-                }
-
-                req.setAttribute("message", "User " + oUser.getUserInfo() + " deleted");
-                req.setAttribute("tab", "Delete user");
-                jspForward = "/templates/Blank.jsp";
-
             } else {
-                logger.info("Editing user");
-                req.setAttribute("oUser", oUser);
+                req.setAttribute("oUser", User);
 
                 // validate user input
                 ArrayList<String> errors = new ArrayList<String>();
 
                 // only admin is allowed to edit usernames
-                String requestedUsername = oUser.getUsername();
-                if (oCurrentUser.isAdmin()) {
-                    requestedUsername = (String) req.getParameter("username");
-                    if (!requestedUsername.equals(oUser.getUsername())) {
+                String requestedUsername = User.getUsername();
+                if (CurrentUser.isAdmin()) {
+                    requestedUsername = req.getParameter("username");
+                    if (!requestedUsername.equals(User.getUsername())) {
                         UserItem tempuser = new UserItem(ds, requestedUsername);
                         if (requestedUsername.length() < 2) {
                             errors.add("The username is too short");
@@ -180,23 +140,23 @@ public class UserEditServlet extends HttpServlet {
 
                 // Validate email address
                 String requestedEmail = (String) req.getParameter("email");
-                errors.addAll(oUser.validateEmailAddress(requestedEmail));
+                errors.addAll(User.validateEmailAddress(requestedEmail));
                 req.setAttribute("validatedEmail", requestedEmail);
 
                 // Validate passwords
                 String requestedPassword1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
                 String requestedPassword2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
                 if (!requestedPassword1.equals("")) {
-                    errors.addAll(oUser.validatePassword(requestedPassword1, requestedPassword2));
+                    errors.addAll(User.validatePassword(requestedPassword1, requestedPassword2));
                 }
                 req.setAttribute("validatedPassword1", requestedPassword1);
                 req.setAttribute("validatedPassword2", requestedPassword2);
 
                 // Validate expiration
-                Boolean requestedBExpiration = oUser.getDateExpiration() == null ? false : true;
+                Boolean requestedBExpiration = User.getDateExpiration() == null ? false : true;
                 Integer requestedDaysUntilExpiration = DAYS_UNTIL_EXPIRATION;
-                if (oCurrentUser.isAdmin()
-                        || oCurrentUser.getUid() == oUser.getUidCreator()) {
+                if (CurrentUser.isAdmin()
+                        || CurrentUser.getUid() == User.getUidCreator()) {
                     if (req.getParameter("bExpiration") != null
                             && req.getParameter("bExpiration").equals("true")) {
                         requestedBExpiration = true;
@@ -213,8 +173,8 @@ public class UserEditServlet extends HttpServlet {
                 req.setAttribute("validatedBExpiration", requestedBExpiration);
                 req.setAttribute("validatedDaysUntilExpiration", requestedDaysUntilExpiration);
 
-                Integer requestedUsertype = oUser.getUserType();
-                if (oCurrentUser.isAdmin()) {
+                Integer requestedUsertype = User.getUserType();
+                if (CurrentUser.isAdmin()) {
                     requestedUsertype = Integer.parseInt((String) req.getParameter("usertype"));
                 }
                 req.setAttribute("validatedUsertype", requestedUsertype);
@@ -229,16 +189,16 @@ public class UserEditServlet extends HttpServlet {
                 } else {
                     // Set the parameters and save the user
 
-                    oUser.setUsername(requestedUsername);
-                    oUser.setEmail(requestedEmail);
+                    User.setUsername(requestedUsername);
+                    User.setEmail(requestedEmail);
                     if (requestedBExpiration) {
-                        oUser.setDaysUntilExpiration(requestedDaysUntilExpiration);
+                        User.setDaysUntilExpiration(requestedDaysUntilExpiration);
                     } else {
-                        oUser.setDateExpiration(null);
+                        User.setDateExpiration(null);
                     }
-                    oUser.setUserType(requestedUsertype);
+                    User.setUserType(requestedUsertype);
 
-                    if (oUser.save(ds)) {
+                    if (User.save(ds)) {
                         req.setAttribute("message", "Your changes have been saved");
                         req.setAttribute("validatedPassword1", "");
                         req.setAttribute("validatedPassword2", "");

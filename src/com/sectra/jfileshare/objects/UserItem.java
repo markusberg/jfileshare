@@ -554,19 +554,35 @@ public class UserItem {
      * @return True if the user has access to the provided file
      */
     public boolean hasEditAccessTo(FileItem oFile) {
-        if (oFile.getFid() == null) {
-            logger.info("File not found");
-            return false;
-        } else if (this.isAdmin()) {
-            logger.info("Administrator access to delete file " + oFile.getFid());
+        if (this.isAdmin()) {
+            logger.info("Administrator access to edit file " + oFile.getFid());
             return true;
         } else if (oFile.getOwnerUid().equals(this.getUid())) {
-            logger.info("Owner access to delete file " + oFile.getFid());
+            logger.info("Owner access to edit file " + oFile.getFid());
             return true;
         }
         logger.info("User " + this.getUserInfo() + " does not have edit access to file " + oFile.getFid());
         return false;
     }
 
+    /**
+     * Does the user enjoy edit rights to the specified user
+     * @param User
+     * @return True if the user has access to the provided user
+     */
+    public boolean hasEditAccessTo(UserItem User) {
+        if (this.isAdmin()) {
+            logger.info("Administrator access to edit user " + User.getUserInfo());
+            return true;
+        } else if (User.getUidCreator().equals(this.getUid())) {
+            logger.info("Creator access to edit user " + User.getUserInfo());
+            return true;
+        } else if (User.getUid().equals(this.getUid())) {
+            logger.info("Edit access to self granted to " + User.getUserInfo());
+            return true;
+        }
+        logger.info("User " + this.getUserInfo() + " does not have edit access to user " + User.getUserInfo());
+        return false;
+    }
 }
 

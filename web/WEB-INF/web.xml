@@ -112,6 +112,10 @@
         <servlet-class>com.sectra.jfileshare.servlets.UserAdminServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>UserDelete</servlet-name>
+        <servlet-class>com.sectra.jfileshare.servlets.UserDeleteServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>UserEdit</servlet-name>
         <servlet-class>com.sectra.jfileshare.servlets.UserEditServlet</servlet-class>
     </servlet>
@@ -176,7 +180,7 @@
         <url-pattern>/user/admin/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>UserEdit</servlet-name>
+        <servlet-name>UserDelete</servlet-name>
         <url-pattern>/user/delete/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
