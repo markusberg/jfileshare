@@ -60,7 +60,6 @@ public class LoginFilter implements Filter {
         resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
         resp.setDateHeader("Expires", -1);
         resp.setDateHeader("Last-Modified", System.currentTimeMillis() - 1000 * 60 * 30);
-        req.setCharacterEncoding("UTF-8");
         if (CheckUser(req, session)) {
             chain.doFilter(request, response);
         } else {

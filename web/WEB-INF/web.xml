@@ -13,6 +13,10 @@
         <filter-class>com.opensymphony.module.sitemesh.filter.PageFilter</filter-class>
     </filter>
     <filter>
+        <filter-name>setcharacterencoding</filter-name>
+        <filter-class>com.sectra.jfileshare.filters.SetCharacterEncodingFilter</filter-class>
+    </filter>
+    <filter>
         <filter-name>login</filter-name>
         <filter-class>com.sectra.jfileshare.filters.LoginFilter</filter-class>
     </filter>
@@ -24,11 +28,17 @@
         <filter-name>fileAuth</filter-name>
         <filter-class>com.sectra.jfileshare.filters.FileAuthenticationFilter</filter-class>
     </filter>
-    <!-- Sitemesh filters -->
+    <!-- Sitemesh filter -->
     <filter-mapping>
         <filter-name>sitemesh</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <!-- Character encoding filter -->
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!-- Authentication filters -->
     <filter-mapping>
         <filter-name>logout</filter-name>
