@@ -60,6 +60,7 @@ public class LoginFilter implements Filter {
         resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
         resp.setDateHeader("Expires", -1);
         resp.setDateHeader("Last-Modified", System.currentTimeMillis() - 1000 * 60 * 30);
+        req.setCharacterEncoding("UTF-8");
         if (CheckUser(req, session)) {
             chain.doFilter(request, response);
         } else {
@@ -75,7 +76,6 @@ public class LoginFilter implements Filter {
         if (session.getAttribute("user") != null) {
             return true;
         }
-
         // Second, check if we are logging in right now
         if ("login".equals(req.getParameter("action"))) {
             String username = req.getParameter("login_username");
@@ -83,7 +83,7 @@ public class LoginFilter implements Filter {
 
             if (username != null && pwPlaintext != null) {
                 UserItem oUser = new UserItem(ds, username);
-                if (oUser.getUid() == -1 || !oUser.authenticated(pwPlaintext)) {
+                if (oUser.getUid() == null || !oUser.authenticated(pwPlaintext)) {
                     req.setAttribute("message_warning", "Non-existent user or incorrect password");
                 } else {
                     logger.info("User " + oUser.getUserInfo() + " is now logged in");
