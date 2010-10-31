@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
+
 public class FileDownloadServlet extends HttpServlet {
 
     private DataSource ds;
@@ -52,39 +54,25 @@ public class FileDownloadServlet extends HttpServlet {
 
         Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
-
         FileItem oFile = new FileItem(ds, iFid);
-
-        File fileOnDisk = new File(pathFileStore + "/" + Integer.toString(oFile.getFid()));
+        File fileOnDisk = new File(pathFileStore + "/" + oFile.getFid().toString());
 
         logger.info("Preparing to stream file");
         resp.setContentType(oFile.getType());
         resp.setHeader("Content-disposition", "attachment; filename=\"" + oFile.getName() + "\"");
         resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
 
-        ServletOutputStream sos = resp.getOutputStream();
-        FileInputStream fis = new FileInputStream(fileOnDisk);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        BufferedOutputStream bos = new BufferedOutputStream(sos);
+        FileInputStream instream = new FileInputStream(fileOnDisk);
+        ServletOutputStream outstream = resp.getOutputStream();
 
         try {
-            int c;
-            byte[] buffersize = new byte[2048];
-            while ((c = bis.read(buffersize)) != -1) {
-                bos.write(buffersize, 0, c);
-            }
+            IOUtils.copyLarge(instream, outstream);
         } finally {
-            if (bos != null) {
-                bos.close();
+            if (instream != null) {
+                instream.close();
             }
-            if (bis != null) {
-                bis.close();
-            }
-            if (fis != null) {
-                fis.close();
-            }
-            if (sos != null) {
-                sos.close();
+            if (outstream != null) {
+                outstream.close();
             }
         }
         String ipAddr = req.getRemoteAddr();
