@@ -13,10 +13,10 @@
                         var xml = oAjax.responseXML;
                         var bytesRead = xml.getElementsByTagName("bytesRead")[0].firstChild.data;
                         var bytesTotal = xml.getElementsByTagName("bytesTotal")[0].firstChild.data;
-                        var iPercent = Math.ceil(bytesRead/bytesTotal*100);
+                        var completion = bytesRead/bytesTotal;
 
-                        domStatusText.innerHTML = "Upload status: " + iPercent + "% ("+ humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
-                        changeWidth( iPercent );
+                        domStatusText.innerHTML = "Upload status: " + Math.ceil(completion*100) + "% ("+ humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
+                        changeWidth( completion );
                         oAjax = null;
                     } else {
                         alert( "Error: " + oAjax.statusText );
@@ -50,8 +50,9 @@
                 return (iBytes/1024/1024).toFixed(2) + " MiB";
             }
 
-            function changeWidth( iPercent ) {
-                var iProgress = Math.ceil( (iPercent/100) * iWidth );
+            function changeWidth( completion ) {
+                var iWidth = domProgressBar.offsetWidth-2;
+                var iProgress = Math.ceil( completion * iWidth );
                 if ( iProgress > iWidth ) {
                     iProgress = iWidth;
                 }
@@ -69,16 +70,17 @@
             }
 
             function initUpload() {
+                clearTimeout(logoutTimer);
                 ToggleVisibility('uploadform');
                 ToggleVisibility('Status');
-                iWidth = document.getElementById("ProgressBar").offsetWidth - 2;
+                domProgressBar = document.getElementById("ProgressBar");
                 domBar = document.getElementById("Bar");
                 domStatusText = document.getElementById("StatusText");
                 domIdUpload = document.getElementById("upid");
                 setInterval('checkUploadProgress()', 1000);
             }
 
-            var iWidth;
+            var domProgressBar;
             var domBar;
             var domStatusText;
             var domIdUpload;
