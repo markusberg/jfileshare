@@ -87,7 +87,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN enabled enabled tinyint(1) NOT NULL default 1");
 
                 alterDatabase(dbConn, "alter table FileItems drop key `md5sum`");
-                alterDatabase(dbConn, "update FileItems set dateExpiration=null where permanent != 1");
+                alterDatabase(dbConn, "update FileItems set dateExpiration=NULL where permanent=1");
                 alterDatabase(dbConn, "alter table FileItems drop column permanent");
 
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN uid uid int(5) NOT NULL AUTO_INCREMENT");
