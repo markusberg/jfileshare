@@ -213,7 +213,9 @@ public class UserViewServlet extends HttpServlet {
                     + "the following file available for download:\n"
                     + "Filename: " + oFile.getName() + "\n"
                     + "Filesize: " + FileItem.humanReadable(oFile.getSize()) + "\n\n"
-                    + oFile.getURL(URL_PREFIX + pathContext), "utf-8");
+                    + oFile.getURL(URL_PREFIX + pathContext)
+                    + (oFile.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + oFile.getDaysUntilExpiration() + " day(s))")
+                    , "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
@@ -224,6 +226,7 @@ public class UserViewServlet extends HttpServlet {
                     + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>\n"
                     + "</table>\n"
                     + "<p><a href=\"" + oFile.getURL(URL_PREFIX + pathContext) + "\">" + oFile.getURL(URL_PREFIX + pathContext) + "</a>\n"
+                    + (oFile.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + oFile.getDaysUntilExpiration() + " day(s))")
                     + "</p>\n", "text/html; charset=utf-8");
 
             /* Possibly attach image to make it look nicer
