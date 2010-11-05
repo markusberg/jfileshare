@@ -14,7 +14,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=8" />
 
         <title>SECTRA file distribution facility <decorator:title /></title>
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css" type="text/css" />
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main2.css" type="text/css" />
         <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js"></script>
 
         <%
