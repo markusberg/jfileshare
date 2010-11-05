@@ -172,7 +172,8 @@ public class UserViewServlet extends HttpServlet {
                         String httpScheme = req.getScheme();
                         String serverName = req.getServerName();
                         Integer serverPort = (Integer) req.getServerPort();
-                        if (serverPort == 80) {
+                        if ((serverPort == 80 && httpScheme.equals("http"))
+                            || (serverPort == 443 && httpScheme.equals("https"))) {
                             serverPort = null;
                         }
 
