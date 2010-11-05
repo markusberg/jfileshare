@@ -91,7 +91,7 @@ public class FileAuthenticationFilter implements Filter {
             logger.info("File " + oFile.getFid() + " is password protected");
             // logger.info("File password: " + oFile.getPwHash());
             servletRequest.setAttribute("tab", "File authentication");
-            req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()));
+            req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()) + "?md5=" + oFile.getMd5sum());
             filterconfig.getServletContext().getRequestDispatcher("/templates/FilePassword.jsp").forward(servletRequest, servletResponse);
         } else {
             // Everything appears to check out
