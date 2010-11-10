@@ -4,7 +4,7 @@
         <th>Size</th>
         <th>Exp.</th>
         <th>Downloads</th>
-        <th>PW</th>
+        <th>Pw</th>
         <th>Notify a recipient</th>
     </tr>
     <%

@@ -17,14 +17,14 @@
                     if (request.getAttribute("oUser") != null) {
                         UserItem oUser = (UserItem) request.getAttribute("oUser");
                         UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+                        if (!oUser.getUid().equals(oCurrentUser.getUid())) {
         %>
 
-        <h2>User information page</h2>
-        <table id="singleentry">
+        <table>
             <tr>
                 <th>Username:</th>
                 <td><%= oUser.getUsername()%>
-                ( <a href="<%= request.getContextPath()%>/user/edit/<%= oUser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /> Edit User</a> )
+                    ( <a href="<%= request.getContextPath()%>/user/edit/<%= oUser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /> Edit User</a> )
                 </td>
             </tr>
             <tr>
@@ -42,9 +42,8 @@
                 <td><%= oUser.getDateExpiration() == null ? "N/A" : oUser.getDaysUntilExpiration() + " days"%></td>
             </tr>
         </table>
-
-        <h2>Files owned by <%= oUser.getUsername()%></h2>
         <%
+                                }
                                 ArrayList<FileItem> aFiles = (ArrayList<FileItem>) request.getAttribute("aFiles");
                                 if (aFiles.size() > 0) {
         %>

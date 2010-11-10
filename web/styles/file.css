@@ -35,10 +35,6 @@
     padding: 0.2em 0.5em;
 }
 
-#singlefile th {
-    text-align: right;
-}
-
 #singlefile .admin {
     background: #eee;
 }

@@ -98,24 +98,31 @@
             <form action="<%= request.getContextPath()%>/file/upload/" method="post" onsubmit="initUpload();" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="fileupload" />
 
-                <p>Please select file to upload:
-                    <input id="fileinput" type="file" name="file" />
-                    <input type="submit" name="submit" value="Upload file" />
-                </p>
                 <table>
                     <tr>
-                        <td><input name="usepw" value="true" type="checkbox" onclick="ToggleVisibility('pwlabel');" /></td>
-                        <td>Require password</td>
+                        <th style="text-align:right;">Select file to upload:</th>
+                        <td><input id="fileinput" type="file" name="file" /></td>
+                    </tr>
+                    <tr>
+                        <th style="text-align:right;">File password:</th>
+                        <td><input type="text" name="password" />
+                            <span class="note">Note: leave blank in order to leave file without password protection</span>
+                        </td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td class="note">Even though the url is hard to guess, some browsers may exchange the url data with third parties.To protect sensitive data, additional password is a good idea. This password will be required before user is allowed to download the file.</td>
+                        <td><input type="submit" name="submit" value="Upload file" /></td>
                     </tr>
                     <tr>
                         <td></td>
-                        <td id="pwlabel" style="display: none;">Password: <input type="text" name="password" /></td>
+                        <td class="note"><strong>Important safety tip:</strong> even though
+                            the url is difficult to guess, some browsers may exchange the url
+                            data with third parties. To protect sensitive data, setting a file
+                            password is a good idea. This password will be required before a
+                            user is allowed to download the file.</td>
                     </tr>
                 </table>
+
             </form>
         </div>
         <div id="Status" style="display: none;">

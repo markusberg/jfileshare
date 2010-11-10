@@ -10,32 +10,14 @@ body {
 #container {
     background: #ddd url(../images/logo.png) no-repeat top right;
     margin: 2em;
-/*
-    border: 0px solid #a7a7a7;
-    padding: 1em; 
-*/
 }
 
-/*
-img#logotype {
-    float: right;
-    width: 200px;
-    height: 38px;
-}
-
-#header {
-    height: 81px;
+#userinfo {
+    position: relative;
+    top: 50px;
     text-align: right;
-    background-image: url(../images/banner_bg.gif);
-    border: 1px solid #a7a7a7;
-    margin-bottom: 1em;
+    font-size: 0.8em;
 }
-
-#header img {
-    margin-top: 10px;
-    margin-right: 10px;
-}
-*/
 
 #content {
     background: white;
@@ -97,8 +79,9 @@ td.number {
     text-align: right;
 }
 
-table#singleentry th {
+table th {
     text-align: right;
+    white-space: nowrap;
 }
 
 /* styles for the tabbed menu interface */

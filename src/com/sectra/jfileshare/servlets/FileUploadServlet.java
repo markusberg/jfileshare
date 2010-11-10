@@ -100,10 +100,6 @@ public class FileUploadServlet extends HttpServlet {
             session.setAttribute("uploadListener", listener);
             upload.setProgressListener(listener);
 
-            // FileItem tempFileItemObject = null;
-            boolean usepw = false;
-            String pwPlainText = "";
-
             try {
                 FileItem oFile = new FileItem();
 
@@ -121,15 +117,10 @@ public class FileUploadServlet extends HttpServlet {
                         String value = Streams.asString(instream);
                         // logger.info(name + " : " + value);
                         /* not the file upload. Maybe the password field? */
-                        if (name.equals("usepw")
-                                && value.equals("true")) {
-                            usepw = true;
-                        }
-
                         if (name.equals("password")
                                 && !value.equals("")) {
                             logger.info("Uploaded file has password set");
-                            pwPlainText = value;
+                            oFile.setPwPlainText(value);
                         }
                         instream.close();
                     } else {
@@ -165,9 +156,6 @@ public class FileUploadServlet extends HttpServlet {
                     }
                 }
                 /* All done. Save the new file */
-                if (usepw && !pwPlainText.equals("")) {
-                    oFile.setPwPlainText(pwPlainText);
-                }
                 oFile.setDaysToKeep(DAYS_FILE_RETENTION);
 
                 if (!oFile.save(ds)) {
@@ -177,7 +165,7 @@ public class FileUploadServlet extends HttpServlet {
                     File finalfile = new File(this.PATH_STORE, Integer.toString(oFile.getFid()));
                     tempfile.renameTo(finalfile);
                     logger.info("User " + oCurrentUser.getUid() + " storing file \"" + oFile.getName() + "\" in the filestore");
-                    req.setAttribute("message", "File \"" + oFile.getName() + "\" uploaded successfully");
+                    req.setAttribute("message", "File \"" + oFile.getName() + "\" uploaded successfully. <a href=\"" + req.getContextPath() +"/file/edit/" + oFile.getFid() + "\">Click here to edit file</a>");
                 }
                 session.setAttribute("uploadListener", null);
             } catch (SizeLimitExceededException e) {

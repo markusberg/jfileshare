@@ -14,8 +14,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=8" />
 
         <title>SECTRA file distribution facility <decorator:title /></title>
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main2.css" type="text/css" />
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js"></script>
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=3" type="text/css" />
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=2"></script>
 
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
@@ -88,37 +88,42 @@
 
     <body>
         <div id="container">
-            <div>
-                <ul id="Menu">
-                    <%
-                                for (Tab tab : tablist) {
-                                    if (tab.isEnabled()) {
-                                        if (tab.isSelected()) {
-                                            out.print("<li><div id=\"tabSelected\">" + tab.getTitle() + "</div></li>\n");
-                                        } else {
-                                            out.print("<li><a href=\"" + request.getContextPath() + tab.getLink() + "\">" + tab.getTitle() + "</a></li>\n");
-                                        }
+
+            <%
+                        if (user != null) {
+            %>
+            <div id="userinfo">
+                <form name="logout" action="<%= request.getContextPath()%>/logout" method="post">
+                    Currently logged in as <%=user.getUsername()%> ::
+                    <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Preferences</a> ::
+                    <a href="#" onclick="document.logout.submit()">Log out</a>
+                    <!-- input type="submit" name="logout" value="Log out" -->
+                </form>
+
+            </div>
+
+            <%
+                        }
+            %>
+
+            <ul id="Menu">
+                <%
+                            for (Tab tab : tablist) {
+                                if (tab.isEnabled()) {
+                                    if (tab.isSelected()) {
+                                        out.print("<li><div id=\"tabSelected\">" + tab.getTitle() + "</div></li>\n");
+                                    } else {
+                                        out.print("<li><a href=\"" + request.getContextPath() + tab.getLink() + "\">" + tab.getTitle() + "</a></li>\n");
                                     }
                                 }
-                    %>
-                </ul>
-            </div>
+                            }
+                %>
+            </ul>
 
             <div id="content">
                 <decorator:body />
             </div>
 
-            <%
-                        if (session.getAttribute("user") != null) {
-            %>
-            <div style="padding-top: 1em; text-align: right;">
-                <form action="<%= request.getContextPath()%>/logout" method="post">
-                    <input class="button" type="submit" name="logout" value="Log out" />
-                </form>
-            </div>
-            <%
-                        }
-            %>
         </div>
 
     </body>
