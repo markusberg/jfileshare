@@ -5,7 +5,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import javax.servlet.ServletException;
@@ -53,13 +52,8 @@ public class LoginFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
         HttpSession session = req.getSession();
 
-        resp.setHeader("Pragma", "no-cache");
-        resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
-        resp.setDateHeader("Expires", -1);
-        resp.setDateHeader("Last-Modified", System.currentTimeMillis() - 1000 * 60 * 30);
         if (CheckUser(req, session)) {
             chain.doFilter(request, response);
         } else {

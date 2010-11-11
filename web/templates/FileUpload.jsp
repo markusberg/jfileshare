@@ -7,16 +7,29 @@
 
         <script type="text/javascript">
 
+            function uploadComplete(success) {
+                clearTimeout(uploadProgress);
+                LogoutTimer.start();
+                ToggleVisibility('uploadform');
+                ToggleVisibility('Status');
+
+                statusbox = document.createElement('div');
+                statusbox.setAttribute('id', success?'messagebox_info':'messagebox_warning');
+                statusbox.innerHTML = domIframe.document.getElementById("msg").innerHTML;
+                domContent.insertBefore(statusbox, domContent.firstChild);
+            }
+
             function processXMLResponse() {
                 if ( oAjax.readyState == 4 ) {
                     if ( oAjax.status == 200 ) {
                         var xml = oAjax.responseXML;
                         var bytesRead = xml.getElementsByTagName("bytesRead")[0].firstChild.data;
                         var bytesTotal = xml.getElementsByTagName("bytesTotal")[0].firstChild.data;
-                        var completion = bytesRead/bytesTotal;
-
-                        domStatusText.innerHTML = "Upload status: " + Math.ceil(completion*100) + "% ("+ humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
-                        changeWidth( completion );
+                        if (bytesTotal != 0) {
+                            var completion = bytesRead/bytesTotal;
+                            domStatusText.innerHTML = "Upload status: " + Math.floor(completion*100) + "% ("+ humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
+                            changeWidth( completion );
+                        }
                         oAjax = null;
                     } else {
                         alert( "Error: " + oAjax.statusText );
@@ -26,7 +39,7 @@
 
 
             function checkUploadProgress() {
-                var url = urlBase + "/ajax/uploadprogress";
+                var url = contextPath + "/ajax/filereceiver";
 
                 if ( oAjax != null ) {
                     // A request is already in progress.
@@ -52,7 +65,7 @@
 
             function changeWidth( completion ) {
                 var iWidth = domProgressBar.offsetWidth-2;
-                var iProgress = Math.ceil( completion * iWidth );
+                var iProgress = Math.floor( completion * iWidth );
                 if ( iProgress > iWidth ) {
                     iProgress = iWidth;
                 }
@@ -70,22 +83,29 @@
             }
 
             function initUpload() {
-                clearTimeout(logoutTimer);
+                LogoutTimer.stop();
                 ToggleVisibility('uploadform');
                 ToggleVisibility('Status');
                 domProgressBar = document.getElementById("ProgressBar");
                 domBar = document.getElementById("Bar");
                 domStatusText = document.getElementById("StatusText");
                 domIdUpload = document.getElementById("upid");
-                setInterval('checkUploadProgress()', 1000);
+                uploadProgress = setInterval("checkUploadProgress()", 1000);
+                domIframe = document.getElementById("uploadFrame").contentWindow;
+                domContent = document.getElementById("content");
+
+                if ( domContent.firstChild.id != 'uploadform') {
+                    domContent.removeChild(domContent.firstChild);
+                }
             }
 
             var domProgressBar;
             var domBar;
             var domStatusText;
             var domIdUpload;
-            var uploadstatus;
-            var urlBase = "<%= request.getContextPath()%>";
+            var domIframe;
+            var domContent;
+            var uploadProgress;
             var oAjax = null;
 
         </script>
@@ -95,9 +115,7 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <div id="uploadform" style="display: block;">
-            <form action="<%= request.getContextPath()%>/file/upload/" method="post" onsubmit="initUpload();" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="fileupload" />
-
+            <form action="<%= request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="uploadFrame" enctype="multipart/form-data">
                 <table>
                     <tr>
                         <th style="text-align:right;">Select file to upload:</th>
@@ -131,7 +149,7 @@
                 <div id="Bar"></div>
             </div>
         </div>
-
+        <iframe name="uploadFrame" id="uploadFrame" src="" style="display: none;"></iframe>
     </body>
 
 </html>

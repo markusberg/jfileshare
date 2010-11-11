@@ -15,21 +15,15 @@
 
         <title>SECTRA file distribution facility <decorator:title /></title>
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=3" type="text/css" />
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=2"></script>
-
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
                     // Add javascript for session timeout
                     if (user != null) {
         %>
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=3"></script>
         <script type="text/javascript">
-            function renewSessionTimeout(idTimeout) {
-                if (idTimeout!=null) {
-                    clearTimeout(idTimeout);
-                }
-                return setTimeout(function() { window.location="<%=request.getContextPath()%>/logout?reason=inactivity"; }, 1000*60*30);
-            }
-            var logoutTimer = renewSessionTimeout(null);
+            var contextPath = "<%=request.getContextPath()%>";
+            LogoutTimer.start();
         </script>
         <%
                     }
@@ -97,7 +91,6 @@
                     Currently logged in as <%=user.getUsername()%> ::
                     <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Preferences</a> ::
                     <a href="#" onclick="document.logout.submit()">Log out</a>
-                    <!-- input type="submit" name="logout" value="Log out" -->
                 </form>
 
             </div>

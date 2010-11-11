@@ -26,3 +26,17 @@ function getAjaxObject() {
     }
     return oAjax;
 }
+
+var LogoutTimer = (function(){
+    var idTimer;
+    return {
+        start: function() {
+            idTimer = setTimeout(function() {
+                window.location=contextPath+"/logout?reason=inactivity";
+            }, 1000*60*30);
+        },
+        stop: function() {
+            clearTimeout(idTimer);
+        }
+    };
+})();

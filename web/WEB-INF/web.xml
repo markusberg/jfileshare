@@ -38,7 +38,6 @@
         <filter-name>setcharacterencoding</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <!-- Authentication filters -->
     <filter-mapping>
         <filter-name>logout</filter-name>
@@ -134,8 +133,8 @@
         <servlet-class>com.sectra.jfileshare.servlets.UserViewServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>AjaxUploadProgress</servlet-name>
-        <servlet-class>com.sectra.jfileshare.ajax.UploadProgressServlet</servlet-class>
+        <servlet-name>AjaxFileReceiver</servlet-name>
+        <servlet-class>com.sectra.jfileshare.ajax.FileReceiverServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>PasswordReset</servlet-name>
@@ -202,8 +201,8 @@
         <url-pattern>/user/view/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>AjaxUploadProgress</servlet-name>
-        <url-pattern>/ajax/uploadprogress</url-pattern>
+        <servlet-name>AjaxFileReceiver</servlet-name>
+        <url-pattern>/ajax/filereceiver</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>PasswordReset</servlet-name>
