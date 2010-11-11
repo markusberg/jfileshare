@@ -40,7 +40,7 @@
                 </tr>
                 <tr>
                     <th>Password: </th>
-                    <td><input type="password" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>"/><span class="note">(Leave password fields empty to keep the existing password)</span></td>
+                    <td><input type="password" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>"/><span class="note">Note: leave blank in order to keep existing password unchanged</span></td>
                 </tr>
                 <tr>
                     <th>Verify password: </th>

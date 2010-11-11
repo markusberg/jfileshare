@@ -76,7 +76,7 @@
                     <td>
                         <div id="Password"<%=displaystyle%>>
                             <input type="text" name="sPassword" />
-                            <span class="note">Note: leave blank in order to keep password unchanged</span>
+                            <span class="note">Note: leave blank in order to keep existing password unchanged</span>
                         </div>
                     </td>
                 </tr>
