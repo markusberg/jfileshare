@@ -7,14 +7,14 @@
 
         <script type="text/javascript">
 
-            function uploadComplete(success) {
+            function uploadComplete(status) {
                 clearTimeout(uploadProgress);
                 LogoutTimer.start();
                 ToggleVisibility('uploadform');
                 ToggleVisibility('Status');
 
                 statusbox = document.createElement('div');
-                statusbox.setAttribute('id', success?'messagebox_info':'messagebox_warning');
+                statusbox.setAttribute('id', 'messagebox_'+status);
                 statusbox.innerHTML = domIframe.document.getElementById("msg").innerHTML;
                 domContent.insertBefore(statusbox, domContent.firstChild);
             }

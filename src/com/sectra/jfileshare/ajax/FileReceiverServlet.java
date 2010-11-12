@@ -154,7 +154,7 @@ public class FileReceiverServlet extends HttpServlet {
                     } else {
                         // This is the file you're looking for
                         file.setName(item.getName());
-                        file.setType(item.getContentType());
+                        file.setType(item.getContentType()==null?"application/octet-stream":item.getContentType());
                         file.setOwnerUid(currentUser.getUid());
 
                         try {
@@ -195,25 +195,26 @@ public class FileReceiverServlet extends HttpServlet {
                 file.setDaysToKeep(DAYS_FILE_RETENTION);
 
                 if (!file.save(ds)) {
-                    req.setAttribute("javascript", "Unable to contact the database");
+                    req.setAttribute("msg", "Unable to contact the database");
+                    req.setAttribute("javascript", "parent.uploadComplete('critical');");
                 } else {
                     File tempfile = new File(this.PATH_TEMP, Integer.toString(currentUser.getUid()));
                     File finalfile = new File(this.PATH_STORE, Integer.toString(file.getFid()));
                     tempfile.renameTo(finalfile);
                     logger.info("User " + currentUser.getUid() + " storing file \"" + file.getName() + "\" in the filestore");
                     req.setAttribute("msg", "File '" + file.getName() + "' uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
-                    req.setAttribute("javascript", "parent.uploadComplete(true);");
+                    req.setAttribute("javascript", "parent.uploadComplete('info');");
                 }
             } catch (SizeLimitExceededException e) {
                 req.setAttribute("msg", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(FILE_SIZE_MAX));
-                req.setAttribute("javascript", "parent.uploadComplete(false);");
+                req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (FileUploadException e) {
                 req.setAttribute("msg", "Unable to upload file");
-                req.setAttribute("javascript", "parent.uploadComplete(false);");
+                req.setAttribute("javascript", "parent.uploadComplete('warning');");
                 e.printStackTrace();
             } catch (Exception e) {
                 req.setAttribute("msg", "Unable to upload file");
-                req.setAttribute("javascript", "parent.uploadComplete(false);");
+                req.setAttribute("javascript", "parent.uploadComplete('warning');");
                 e.printStackTrace();
             } finally {
                 session.setAttribute("uploadListener", null);

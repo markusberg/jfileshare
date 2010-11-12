@@ -20,7 +20,7 @@
                     // Add javascript for session timeout
                     if (user != null) {
         %>
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=3"></script>
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=4"></script>
         <script type="text/javascript">
             var contextPath = "<%=request.getContextPath()%>";
             LogoutTimer.start();
@@ -89,7 +89,7 @@
             <div id="userinfo">
                 <form name="logout" action="<%= request.getContextPath()%>/logout" method="post">
                     Currently logged in as <%=user.getUsername()%> ::
-                    <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Preferences</a> ::
+                    <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Settings</a> ::
                     <a href="#" onclick="document.logout.submit()">Log out</a>
                 </form>
 
