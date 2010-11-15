@@ -2,10 +2,10 @@
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>JFileShare webapp</display-name>
     <description>
-      This is jfileshare. A webbapp for sharing large (or small) files with
-      others over the internet. It was written by Zoran Pucar.
-      Converted to Tomcat and Ant by Markus Berg [markus.berg@sectra.se]
-      Completely rewritten by Markus Berg [markus.berg@sectra.se]
+        This is jfileshare. A webbapp for sharing large (or small) files with
+        others over the internet. It was written by Zoran Pucar.
+        Converted to Tomcat and Ant by Markus Berg [markus.berg@sectra.se]
+        Completely rewritten by Markus Berg [markus.berg@sectra.se]
     </description>
     <!-- Filter definitions -->
     <filter>
@@ -36,7 +36,32 @@
     <!-- Character encoding filter -->
     <filter-mapping>
         <filter-name>setcharacterencoding</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/ajax/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/user/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/file/edit/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/file/upload/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/file/view/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/passwordreset/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>setcharacterencoding</filter-name>
+        <url-pattern>/</url-pattern>
     </filter-mapping>
     <!-- Authentication filters -->
     <filter-mapping>
