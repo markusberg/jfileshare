@@ -16,7 +16,7 @@
 
                 statusbox = document.createElement('div');
                 statusbox.setAttribute('id', 'messagebox_'+status);
-                statusbox.innerHTML = domUploadIframe.document.getElementById("msg").innerHTML;
+                statusbox.innerHTML = domUploadIFrame.document.getElementById("msg").innerHTML;
                 domContent.insertBefore(statusbox, domContent.firstChild);
             }
 
@@ -81,7 +81,7 @@
                 domBar = document.getElementById("Bar");
                 domStatusText = document.getElementById("StatusText");
                 uploadProgress = setInterval("checkUploadProgress()", 1000);
-                domUploadIframe = document.getElementById("UploadIframe").contentWindow;
+                domUploadIFrame = document.getElementById("UploadIFrame").contentWindow;
                 domContent = document.getElementById("content");
 
                 if ( domContent.firstChild.id != 'UploadForm') {
@@ -92,7 +92,7 @@
             var domProgressBar;
             var domBar;
             var domStatusText;
-            var domUploadIframe;
+            var domUploadIFrame;
             var domContent;
             var uploadProgress;
             var oAjax = null;
@@ -104,7 +104,7 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <div id="UploadForm" style="display: block;">
-            <form action="<%=request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="uploadFrame" enctype="multipart/form-data">
+            <form action="<%=request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="UploadIFrame" enctype="multipart/form-data">
                 <table>
                     <tr>
                         <th style="text-align:right;">Select file to upload:</th>
@@ -138,7 +138,7 @@
                 <div id="Bar"></div>
             </div>
         </div>
-        <iframe name="UploadIframe" id="UploadIframe" src="" style="display: none;"></iframe>
+        <iframe name="UploadIFrame" id="UploadIFrame" src="" style="display: none;"></iframe>
     </body>
 
 </html>
