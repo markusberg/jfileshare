@@ -112,6 +112,9 @@ public class FileItem {
     }
 
     public void setName(String name) {
+        if (name.contains("\\")) {
+            name = name.substring(name.lastIndexOf("\\")+1);
+        }
         this.name = name;
     }
 
