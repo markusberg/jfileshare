@@ -10,12 +10,13 @@
             function uploadComplete(status) {
                 clearTimeout(uploadProgress);
                 LogoutTimer.start();
-                ToggleVisibility('uploadform');
+                updateProgress(0, 0);
+                ToggleVisibility('UploadForm');
                 ToggleVisibility('Status');
 
                 statusbox = document.createElement('div');
                 statusbox.setAttribute('id', 'messagebox_'+status);
-                statusbox.innerHTML = domIframe.document.getElementById("msg").innerHTML;
+                statusbox.innerHTML = domUploadIframe.document.getElementById("msg").innerHTML;
                 domContent.insertBefore(statusbox, domContent.firstChild);
             }
 
@@ -25,11 +26,7 @@
                         var xml = oAjax.responseXML;
                         var bytesRead = xml.getElementsByTagName("bytesRead")[0].firstChild.data;
                         var bytesTotal = xml.getElementsByTagName("bytesTotal")[0].firstChild.data;
-                        if (bytesTotal != 0) {
-                            var completion = bytesRead/bytesTotal;
-                            domStatusText.innerHTML = "Upload status: " + Math.floor(completion*100) + "% ("+ humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
-                            changeWidth( completion );
-                        }
+                        updateProgress(bytesRead, bytesTotal);
                         oAjax = null;
                     } else {
                         alert( "Error: " + oAjax.statusText );
@@ -40,13 +37,11 @@
 
             function checkUploadProgress() {
                 var url = contextPath + "/ajax/filereceiver";
-
                 if ( oAjax != null ) {
                     // A request is already in progress.
                     return;
                 }
                 oAjax = getAjaxObject();
-                
                 oAjax.onreadystatechange = processXMLResponse;
                 oAjax.open("GET", url, true);
                 oAjax.send(null);
@@ -59,42 +54,37 @@
                 if (iBytes < (1024*1024)) {
                     return (iBytes/1024).toFixed(2) + " KiB";
                 }
-
                 return (iBytes/1024/1024).toFixed(2) + " MiB";
             }
 
-            function changeWidth( completion ) {
-                var iWidth = domProgressBar.offsetWidth-2;
-                var iProgress = Math.floor( completion * iWidth );
-                if ( iProgress > iWidth ) {
-                    iProgress = iWidth;
+            function updateProgress(bytesRead, bytesTotal) {
+                var completion;
+                var statusText;
+                if (bytesTotal == 0) {
+                    completion = 0;
+                    statusText = "Not yet started";
+                } else {
+                    completion = bytesRead/bytesTotal;
+                    statusText = Math.floor(completion*100) + "% (" + humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
                 }
-                domBar.style.width = iProgress + "px";
-            }
 
-            // This is incomplete... might finish this in the future.
-            // The plan is to allow several simultaneous uploads. When we do,
-            // we will need some mechanism to separate the uploadlisteners
-            // from one another.
-            function upidNegotiate() {
-                var iRandom = Math.floor(Math.random()*1000);
-                domIdUpload.value=iRandom;
-                idUpload = iRandom;
+                var iWidth = domProgressBar.offsetWidth-2;
+                domBar.style.width = Math.floor(completion*iWidth) + "px";
+                domStatusText.innerHTML = statusText;
             }
 
             function initUpload() {
                 LogoutTimer.stop();
-                ToggleVisibility('uploadform');
+                ToggleVisibility('UploadForm');
                 ToggleVisibility('Status');
                 domProgressBar = document.getElementById("ProgressBar");
                 domBar = document.getElementById("Bar");
                 domStatusText = document.getElementById("StatusText");
-                domIdUpload = document.getElementById("upid");
                 uploadProgress = setInterval("checkUploadProgress()", 1000);
-                domIframe = document.getElementById("uploadFrame").contentWindow;
+                domUploadIframe = document.getElementById("UploadIframe").contentWindow;
                 domContent = document.getElementById("content");
 
-                if ( domContent.firstChild.id != 'uploadform') {
+                if ( domContent.firstChild.id != 'UploadForm') {
                     domContent.removeChild(domContent.firstChild);
                 }
             }
@@ -102,8 +92,7 @@
             var domProgressBar;
             var domBar;
             var domStatusText;
-            var domIdUpload;
-            var domIframe;
+            var domUploadIframe;
             var domContent;
             var uploadProgress;
             var oAjax = null;
@@ -114,8 +103,8 @@
 
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
-        <div id="uploadform" style="display: block;">
-            <form action="<%= request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="uploadFrame" enctype="multipart/form-data">
+        <div id="UploadForm" style="display: block;">
+            <form action="<%=request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="uploadFrame" enctype="multipart/form-data">
                 <table>
                     <tr>
                         <th style="text-align:right;">Select file to upload:</th>
@@ -144,12 +133,12 @@
             </form>
         </div>
         <div id="Status" style="display: none;">
-            <div id="StatusText">Status: </div>
+            <div>Upload status: <span id="StatusText">Not yet started</span></div>
             <div id="ProgressBar">
                 <div id="Bar"></div>
             </div>
         </div>
-        <iframe name="uploadFrame" id="uploadFrame" src="" style="display: none;"></iframe>
+        <iframe name="UploadIframe" id="UploadIframe" src="" style="display: none;"></iframe>
     </body>
 
 </html>
