@@ -14,13 +14,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=8" />
 
         <title>SECTRA file distribution facility <decorator:title /></title>
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=3" type="text/css" />
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.2" type="text/css" />
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
                     // Add javascript for session timeout
                     if (user != null) {
         %>
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=4"></script>
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=1.2"></script>
         <script type="text/javascript">
             var contextPath = "<%=request.getContextPath()%>";
             LogoutTimer.start();

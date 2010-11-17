@@ -441,7 +441,7 @@ public class UserItem {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.uid=? order by FileItems.name DESC;");
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.uid=? order by FileItems.name ASC;");
             st.setInt(1, this.getUid());
             st.execute();
             ResultSet rs = st.getResultSet();
