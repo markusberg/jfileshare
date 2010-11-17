@@ -26,6 +26,11 @@ body {
     clear: both;
 }
 
+#footer {
+    text-align: right;
+    font-size: 0.8em;
+}
+
 input.textentry {
     width: 15em;
 }

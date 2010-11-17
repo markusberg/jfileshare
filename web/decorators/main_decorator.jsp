@@ -117,6 +117,9 @@
                 <decorator:body />
             </div>
 
+            <div id="footer">
+                jfileshare version 1.2
+            </div>
         </div>
 
     </body>
