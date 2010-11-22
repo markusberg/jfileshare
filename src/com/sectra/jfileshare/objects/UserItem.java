@@ -550,7 +550,7 @@ public class UserItem {
 
     /**
      * Does the user enjoy edit rights to the specified file
-     * @param oFile
+     * @param file
      * @return True if the user has access to the provided file
      */
     public boolean hasEditAccessTo(FileItem file) {
@@ -567,7 +567,7 @@ public class UserItem {
 
     /**
      * Does the user enjoy edit rights to the specified user
-     * @param User
+     * @param user
      * @return True if the user has access to the provided user
      */
     public boolean hasEditAccessTo(UserItem user) {
