@@ -553,15 +553,15 @@ public class UserItem {
      * @param oFile
      * @return True if the user has access to the provided file
      */
-    public boolean hasEditAccessTo(FileItem oFile) {
+    public boolean hasEditAccessTo(FileItem file) {
         if (this.isAdmin()) {
-            logger.info("Administrator access to edit file " + oFile.getFid());
+            logger.info("Administrator access to edit file " + file.getFid());
             return true;
-        } else if (oFile.getOwnerUid().equals(this.getUid())) {
-            logger.info("Owner access to edit file " + oFile.getFid());
+        } else if (file.getOwnerUid().equals(this.getUid())) {
+            logger.info("Owner access to edit file " + file.getFid());
             return true;
         }
-        logger.info("User " + this.getUserInfo() + " does not have edit access to file " + oFile.getFid());
+        logger.info("User " + this.getUserInfo() + " does not have edit access to file " + file.getFid());
         return false;
     }
 
@@ -570,18 +570,18 @@ public class UserItem {
      * @param User
      * @return True if the user has access to the provided user
      */
-    public boolean hasEditAccessTo(UserItem User) {
+    public boolean hasEditAccessTo(UserItem user) {
         if (this.isAdmin()) {
-            logger.info("Administrator access to edit user " + User.getUserInfo());
+            logger.info("Administrator access to edit user " + user.getUserInfo());
             return true;
-        } else if (User.getUidCreator().equals(this.getUid())) {
-            logger.info("Creator access to edit user " + User.getUserInfo());
+        } else if (user.getUidCreator().equals(this.getUid())) {
+            logger.info("Creator access to edit user " + user.getUserInfo());
             return true;
-        } else if (User.getUid().equals(this.getUid())) {
-            logger.info("Edit access to self granted to " + User.getUserInfo());
+        } else if (user.getUid().equals(this.getUid())) {
+            logger.info("Edit access to self granted to " + user.getUserInfo());
             return true;
         }
-        logger.info("User " + this.getUserInfo() + " does not have edit access to user " + User.getUserInfo());
+        logger.info("User " + this.getUserInfo() + " does not have edit access to user " + user.getUserInfo());
         return false;
     }
 }

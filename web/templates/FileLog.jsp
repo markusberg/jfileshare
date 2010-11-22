@@ -20,7 +20,7 @@
                 if (aDownloadLog.size() > 0) {
                     boolean even = false;
         %>
-        <p>The file <%= oFile.getName()%> has been downloaded <%=aDownloadLog.size()%> time(s).</p>
+        <p>The file <%= oFile.getName()%> has been downloaded <%=aDownloadLog.size()%> <%=aDownloadLog.size()==1?"time":"times"%>.</p>
         <table id="files">
             <tr>
                 <th>Time</th><th>IP</th>

@@ -76,7 +76,13 @@
                     <td>
                         <div id="Password"<%=displaystyle%>>
                             <input type="text" name="sPassword" />
+                            <% 
+                            if (oFile.getPwHash==null) {
+                            %>
                             <span class="note">Note: leave blank in order to keep existing password unchanged</span>
+                            <%
+                            }
+                            %>
                         </div>
                     </td>
                 </tr>

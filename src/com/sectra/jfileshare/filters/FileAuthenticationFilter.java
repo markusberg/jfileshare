@@ -73,7 +73,7 @@ public class FileAuthenticationFilter implements Filter {
             logger.info("File not found in database");
             req.setAttribute("message_critical", "File not found");
             filterconfig.getServletContext().getRequestDispatcher("/templates/404.jsp").forward(servletRequest, servletResponse);
-        } else if (oCurrentUser != null && !isAuthRequired(oCurrentUser, oFile)) {
+        } else if (oCurrentUser != null && oCurrentUser.hasEditAccessTo(oFile)) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else if (!oFile.isEnabled()) {
             logger.info("File found, but it's disabled");
@@ -99,23 +99,6 @@ public class FileAuthenticationFilter implements Filter {
         }
     }
 
-    /**
-     * Does the user have implicit access to this file?
-     * 
-     * @param oUser
-     * @param oFile
-     * @return
-     */
-    private boolean isAuthRequired(UserItem oUser, FileItem oFile) {
-        if (oUser.isAdmin()) {
-            logger.info("Administrator access to file " + oFile.getFid());
-            return false;
-        } else if (oFile.getOwnerUid().equals(oUser.getUid())) {
-            logger.info("Owner access to file " + oFile.getFid());
-            return false;
-        }
-        return true;
-    }
 
     private boolean authenticated(FileItem oFile, HttpSession session, HttpServletRequest req) {
         //First, are we authenticated for this file
@@ -128,10 +111,9 @@ public class FileAuthenticationFilter implements Filter {
             }
         }
 
-        // We need to authenticate, so are we logging in?
-        if (req.getParameter("sendpassword") != null) {
-            //We are logging in.. verify the password.
-            // if (utils.Jcrypt.crypt(oFile.getPwHash(), req.getParameter("FilePassword")).equals(oFile.getPwHash())) {
+        // We need to authenticate; do we have a password to authenticate?
+        if (req.getParameter("FilePassword") != null) {
+            // We are logging in.. verify the password.
             if (oFile.authenticated(req.getParameter("FilePassword"))) {
                 logger.info("Saving " + oFile.getFid() + " to authfiles in session ");
                 if (session.getAttribute("authfiles") != null) {
@@ -149,7 +131,6 @@ public class FileAuthenticationFilter implements Filter {
                 req.setAttribute("message_warning", "Incorrect password");
             }
         }
-
         return false;
     }
 }
