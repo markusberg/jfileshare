@@ -54,7 +54,7 @@ public class UserEditServlet extends HttpServlet {
         RequestDispatcher disp;
         String jspForward = "";
         HttpSession session = req.getSession();
-        UserItem CurrentUser = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
 
         UserItem User;
         Integer iUid = null;
@@ -66,14 +66,14 @@ public class UserEditServlet extends HttpServlet {
             iUid = Integer.parseInt(sUid);
             User = new UserItem(ds, iUid);
         } catch (NullPointerException e) {
-            User = CurrentUser;
+            User = currentUser;
         }
 
         if (User.getUid() == null) {
             logger.info("Attempting to modify nonexistent user");
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
             jspForward = "/templates/404.jsp";
-        } else if (!CurrentUser.hasEditAccessTo(User)) {
+        } else if (!currentUser.hasEditAccessTo(User)) {
             req.setAttribute("message_critical", "You do not have access to edit user " + User.getUserInfo());
             jspForward = "/templates/AccessDenied.jsp";
         } else {
@@ -211,7 +211,6 @@ public class UserEditServlet extends HttpServlet {
                 req.setAttribute("tab", "Edit user");
                 jspForward = "/templates/UserEdit.jsp";
             }
-
 
             disp = app.getRequestDispatcher(jspForward);
             disp.forward(req, resp);

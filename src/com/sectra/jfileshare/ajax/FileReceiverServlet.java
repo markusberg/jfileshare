@@ -81,7 +81,7 @@ public class FileReceiverServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
         HttpSession session = req.getSession();
         FileUploadListener listener = null;
-        StringBuffer buffy = new StringBuffer();
+        StringBuilder buffy = new StringBuilder();
         long bytesRead = 0L;
         long contentLength = 0L;
         logger.info("Upload progress is running");
@@ -100,8 +100,8 @@ public class FileReceiverServlet extends HttpServlet {
         } else {
             bytesRead = listener.getBytesRead();
             contentLength = listener.getContentLength();
-            buffy.append("\t<bytesRead>" + bytesRead + "</bytesRead>\n");
-            buffy.append("\t<bytesTotal>" + contentLength + "</bytesTotal>\n");
+            buffy.append("\t<bytesRead>").append(bytesRead).append("</bytesRead>\n");
+            buffy.append("\t<bytesTotal>").append(contentLength).append("</bytesTotal>\n");
         }
         buffy.append("</response>\n");
 
@@ -211,11 +211,9 @@ public class FileReceiverServlet extends HttpServlet {
             } catch (FileUploadException e) {
                 req.setAttribute("msg", "Unable to upload file");
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
-                e.printStackTrace();
             } catch (Exception e) {
                 req.setAttribute("msg", "Unable to upload file");
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
-                e.printStackTrace();
             } finally {
                 session.setAttribute("uploadListener", null);
             }
@@ -232,7 +230,7 @@ public class FileReceiverServlet extends HttpServlet {
      * @return ascii hexcode representation of input
      */
     private static String toHex(byte[] hashValue) {
-        StringBuffer hexString = new StringBuffer();
+        StringBuilder hexString = new StringBuilder();
         for (int i = 0; i < hashValue.length; i++) {
             String hex = Integer.toHexString(0xFF & hashValue[i]);
             if (hex.length() == 1) {

@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.filters;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import com.sectra.jfileshare.objects.UserItem;
 
 public class LogoutFilter implements Filter {
+
     private FilterConfig filterconfig;
     private static final Logger logger =
             Logger.getLogger(LogoutFilter.class.getName());
@@ -32,22 +34,21 @@ public class LogoutFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         UserItem user = (UserItem) request.getSession().getAttribute("user");
         if (user != null) {
-            logger.info("Logging out user " + user.getUsername());
             request.getSession().removeAttribute("user");
             request.getSession().removeAttribute("authfiles");
             request.getSession().removeAttribute("uploadListener");
-            // request.setAttribute("address", request.getContextPath());
             request.setAttribute("message", "You are now logged out");
-            // request.setAttribute("tab", "Logout");
         }
         if (request.getParameter("reason") != null && request.getParameter("reason").equals("inactivity")) {
+            logger.log(Level.INFO, "Logging out user {0} due to inactivity", user.getUserInfo());
             request.setAttribute("message", "You have been logged out due to inactivity");
+        } else {
+            logger.log(Level.INFO, "User {0} logged out", user.getUserInfo());
         }
         filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(servletRequest, servletResponse);
     }
 
     @Override
     public void destroy() {
-        logger.info("User logged out");
     }
 }

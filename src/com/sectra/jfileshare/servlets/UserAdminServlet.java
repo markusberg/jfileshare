@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -72,7 +73,7 @@ public class UserAdminServlet extends HttpServlet {
     }
 
     private ArrayList getAllUsers() {
-        ArrayList<UserItem> aUsers = new ArrayList<UserItem>();
+        ArrayList<UserItem> allUsers = new ArrayList<UserItem>();
         Connection dbConn = null;
 
         try {
@@ -96,10 +97,10 @@ public class UserAdminServlet extends HttpServlet {
                 user.setSumFilesize(rs.getDouble("sumFilesize"));
                 user.setSumFiles(rs.getInt("sumFiles"));
                 user.setSumChildren(rs.getInt("sumChildren"));
-                aUsers.add(user);
+                allUsers.add(user);
             }
         } catch (SQLException e) {
-            logger.severe("Exception: " + e.toString());
+            logger.log(Level.SEVERE, "Exception: {0}", e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -109,10 +110,7 @@ public class UserAdminServlet extends HttpServlet {
             }
         }
 
-        if (aUsers.isEmpty()) {
-            return null;
-        }
-        logger.info("Found " + aUsers.size() + " users ");
-        return aUsers;
+        logger.log(Level.INFO, "Found {0} users ", allUsers.size());
+        return allUsers;
     }
 }

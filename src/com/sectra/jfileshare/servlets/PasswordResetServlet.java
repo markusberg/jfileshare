@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 import java.util.Properties;
@@ -72,10 +73,10 @@ public class PasswordResetServlet extends HttpServlet {
             SMTP_SENDER.validate();
 
         } catch (NamingException e) {
-            logger.severe("Throwing exception: " + e.toString());
+            logger.log(Level.SEVERE, "Throwing exception: {0}", e.toString());
             throw new ServletException(e);
         } catch (AddressException e) {
-            logger.warning("SMTP_SENDER address is incorrect: " + e.toString());
+            logger.log(Level.WARNING, "SMTP_SENDER address is incorrect: {0}", e.toString());
         }
     }
 
@@ -122,7 +123,7 @@ public class PasswordResetServlet extends HttpServlet {
                 urlPrefix = httpScheme + "://"
                         + serverName
                         + (serverPort != null ? ":" + serverPort.toString() : "");
-                logger.info("No url prefix specified. Calculating: " + urlPrefix);
+                logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", urlPrefix);
             }
 
 
@@ -170,11 +171,11 @@ public class PasswordResetServlet extends HttpServlet {
             TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());
 
             ArrayList<String> errors = new ArrayList<String>();
-            UserItem oUser = new UserItem(datasource, (String) UserInfo.get("username"));
+            UserItem user = new UserItem(datasource, (String) UserInfo.get("username"));
 
             String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
             String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-            errors.addAll(oUser.validatePassword(password1, password2));
+            errors.addAll(user.validatePassword(password1, password2));
 
             if (errors.size() > 0) {
                 String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
@@ -187,20 +188,21 @@ public class PasswordResetServlet extends HttpServlet {
                 req.setAttribute("key", UserInfo.get("key"));
                 disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
             } else {
-                oUser.setUsername((String) UserInfo.get("username"));
-                oUser.setEmail((String) UserInfo.get("emailaddress"));
-                if (oUser.getUid() == null) {
+                user.setUsername((String) UserInfo.get("username"));
+                user.setEmail((String) UserInfo.get("emailaddress"));
+                if (user.getUid() == null) {
                     // Account didn't exist prior to pwreset attempt.
                     // Thus, this is a
                     // Sectra Corporate user
-                    oUser.setUserType(oUser.TYPE_INTERNAL);
+                    user.setUserType(UserItem.TYPE_INTERNAL);
                 }
-                oUser.save(datasource);
+                user.save(datasource);
                 req.setAttribute("message", "Password for user <strong>" + (String) UserInfo.get("username") + "</strong> has been reset. You can now login with your newly selected password.");
                 this.DropRecoveryKey((String) UserInfo.get("key"));
             }
 
             if (1 == 0) {
+                // FIXME: convert this to some form of exception handling
                 req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             }
             disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
@@ -260,7 +262,7 @@ public class PasswordResetServlet extends HttpServlet {
 
             return true;
         } catch (MessagingException e) {
-            logger.warning("Unable to send notification email: " + e.toString());
+            logger.log(Level.WARNING, "Unable to send notification email: {0}", e.toString());
             return false;
         }
     }
@@ -273,8 +275,7 @@ public class PasswordResetServlet extends HttpServlet {
             PreparedStatement st = dbConn.prepareStatement("delete from PasswordReset where `key`=?");
             st.setString(1, key);
             st.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
         } finally {
             if (dbConn != null) {
                 try {
@@ -297,8 +298,7 @@ public class PasswordResetServlet extends HttpServlet {
             st.setString(2, emailaddress);
             st.setString(3, key);
             st.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
         } finally {
             if (dbConn != null) {
                 try {
@@ -337,7 +337,7 @@ public class PasswordResetServlet extends HttpServlet {
                     UserInfo.put("emailaddress", rs.getString("emailaddress"));
                 }
             } catch (SQLException e) {
-                logger.severe("Unable to connect to database: " + e.toString());
+                logger.log(Level.SEVERE, "Unable to connect to database: {0}", e.toString());
             } finally {
                 if (dbConn != null) {
                     try {

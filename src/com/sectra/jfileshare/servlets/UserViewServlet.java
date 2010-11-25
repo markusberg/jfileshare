@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import java.util.logging.Level;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +71,7 @@ public class UserViewServlet extends HttpServlet {
         } catch (NamingException e) {
             throw new ServletException(e);
         } catch (AddressException e) {
-            logger.warning("SMTP_SENDER address is invalid: " + e.toString());
+            logger.log(Level.WARNING, "SMTP_SENDER address is invalid: {0}", e.toString());
         }
     }
 
@@ -83,46 +84,44 @@ public class UserViewServlet extends HttpServlet {
         RequestDispatcher disp;
 
         String reqUid = req.getPathInfo();
-        Integer iUid;
+        Integer uid;
 
         try {
             reqUid = reqUid.replaceAll("/", "");
             if (reqUid.equals("")) {
-                iUid = oCurrentUser.getUid();
+                uid = oCurrentUser.getUid();
             } else {
-                iUid = Integer.parseInt(reqUid);
+                uid = Integer.parseInt(reqUid);
             }
-            logger.info("Requesting uid: " + reqUid);
+            logger.log(Level.INFO, "Requesting uid: {0}", reqUid);
         } catch (NumberFormatException n) {
-            iUid = -1;
+            uid = -1;
         } catch (NullPointerException n) {
-            iUid = oCurrentUser.getUid();
+            uid = oCurrentUser.getUid();
         }
 
-        UserItem oUser = new UserItem(ds, iUid);
+        UserItem user = new UserItem(ds, uid);
 
-        if (oUser.getUid() != null && oUser.getUid() == -2) {
+        if (user.getUid() != null && user.getUid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (oUser.getUid() == null) {
+        } else if (user.getUid() == null) {
             disp = app.getRequestDispatcher("/templates/404.jsp");
             req.setAttribute("message_warning", "User not found (" + reqUid + ")");
         } else if (!(oCurrentUser.isAdmin()
-                || oUser.getUidCreator().equals(oCurrentUser.getUid())
-                || oUser.getUid().equals(oCurrentUser.getUid()))) {
-            // logger.info("Currentuser: " + Integer.toString(oCurrentUser.getUid()));
-            // logger.info("Creator uid: " + Integer.toString(oUser.getUidCreator()));
+                || user.getUidCreator().equals(oCurrentUser.getUid())
+                || user.getUid().equals(oCurrentUser.getUid()))) {
             req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
-            if (!oCurrentUser.getUid().equals(iUid)) {
-                req.setAttribute("tab", oUser.getUsername());
+            if (!oCurrentUser.getUid().equals(uid)) {
+                req.setAttribute("tab", user.getUsername());
             }
 
-            req.setAttribute("oUser", oUser);
-            req.setAttribute("aFiles", oUser.getFiles(ds));
-            req.setAttribute("aUsers", oUser.getChildren(ds));
+            req.setAttribute("oUser", user);
+            req.setAttribute("aFiles", user.getFiles(ds));
+            req.setAttribute("aUsers", user.getChildren(ds));
             disp = app.getRequestDispatcher("/templates/UserView.jsp");
         }
         disp.forward(req, resp);
@@ -180,7 +179,7 @@ public class UserViewServlet extends HttpServlet {
                         URL_PREFIX = httpScheme + "://"
                                 + serverName
                                 + (serverPort != null ? ":" + serverPort.toString() : "");
-                        logger.info("No url prefix specified. Calculating: " + URL_PREFIX);
+                        logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", URL_PREFIX);
                     }
                     if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
                         req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
@@ -251,7 +250,7 @@ public class UserViewServlet extends HttpServlet {
             Transport.send(msg);
             return true;
         } catch (MessagingException e) {
-            logger.warning("Unable to send notification email: " + e.toString());
+            logger.log(Level.WARNING, "Unable to send notification email: {0}", e.toString());
             return false;
         }
     }

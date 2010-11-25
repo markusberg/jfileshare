@@ -71,9 +71,9 @@ public class FileLogServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
             req.setAttribute("oFile", oFile);
-            ArrayList aDownloadLog = oFile.getLogs(ds);
-            req.setAttribute("aDownloadLog", aDownloadLog);
-            if (aDownloadLog.size() == 0) {
+            ArrayList downloadLogs = oFile.getLogs(ds);
+            req.setAttribute("aDownloadLog", downloadLogs);
+            if (downloadLogs.isEmpty()) {
                 req.setAttribute("message", "This file (" + oFile.getName() + ") has never been downloaded");
             }
             req.setAttribute("tab", "File log");

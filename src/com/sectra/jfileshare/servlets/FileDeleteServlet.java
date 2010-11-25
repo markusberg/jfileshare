@@ -4,7 +4,7 @@ import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 
@@ -16,8 +16,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
 import javax.servlet.RequestDispatcher;
 
@@ -87,7 +85,7 @@ public class FileDeleteServlet extends HttpServlet {
             }
         } else {
             req.setAttribute("message_warning", "You don't have access to delete that file");
-            logger.info("Illegal file delete by " + User.getUserInfo());
+            logger.log(Level.INFO, "Illegal file delete attempted by {0}", User.getUserInfo());
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         }
         disp.forward(req, resp);

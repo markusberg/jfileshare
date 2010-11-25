@@ -1,6 +1,7 @@
 package com.sectra.jfileshare.servlets;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -24,15 +25,15 @@ public class LinkCompatibilityServlet extends HttpServlet {
 
         String PathInfo = req.getPathInfo().substring(1);
         String md5sum = PathInfo.split("_SECTRA_")[0];
-        int iFid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
+        int fid = Integer.parseInt(PathInfo.split("_SECTRA_")[1]);
 
-        logger.info("Access requested to file: " + iFid);
+        logger.log(Level.INFO, "Access requested to file: {0}", fid);
 
         String url = req.getContextPath();
         if (req.getServletPath().equals("/download/view")) {
-            url += "/file/view/" + iFid + "?md5=" + md5sum;
+            url += "/file/view/" + fid + "?md5=" + md5sum;
         } else if (req.getServletPath().equals("/download/get")) {
-            url += "/file/download/" + iFid + "?md5=" + md5sum;
+            url += "/file/download/" + fid + "?md5=" + md5sum;
         }
         resp.sendRedirect(url);
     }

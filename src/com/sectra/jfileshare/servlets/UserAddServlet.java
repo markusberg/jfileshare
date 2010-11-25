@@ -4,6 +4,7 @@ import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 import java.util.ArrayList;
@@ -51,12 +52,12 @@ public class UserAddServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         RequestDispatcher disp;
         ServletContext app = getServletContext();
 
-        if (oCurrentUser.isExternal()) {
-            logger.info(oCurrentUser.getUserInfo() + " has insufficient access to create users");
+        if (currentUser.isExternal()) {
+            logger.log(Level.INFO, "{0} has insufficient access to create users", currentUser.getUserInfo());
             req.setAttribute("message_warning", "You do not have access to create users");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
@@ -85,12 +86,12 @@ public class UserAddServlet extends HttpServlet {
         } else if (req.getParameter("action") != null
                 && req.getParameter("action").equals("adduser")) {
             HttpSession session = req.getSession();
-            UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+            UserItem currentUser = (UserItem) session.getAttribute("user");
             RequestDispatcher disp;
             ServletContext app = getServletContext();
 
-            if (oCurrentUser.isExternal()) {
-                logger.info(oCurrentUser.getUserInfo() + " has insufficient access to create users");
+            if (currentUser.isExternal()) {
+                logger.log(Level.INFO, "{0} has insufficient access to create users", currentUser.getUserInfo());
                 req.setAttribute("message_warning", "You do not have access to create users");
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             } else {
@@ -134,7 +135,7 @@ public class UserAddServlet extends HttpServlet {
 
                 // If oCurrentUser is an admin, set the requested user type
                 int usertype = UserItem.TYPE_EXTERNAL;
-                if (oCurrentUser.isAdmin()) {
+                if (currentUser.isAdmin()) {
                     int reqUsertype = Integer.parseInt(req.getParameter("usertype"));
                     if (reqUsertype == UserItem.TYPE_ADMIN
                             || reqUsertype == UserItem.TYPE_EXTERNAL
@@ -156,7 +157,7 @@ public class UserAddServlet extends HttpServlet {
                     disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
                 } else {
                     // Set the creator, username, and save the user
-                    oUser.setUidCreator(oCurrentUser.getUid());
+                    oUser.setUidCreator(currentUser.getUid());
                     oUser.setUsername(username);
 
                     if (oUser.save(datasource)) {

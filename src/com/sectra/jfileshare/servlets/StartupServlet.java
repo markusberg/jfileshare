@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 
@@ -135,8 +136,7 @@ public class StartupServlet extends HttpServlet {
             } else {
                 logger.info("Database is already at level 1");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
         } finally {
             if (dbConn != null) {
                 try {
@@ -153,9 +153,8 @@ public class StartupServlet extends HttpServlet {
             Statement st = dbConn.createStatement();
             int i = st.executeUpdate(sqlStatement);
 
-            logger.info("db update returned: " + Integer.toString(i));
-        } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "db update returned: {0}", Integer.toString(i));
+        } catch (SQLException ignored) {
         }
     }
 }

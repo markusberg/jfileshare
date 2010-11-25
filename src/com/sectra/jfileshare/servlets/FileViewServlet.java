@@ -3,6 +3,7 @@ package com.sectra.jfileshare.servlets;
 import com.sectra.jfileshare.objects.FileItem;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -42,15 +43,15 @@ public class FileViewServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
 
-        logger.info("Access requested to file: " + iFid);
+        logger.log(Level.INFO, "Access requested to file: {0}", fid);
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        FileItem oFile = new FileItem(ds, iFid);
-        logger.info("Fetched file: " + oFile.getFid());
+        FileItem oFile = new FileItem(ds, fid);
+        logger.log(Level.INFO, "Fetched file: {0}", oFile.getFid());
 
         if (oFile.getFid() != null && oFile.getFid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
@@ -68,8 +69,6 @@ public class FileViewServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             req.setAttribute("message_warning", "File exists, but requires complete address");
         }
-
-
         disp.forward(req, resp);
     }
 

@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
@@ -55,25 +56,25 @@ public class FileAuthenticationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpSession session = req.getSession();
 
-        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
 
-        FileItem oFile = new FileItem(ds, iFid);
+        FileItem oFile = new FileItem(ds, fid);
         logger.info(oFile.getName());
 
-        UserItem oCurrentUser = null;
+        UserItem currentUser = null;
         if (session.getAttribute("user") != null) {
-            oCurrentUser = (UserItem) session.getAttribute("user");
+            currentUser = (UserItem) session.getAttribute("user");
         }
         if (oFile.getDownloads() != null) {
-            logger.info("downloads left: " + Integer.toString(oFile.getDownloads()));
+            logger.log(Level.INFO, "downloads left: {0}", Integer.toString(oFile.getDownloads()));
         }
-        
+
         if (oFile.getFid() == null || !oFile.getMd5sum().equals(md5sum)) {
             logger.info("File not found in database");
             req.setAttribute("message_critical", "File not found");
             filterconfig.getServletContext().getRequestDispatcher("/templates/404.jsp").forward(servletRequest, servletResponse);
-        } else if (oCurrentUser != null && oCurrentUser.hasEditAccessTo(oFile)) {
+        } else if (currentUser != null && currentUser.hasEditAccessTo(oFile)) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else if (!oFile.isEnabled()) {
             logger.info("File found, but it's disabled");
@@ -88,7 +89,7 @@ public class FileAuthenticationFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } else if (!authenticated(oFile, session, req)) {
             // Send to password-screen
-            logger.info("File " + oFile.getFid() + " is password protected");
+            logger.log(Level.INFO, "File {0} is password protected", oFile.getFid());
             // logger.info("File password: " + oFile.getPwHash());
             servletRequest.setAttribute("tab", "File authentication");
             req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()) + "?md5=" + oFile.getMd5sum());
@@ -99,13 +100,12 @@ public class FileAuthenticationFilter implements Filter {
         }
     }
 
-
-    private boolean authenticated(FileItem oFile, HttpSession session, HttpServletRequest req) {
+    private boolean authenticated(FileItem file, HttpSession session, HttpServletRequest req) {
         //First, are we authenticated for this file
         if (session.getAttribute("authfiles") != null) {
             ArrayList authfiles = (ArrayList) session.getAttribute("authfiles");
 
-            if (authfiles.contains(oFile.getFid())) {
+            if (authfiles.contains(file.getFid())) {
                 logger.info("User already authenticated for file");
                 return true;
             }
@@ -114,16 +114,16 @@ public class FileAuthenticationFilter implements Filter {
         // We need to authenticate; do we have a password to authenticate?
         if (req.getParameter("FilePassword") != null) {
             // We are logging in.. verify the password.
-            if (oFile.authenticated(req.getParameter("FilePassword"))) {
-                logger.info("Saving " + oFile.getFid() + " to authfiles in session ");
+            if (file.authenticated(req.getParameter("FilePassword"))) {
+                logger.log(Level.INFO, "Saving {0} to authfiles in session ", file.getFid());
                 if (session.getAttribute("authfiles") != null) {
                     @SuppressWarnings("unchecked")
                     ArrayList<Integer> authfiles = (ArrayList<Integer>) session.getAttribute("authfiles");
-                    authfiles.add(oFile.getFid());
+                    authfiles.add(file.getFid());
                     session.setAttribute("authfiles", authfiles);
                 } else {
                     ArrayList<Integer> authfiles = new ArrayList<Integer>();
-                    authfiles.add(oFile.getFid());
+                    authfiles.add(file.getFid());
                     session.setAttribute("authfiles", authfiles);
                 }
                 return true;

@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.logging.Logger;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class UserItem {
     public static final int TYPE_ADMIN = 1;
     public static final int TYPE_INTERNAL = 2;
     public static final int TYPE_EXTERNAL = 3;
-    private Logger logger = Logger.getLogger(UserItem.class.getName());
+    private static final Logger logger = Logger.getLogger(UserItem.class.getName());
     /**
      * Integer to string mapping of expiration dates
      */
@@ -473,7 +474,7 @@ public class UserItem {
             }
             st.close();
         } catch (SQLException e) {
-            logger.warning("Exception: " + e.toString());
+            logger.log(Level.WARNING, "Exception: {0}", e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -483,7 +484,7 @@ public class UserItem {
             }
         }
 
-        logger.info("Found " + aFiles.size() + " files owned by user " + this.getUserInfo());
+        logger.log(Level.INFO, "Found {0} files owned by user {1}", new Object[]{aFiles.size(), this.getUserInfo()});
         return aFiles;
     }
 
@@ -508,7 +509,7 @@ public class UserItem {
                 errors.add("Password must contain at least one non-alphabetic character (numeric, symbol, space)");
             }
         }
-        if (errors.size() == 0) {
+        if (errors.isEmpty()) {
             this.setPwPlainText(pw1);
         }
         return errors;
@@ -555,13 +556,13 @@ public class UserItem {
      */
     public boolean hasEditAccessTo(FileItem file) {
         if (this.isAdmin()) {
-            logger.info("Administrator access to edit file " + file.getFid());
+            logger.log(Level.INFO, "Administrator access to edit file {0}", file.getFid());
             return true;
         } else if (file.getOwnerUid().equals(this.getUid())) {
-            logger.info("Owner access to edit file " + file.getFid());
+            logger.log(Level.INFO, "Owner access to edit file {0}", file.getFid());
             return true;
         }
-        logger.info("User " + this.getUserInfo() + " does not have edit access to file " + file.getFid());
+        logger.log(Level.INFO, "User {0} does not have edit access to file {1}", new Object[]{this.getUserInfo(), file.getFid()});
         return false;
     }
 
@@ -572,16 +573,16 @@ public class UserItem {
      */
     public boolean hasEditAccessTo(UserItem user) {
         if (this.isAdmin()) {
-            logger.info("Administrator access to edit user " + user.getUserInfo());
+            logger.log(Level.INFO, "Administrator access to edit user {0}", user.getUserInfo());
             return true;
         } else if (user.getUidCreator().equals(this.getUid())) {
-            logger.info("Creator access to edit user " + user.getUserInfo());
+            logger.log(Level.INFO, "Creator access to edit user {0}", user.getUserInfo());
             return true;
         } else if (user.getUid().equals(this.getUid())) {
-            logger.info("Edit access to self granted to " + user.getUserInfo());
+            logger.log(Level.INFO, "Edit access to self granted to {0}", user.getUserInfo());
             return true;
         }
-        logger.info("User " + this.getUserInfo() + " does not have edit access to user " + user.getUserInfo());
+        logger.log(Level.INFO, "User {0} does not have edit access to user {1}", new Object[]{this.getUserInfo(), user.getUserInfo()});
         return false;
     }
 }

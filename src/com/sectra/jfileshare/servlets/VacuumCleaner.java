@@ -1,5 +1,20 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.UserItem;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -9,21 +24,6 @@ import javax.sql.DataSource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
-import com.sectra.jfileshare.objects.FileItem;
-import com.sectra.jfileshare.objects.UserItem;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class VacuumCleaner extends HttpServlet {
 
@@ -79,19 +79,19 @@ public class VacuumCleaner extends HttpServlet {
         // Delete expired users
         ArrayList<UserItem> aUsers = (ArrayList<UserItem>) getExpiredUsers(ds);
         if (aUsers.size() > 0) {
-            logger.info("Vacuuming " + aUsers.size() + " expired user(s) from the database");
+            logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", aUsers.size());
         }
         for (UserItem user : aUsers) {
             user.delete(ds, PATH_FILE_STORE);
         }
 
         // Delete expired files
-        ArrayList<FileItem> aFiles = (ArrayList<FileItem>) getExpiredFiles(ds);
-        if (aFiles.size() > 0) {
-            logger.info("Vacuuming " + aFiles.size() + " expired file(s) from the database");
+        ArrayList<FileItem> files = (ArrayList<FileItem>) getExpiredFiles(ds);
+        if (!files.isEmpty()) {
+            logger.log(Level.INFO, "Vacuuming {0} expired file(s) from the database", files.size());
         }
-        for (FileItem oFile : aFiles) {
-            oFile.delete(ds, PATH_FILE_STORE);
+        for (FileItem file : files) {
+            file.delete(ds, PATH_FILE_STORE);
         }
 
         // Delete password requests older than 2 days
@@ -101,12 +101,11 @@ public class VacuumCleaner extends HttpServlet {
             int i = st.executeUpdate("DELETE FROM PasswordReset where dateRequest < ( now() - INTERVAL 2 DAY )");
 
             if (i > 0) {
-                logger.info("Vacuuming " + Integer.toString(i) + " entries from password reset table");
+                logger.log(Level.INFO, "Vacuuming {0} entries from password reset table", Integer.toString(i));
             }
             st.close();
             dbConn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -139,7 +138,7 @@ public class VacuumCleaner extends HttpServlet {
     }
 
     private ArrayList<FileItem> getExpiredFiles(DataSource ds) {
-        ArrayList<FileItem> aFiles = new ArrayList<FileItem>();
+        ArrayList<FileItem> files = new ArrayList<FileItem>();
         try {
             Connection dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from FileItems where dateExpiration<now() order by fid");
@@ -156,13 +155,13 @@ public class VacuumCleaner extends HttpServlet {
                 file.setDateCreation(rs.getTimestamp("dateCreation"));
                 file.setDateExpiration(rs.getTimestamp("dateExpiration"));
                 file.setEnabled(rs.getBoolean("enabled"));
-                aFiles.add(file);
+                files.add(file);
             }
             st.close();
             dbConn.close();
         } catch (SQLException e) {
             logger.warning(e.toString());
         }
-        return aFiles;
+        return files;
     }
 }

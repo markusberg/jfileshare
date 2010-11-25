@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.filters;
 
+import java.util.logging.Level;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
@@ -75,16 +76,18 @@ public class LoginFilter implements Filter {
             String pwPlaintext = req.getParameter("login_password");
 
             if (username != null && pwPlaintext != null) {
-                UserItem oUser = new UserItem(ds, username);
-                if (oUser.getUid() == null || !oUser.authenticated(pwPlaintext)) {
+                UserItem user = new UserItem(ds, username);
+                if (user.getUid() == null || !user.authenticated(pwPlaintext)) {
                     req.setAttribute("message_warning", "Non-existent user or incorrect password");
                 } else {
-                    logger.info("User " + oUser.getUserInfo() + " is now logged in");
-                    oUser.saveLastLogin(ds);
-                    session.setAttribute("user", oUser);
+                    logger.log(Level.INFO, "User {0} is now logged in", user.getUserInfo());
+                    user.saveLastLogin(ds);
+                    session.setAttribute("user", user);
                     return true;
                 }
-                if (1 == 0) {
+                if (1 == -2) {
+                    // FIXME: redo this part
+                    // Have the UserItem constructor throw an exception in case there's a db error
                     req.setAttribute("message_critical", "Unable to connect to the database. Please contact the system administrator.");
                 }
             }
