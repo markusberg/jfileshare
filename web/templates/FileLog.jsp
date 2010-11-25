@@ -15,18 +15,18 @@
 
         <%
                     if (request.getAttribute("oFile") != null) {
-                        FileItem oFile = (FileItem) request.getAttribute("oFile");
-                        ArrayList<FileItem.DownloadLog> aDownloadLog = (ArrayList<FileItem.DownloadLog>) request.getAttribute("aDownloadLog");
-                        if (!aDownloadLog.isEmpty()) {
+                        FileItem file = (FileItem) request.getAttribute("oFile");
+                        ArrayList<FileItem.DownloadLog> downloadLogs = (ArrayList<FileItem.DownloadLog>) request.getAttribute("aDownloadLog");
+                        if (!downloadLogs.isEmpty()) {
                             boolean even = false;
         %>
-        <p>The file <%= oFile.getName()%> has been downloaded <%=aDownloadLog.size()%> <%=aDownloadLog.size() == 1 ? "time" : "times"%>.</p>
+        <p>The file <%= file.getName()%> has been downloaded <%=downloadLogs.size()%> <%=downloadLogs.size() == 1 ? "time" : "times"%>.</p>
         <table id="files">
             <tr>
                 <th>Time</th><th>IP</th>
             </tr>
             <%
-                                        for (FileItem.DownloadLog log : aDownloadLog) {
+                                        for (FileItem.DownloadLog log : downloadLogs) {
             %>
             <tr class="<%= even ? "even" : "odd"%>">
                 <td><%=Helpers.formatDate(log.getTime())%></td>

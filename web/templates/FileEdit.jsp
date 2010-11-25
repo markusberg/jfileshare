@@ -60,7 +60,7 @@
                     <%
                                             String checked = "";
                                             String displaystyle = "";
-                                            if (oFile.getPwHash() != null && oFile.getPwHash().length() > 0) {
+                                            if (oFile.getPwHash() != null && !oFile.getPwHash().isEmpty()) {
                                                 checked = " checked";
                                                 displaystyle = " style=\"display: block;\"";
                                             } else {
