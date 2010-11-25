@@ -28,7 +28,7 @@
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>
-                    <td><a href="<%= oFile.getURL(request.getContextPath()) %>"><%= oFile.getName()%></a></td>
+                    <td><a href="<%= oFile.getURL(request.getContextPath())%>"><%= oFile.getName()%></a></td>
                 </tr>
                 <tr>
                     <th>Content-Type: </th>
@@ -58,14 +58,14 @@
                 </tr>
                 <tr>
                     <%
-                                    String checked = "";
-                                    String displaystyle = "";
-                                    if (oFile.getPwHash() != null && oFile.getPwHash().length() > 0) {
-                                        checked = " checked";
-                                        displaystyle = " style=\"display: block;\"";
-                                    } else {
-                                        displaystyle = " style=\"display: none;\"";
-                                    }
+                                            String checked = "";
+                                            String displaystyle = "";
+                                            if (oFile.getPwHash() != null && oFile.getPwHash().length() > 0) {
+                                                checked = " checked";
+                                                displaystyle = " style=\"display: block;\"";
+                                            } else {
+                                                displaystyle = " style=\"display: none;\"";
+                                            }
                     %>
                     <th>Require password: </th>
 
@@ -76,23 +76,22 @@
                     <td>
                         <div id="Password"<%=displaystyle%>>
                             <input type="text" name="sPassword" />
-                            <% 
-                            if (oFile.getPwHash==null) {
+                            <%
+                                                    if (oFile.getPwHash() == null) {
                             %>
                             <span class="note">Note: leave blank in order to keep existing password unchanged</span>
-                            <%
-                            }
+                            <%                                                    }
                             %>
                         </div>
                     </td>
                 </tr>
                 <%
-                                /*
-                                <tr>
-                                <th>Allow tiny-url: </th>
-                                <td><input id="TinyUrl" type="checkbox" name="tinyurl" onclick="warnme();" /></td>
-                                </tr>
-                                 */
+                                        /*
+                                        <tr>
+                                        <th>Allow tiny-url: </th>
+                                        <td><input id="TinyUrl" type="checkbox" name="tinyurl" onclick="warnme();" /></td>
+                                        </tr>
+                                         */
                 %>
             </table>
             <p>

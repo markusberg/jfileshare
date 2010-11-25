@@ -44,30 +44,28 @@
         </table>
         <%
                                 }
-                                ArrayList<FileItem> aFiles = (ArrayList<FileItem>) request.getAttribute("aFiles");
-                                if (aFiles.size() > 0) {
-        %>
-        <%@ include file="/WEB-INF/jspf/FileList.jspf" %>
-        <%                      } else {
+                                ArrayList<FileItem> files = (ArrayList<FileItem>) request.getAttribute("aFiles");
+                                if (files.isEmpty()) {
         %>
         <p>This user has no files.</p>
+        <%                      } else {
+        %>
+        <%@ include file="/WEB-INF/jspf/FileList.jspf" %>
         <%                                }
-
                                 if (!oCurrentUser.isExternal()) {
         %>
         <h2>Users administered by <%= oUser.getUsername()%></h2>
         <%
-                                            ArrayList<UserItem> aUsers = (ArrayList<UserItem>) request.getAttribute("aUsers");
-                                            if (aUsers.size() > 0) {
-        %>
-        <%@include file="/WEB-INF/jspf/UserList.jspf"%>
-        <%                 } else {
+                                            ArrayList<UserItem> users = (ArrayList<UserItem>) request.getAttribute("aUsers");
+                                            if (users.isEmpty()) {
         %>
         <p>This user has no child users.</p>
+        <%                 } else {
+        %>
+        <%@include file="/WEB-INF/jspf/UserList.jspf"%>
         <%                 }
                         }
                     }
         %>
-
     </body>
 </html>

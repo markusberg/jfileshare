@@ -31,7 +31,7 @@
     </tr>
     <tr class="admin">
         <th>Password protected: </th>
-        <td><%= oFile.getPwHash()==null ? "No" : "Yes"%></td>
+        <td><%= oFile.getPwHash() == null ? "No" : "Yes"%></td>
     </tr>
     <tr class="admin">
         <th>Downloads enabled: </th><td><%= oFile.isEnabled() ? "Yes" : "No"%></td>

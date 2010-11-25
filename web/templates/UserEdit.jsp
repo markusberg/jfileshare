@@ -51,10 +51,9 @@
                             boolean bExpiration = (Boolean) request.getAttribute("validatedBExpiration");
                             int daysUntilExpiration = (Integer) request.getAttribute("validatedDaysUntilExpiration");
 
-                            // Only allow setting expiration on users you own
-                            // or if you're an administrator
-                            // i.e. not yourself unless you're an admin
-                            if (oCurrentUser.isAdmin() || oCurrentUser.getUid() == oUser.getUidCreator()) {
+                            // Only allow setting expiration on users that
+                            // you have edit access to
+                            if (oCurrentUser.hasEditAccessTo(oUser)) {
                 %>
                 <tr>
                     <th>Expiration:</th>
