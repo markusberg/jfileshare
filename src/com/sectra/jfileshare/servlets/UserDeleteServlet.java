@@ -73,7 +73,7 @@ public class UserDeleteServlet extends HttpServlet {
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(uid.toString()) + ")");
             jspForward = "/templates/404.jsp";
         } else if (!currentUser.hasEditAccessTo(user)) {
-            req.setAttribute("message_critical", "You do not have access to delete user " + user.getUserInfo());
+            req.setAttribute("message_critical", "You do not have access to delete that user");
             jspForward = "/templates/AccessDenied.jsp";
         } else {
             req.setAttribute("user", user);

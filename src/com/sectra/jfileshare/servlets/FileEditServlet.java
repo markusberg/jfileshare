@@ -70,6 +70,7 @@ public class FileEditServlet extends HttpServlet {
             req.setAttribute("tab", "Edit file");
             disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
         } else {
+            req.setAttribute("message_critical", "You do not have access to edit that file");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         }
         disp.forward(req, resp);
