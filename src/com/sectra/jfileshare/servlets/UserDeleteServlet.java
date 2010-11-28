@@ -55,7 +55,7 @@ public class UserDeleteServlet extends HttpServlet {
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
 
-        UserItem User;
+        UserItem user;
         Integer uid = null;
         try {
             String sUid = req.getPathInfo().substring(1);
@@ -63,20 +63,20 @@ public class UserDeleteServlet extends HttpServlet {
                 throw new NullPointerException();
             }
             uid = Integer.parseInt(sUid);
-            User = new UserItem(ds, uid);
+            user = new UserItem(ds, uid);
         } catch (NullPointerException e) {
-            User = currentUser;
+            user = currentUser;
         }
 
-        if (User.getUid() == null) {
+        if (user.getUid() == null) {
             logger.info("Attempting to delete nonexistent user");
             req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(uid.toString()) + ")");
             jspForward = "/templates/404.jsp";
-        } else if (!currentUser.hasEditAccessTo(User)) {
-            req.setAttribute("message_critical", "You do not have access to delete user " + User.getUserInfo());
+        } else if (!currentUser.hasEditAccessTo(user)) {
+            req.setAttribute("message_critical", "You do not have access to delete user " + user.getUserInfo());
             jspForward = "/templates/AccessDenied.jsp";
         } else {
-            req.setAttribute("oUser", User);
+            req.setAttribute("user", user);
             req.setAttribute("tab", "Delete user");
             jspForward = "/templates/UserDelete.jsp";
         }

@@ -46,35 +46,33 @@ public class FileLogServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         String PathInfo = req.getPathInfo().substring(1);
 
-        int iFid = Integer.parseInt(PathInfo);
+        int fid = Integer.parseInt(PathInfo);
 
         ServletContext app = getServletContext();
         RequestDispatcher disp = null;
 
-        FileItem oFile = new FileItem(ds, iFid);
+        FileItem file = new FileItem(ds, fid);
 
-        if (oFile.getFid() != null && oFile.getFid() == -2) {
+        if (file.getFid() != null && file.getFid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/blank.jsp");
-        } else if (oFile.getFid() == null) {
+        } else if (file.getFid() == null) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
-        } else if (!(oCurrentUser.isAdmin()
-                || oFile.getOwnerUid().equals(oCurrentUser.getUid()))) {
-            // Neither admin nor owner
+        } else if (!currentUser.hasEditAccessTo(file)) {
             req.setAttribute("message_critical", "You don't have access to view the logs of this file");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
-            req.setAttribute("oFile", oFile);
-            ArrayList downloadLogs = oFile.getLogs(ds);
-            req.setAttribute("aDownloadLog", downloadLogs);
+            req.setAttribute("file", file);
+            ArrayList downloadLogs = file.getLogs(ds);
+            req.setAttribute("downloadLogs", downloadLogs);
             if (downloadLogs.isEmpty()) {
-                req.setAttribute("message", "This file (" + oFile.getName() + ") has never been downloaded");
+                req.setAttribute("message", "This file (" + file.getName() + ") has never been downloaded");
             }
             req.setAttribute("tab", "File log");
             disp = app.getRequestDispatcher("/templates/FileLog.jsp");

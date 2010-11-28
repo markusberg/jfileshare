@@ -59,40 +59,39 @@ public class FileAuthenticationFilter implements Filter {
         Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
 
-        FileItem oFile = new FileItem(ds, fid);
-        logger.info(oFile.getName());
+        FileItem file = new FileItem(ds, fid);
+        logger.info(file.getName());
 
         UserItem currentUser = null;
         if (session.getAttribute("user") != null) {
             currentUser = (UserItem) session.getAttribute("user");
         }
-        if (oFile.getDownloads() != null) {
-            logger.log(Level.INFO, "downloads left: {0}", Integer.toString(oFile.getDownloads()));
+        if (file.getDownloads() != null) {
+            logger.log(Level.INFO, "downloads left: {0}", Integer.toString(file.getDownloads()));
         }
 
-        if (oFile.getFid() == null || !oFile.getMd5sum().equals(md5sum)) {
+        if (file.getFid() == null || !file.getMd5sum().equals(md5sum)) {
             logger.info("File not found in database");
             req.setAttribute("message_critical", "File not found");
             filterconfig.getServletContext().getRequestDispatcher("/templates/404.jsp").forward(servletRequest, servletResponse);
-        } else if (currentUser != null && currentUser.hasEditAccessTo(oFile)) {
+        } else if (currentUser != null && currentUser.hasEditAccessTo(file)) {
             filterChain.doFilter(servletRequest, servletResponse);
-        } else if (!oFile.isEnabled()) {
+        } else if (!file.isEnabled()) {
             logger.info("File found, but it's disabled");
             req.setAttribute("message_critical", "The requested file has been disabled by it's owner");
             filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(servletRequest, servletResponse);
-        } else if (oFile.getDownloads() != null && oFile.getDownloads() == 0) {
+        } else if (file.getDownloads() != null && file.getDownloads() == 0) {
             logger.info("File found, but has reached max number of downloads");
             req.setAttribute("message_critical", "The requested file exists, but it has reached its limit on number of downloads. If you require access to this file, please contact the file owner.");
             filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(servletRequest, servletResponse);
-        } else if (oFile.getPwHash() == null) {
+        } else if (file.getPwHash() == null) {
             logger.info("File does not require authentication");
             filterChain.doFilter(servletRequest, servletResponse);
-        } else if (!authenticated(oFile, session, req)) {
+        } else if (!authenticated(file, session, req)) {
             // Send to password-screen
-            logger.log(Level.INFO, "File {0} is password protected", oFile.getFid());
-            // logger.info("File password: " + oFile.getPwHash());
+            logger.log(Level.INFO, "File {0} is password protected", file.getFid());
             servletRequest.setAttribute("tab", "File authentication");
-            req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()) + "?md5=" + oFile.getMd5sum());
+            req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()) + "?md5=" + file.getMd5sum());
             filterconfig.getServletContext().getRequestDispatcher("/templates/FilePassword.jsp").forward(servletRequest, servletResponse);
         } else {
             // Everything appears to check out

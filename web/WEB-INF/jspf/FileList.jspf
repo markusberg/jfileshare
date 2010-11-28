@@ -10,7 +10,7 @@
     <%
                 boolean even = false;
 
-                for (FileItem file : aFiles) {
+                for (FileItem file : files) {
     %>
     <tr class="<%=even ? "even" : "odd"%>">
         <td><%=file.getName()%></td>

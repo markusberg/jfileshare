@@ -13,7 +13,7 @@
     <%
                 boolean even = false;
 
-                for (UserItem childuser : aUsers) {
+                for (UserItem childuser : users) {
                     String lastlogin;
                     if (childuser.getDateLastLogin() == null) {
                         lastlogin = "never";

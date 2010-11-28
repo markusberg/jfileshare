@@ -50,21 +50,21 @@ public class FileViewServlet extends HttpServlet {
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        FileItem oFile = new FileItem(ds, fid);
-        logger.log(Level.INFO, "Fetched file: {0}", oFile.getFid());
+        FileItem file = new FileItem(ds, fid);
+        logger.log(Level.INFO, "Fetched file: {0}", file.getFid());
 
-        if (oFile.getFid() != null && oFile.getFid() == -2) {
+        if (file.getFid() != null && file.getFid() == -2) {
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (oFile.getFid() == null) {
+        } else if (file.getFid() == null) {
             logger.info("File not found");
             req.setAttribute("message_warning", "The requested file is not found");
             disp = app.getRequestDispatcher("/templates/404.jsp");
-        } else if (oFile.getMd5sum().equals(md5sum)) {
+        } else if (file.getMd5sum().equals(md5sum)) {
             req.setAttribute("tab", "File");
             disp = app.getRequestDispatcher("/templates/FileView.jsp");
-            req.setAttribute("oFile", oFile);
+            req.setAttribute("file", file);
         } else {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             req.setAttribute("message_warning", "File exists, but requires complete address");

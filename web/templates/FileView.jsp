@@ -12,11 +12,11 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <%
-            if (request.getAttribute("oFile") != null) {
-                FileItem oFile = (FileItem) request.getAttribute("oFile");
+            if (request.getAttribute("file") != null) {
+                FileItem file = (FileItem) request.getAttribute("file");
         %>
         <%@include file="/WEB-INF/jspf/SingleFile.jspf"%>
-        <p><a href="<%= request.getContextPath()%>/file/download/<%=oFile.getFid()%>?md5=<%=oFile.getMd5sum()%>">Download file</a></p>
+        <p><a href="<%= request.getContextPath()%>/file/download/<%=file.getFid()%>?md5=<%=file.getMd5sum()%>">Download file</a></p>
         <%
             }
         %>

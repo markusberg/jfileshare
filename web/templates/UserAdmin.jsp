@@ -3,7 +3,6 @@
 <%@page import="com.sectra.jfileshare.objects.FileItem"%>
 <%@page import="java.util.ArrayList"%>
 <html>
-
     <head>
         <title>User Administration</title>
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath()%>/styles/user.css" />
@@ -12,8 +11,8 @@
     <body>
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
         <%
-                    ArrayList<UserItem> aUsers = (ArrayList<UserItem>) request.getAttribute("aUsers");
-                    if (aUsers.size() > 0) {
+                    ArrayList<UserItem> users = (ArrayList<UserItem>) request.getAttribute("users");
+                    if (users.size() > 0) {
         %>
         <%@ include file="/WEB-INF/jspf/UserList.jspf" %>
         <%          } else {

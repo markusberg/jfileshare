@@ -52,12 +52,12 @@ public class UserAdminServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        if (oCurrentUser.isAdmin()) {
-            req.setAttribute("aUsers", getAllUsers());
+        if (currentUser.isAdmin()) {
+            req.setAttribute("users", getAllUsers());
             disp = app.getRequestDispatcher("/templates/UserAdmin.jsp");
         } else {
             req.setAttribute("message_critical", "You are not authorized to administer users");

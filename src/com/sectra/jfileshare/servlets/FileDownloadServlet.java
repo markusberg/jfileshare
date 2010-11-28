@@ -50,14 +50,14 @@ public class FileDownloadServlet extends HttpServlet {
         // checking and authentication already. We can jump right into
         // serving the file.
 
-        Integer iFid = Integer.parseInt(req.getPathInfo().substring(1));
+        Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
-        FileItem oFile = new FileItem(ds, iFid);
-        File fileOnDisk = new File(pathFileStore + "/" + oFile.getFid().toString());
+        FileItem file = new FileItem(ds, fid);
+        File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
 
         logger.info("Preparing to stream file");
-        resp.setContentType(oFile.getType());
-        resp.setHeader("Content-disposition", "attachment; filename=\"" + oFile.getName() + "\"");
+        resp.setContentType(file.getType());
+        resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
         resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
 
         FileInputStream instream = new FileInputStream(fileOnDisk);
@@ -74,7 +74,7 @@ public class FileDownloadServlet extends HttpServlet {
             }
         }
         String ipAddr = req.getRemoteAddr();
-        oFile.logDownload(ds, ipAddr);
+        file.logDownload(ds, ipAddr);
     }
 
     @Override

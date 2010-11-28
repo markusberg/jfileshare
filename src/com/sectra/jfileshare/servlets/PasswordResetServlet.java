@@ -106,7 +106,7 @@ public class PasswordResetServlet extends HttpServlet {
                 && req.getParameter("action").equals("PasswordResetRequest")) {
             String username = req.getParameter("username");
 
-            UserItem oUser = new UserItem(datasource, username);
+            UserItem user = new UserItem(datasource, username);
             String emailAddress = "";
             pathContext = req.getContextPath();
 
@@ -127,11 +127,11 @@ public class PasswordResetServlet extends HttpServlet {
             }
 
 
-            if (oUser.getUid() == null) {
+            if (user.getUid() == null) {
                 // username does not exist in database
                 emailAddress = username + "@sectra.se";
             } else {
-                emailAddress = oUser.getEmail();
+                emailAddress = user.getEmail();
             }
 
             if (!emailAddress.equals("")) {
@@ -141,10 +141,10 @@ public class PasswordResetServlet extends HttpServlet {
                     String key = Sha512Crypt.Sha512_crypt(emailAddress, null, 0);
                     key = key.substring(key.length() - 50, key.length());
                     if (sendResetInstructions(emailRecipient, key)) {
-                        if (oUser.getUid() == null) {
+                        if (user.getUid() == null) {
                             req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
                         } else {
-                            req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + oUser.getUsername() + "\".");
+                            req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + user.getUsername() + "\".");
                         }
                         StoreRecoveryKey(username, emailAddress, key);
                     } else {

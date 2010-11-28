@@ -21,38 +21,38 @@
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
 
         <%
-                    if (request.getAttribute("oFile") != null) {
-                        FileItem oFile = (FileItem) request.getAttribute("oFile");
+                    if (request.getAttribute("file") != null) {
+                        FileItem file = (FileItem) request.getAttribute("file");
         %>
-        <form action="<%= request.getContextPath()%>/file/edit/<%= oFile.getFid()%>" method="post">
+        <form action="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>" method="post">
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>
-                    <td><a href="<%= oFile.getURL(request.getContextPath())%>"><%= oFile.getName()%></a></td>
+                    <td><a href="<%= file.getURL(request.getContextPath())%>"><%= file.getName()%></a></td>
                 </tr>
                 <tr>
                     <th>Content-Type: </th>
-                    <td><%= oFile.getType()%></td>
+                    <td><%= file.getType()%></td>
                 </tr>
                 <tr>
                     <th>Md5sum: </th>
-                    <td><%= oFile.getMd5sum()%></td>
+                    <td><%= file.getMd5sum()%></td>
                 </tr>
                 <tr>
                     <th>Enabled: </th>
                     <td>
-                        <input type="checkbox" name="bEnabled" value="true" <%= oFile.isEnabled() ? " checked" : ""%> />
+                        <input type="checkbox" name="bEnabled" value="true" <%= file.isEnabled() ? " checked" : ""%> />
                     </td>
                 </tr>
                 <tr>
                     <th>Permanent: </th>
-                    <td><input type="checkbox" name="bPermanent" value="true" <%= oFile.isPermanent() ? " checked" : ""%> />
+                    <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked" : ""%> />
                         <span class="note">Non-permanent files will be automatically removed after <%= Integer.parseInt(getServletContext().getInitParameter("DAYS_FILE_RETENTION").toString())%> days</span>
                     </td>
                 </tr>
                 <tr>
                     <th>Downloads allowed: </th>
-                    <td><input style="width: 4em; text-align: right;" type="text" name="iDownloads" value="<%= oFile.getDownloads() == null ? "" : oFile.getDownloads()%>" />
+                    <td><input style="width: 4em; text-align: right;" type="text" name="iDownloads" value="<%= file.getDownloads() == null ? "" : file.getDownloads()%>" />
                         <span class="note">Integer to specify maximum number of allowed downloads or leave blank for no limit</span>
                     </td>
                 </tr>
@@ -60,7 +60,7 @@
                     <%
                                             String checked = "";
                                             String displaystyle = "";
-                                            if (oFile.getPwHash() != null && !oFile.getPwHash().isEmpty()) {
+                                            if (file.getPwHash() != null && !file.getPwHash().isEmpty()) {
                                                 checked = " checked";
                                                 displaystyle = " style=\"display: block;\"";
                                             } else {
@@ -77,7 +77,7 @@
                         <div id="Password"<%=displaystyle%>>
                             <input type="text" name="sPassword" />
                             <%
-                                                    if (oFile.getPwHash() == null) {
+                                                    if (file.getPwHash() != null) {
                             %>
                             <span class="note">Note: leave blank in order to keep existing password unchanged</span>
                             <%                                                    }

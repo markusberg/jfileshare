@@ -11,14 +11,13 @@
 
     <body>
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
-
         <%
-            if (request.getAttribute("oFile") != null) {
-                FileItem oFile = (FileItem) request.getAttribute("oFile");
+            if (request.getAttribute("file") != null) {
+                FileItem file = (FileItem) request.getAttribute("file");
         %>
         <%@ include file="/WEB-INF/jspf/SingleFile.jspf" %>
 
-        <form action="<%= request.getContextPath()%>/file/delete/<%= oFile.getFid()%>" method="post">
+        <form action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post">
             <p>
                 <input type="hidden" name="action" value="confirmdelete" />
                 <input type="submit" name="confirm" value="Confirm Delete" />

@@ -99,12 +99,12 @@ public class UserAddServlet extends HttpServlet {
 
                 // Check username uniqueness
                 String username = req.getParameter("username") == null ? "" : req.getParameter("username");
-                UserItem oUser = new UserItem(datasource, username);
-                errors.addAll(oUser.validateUserName(username));
+                UserItem user = new UserItem(datasource, username);
+                errors.addAll(user.validateUserName(username));
                 req.setAttribute("validatedUsername", username);
 
                 // Validate email address
-                errors.addAll(oUser.validateEmailAddress(req.getParameter("email")));
+                errors.addAll(user.validateEmailAddress(req.getParameter("email")));
                 req.setAttribute("validatedEmail", req.getParameter("email"));
 
                 // Validate the amount of time account will be active
@@ -121,7 +121,7 @@ public class UserAddServlet extends HttpServlet {
                 if (req.getParameter("bExpiration") != null
                         && req.getParameter("bExpiration").equals("true")) {
                     req.setAttribute("validatedBExpiration", true);
-                    oUser.setDaysUntilExpiration(daysUntilExpiration);
+                    user.setDaysUntilExpiration(daysUntilExpiration);
                 } else {
                     req.setAttribute("validatedBExpiration", false);
                 }
@@ -129,18 +129,18 @@ public class UserAddServlet extends HttpServlet {
                 // Validate passwords
                 String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
                 String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                errors.addAll(oUser.validatePassword(password1, password2));
+                errors.addAll(user.validatePassword(password1, password2));
                 req.setAttribute("validatedPassword1", password1);
                 req.setAttribute("validatedPassword2", password2);
 
-                // If oCurrentUser is an admin, set the requested user type
+                // If currentUser is an admin, set the requested user type
                 int usertype = UserItem.TYPE_EXTERNAL;
                 if (currentUser.isAdmin()) {
                     int reqUsertype = Integer.parseInt(req.getParameter("usertype"));
                     if (reqUsertype == UserItem.TYPE_ADMIN
                             || reqUsertype == UserItem.TYPE_EXTERNAL
                             || reqUsertype == UserItem.TYPE_INTERNAL) {
-                        oUser.setUserType(usertype);
+                        user.setUserType(usertype);
                         usertype = reqUsertype;
                     }
                 }
@@ -157,11 +157,11 @@ public class UserAddServlet extends HttpServlet {
                     disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
                 } else {
                     // Set the creator, username, and save the user
-                    oUser.setUidCreator(currentUser.getUid());
-                    oUser.setUsername(username);
+                    user.setUidCreator(currentUser.getUid());
+                    user.setUsername(username);
 
-                    if (oUser.save(datasource)) {
-                        req.setAttribute("message", "User \"" + Helpers.htmlSafe(oUser.getUsername()) + "\" created");
+                    if (user.save(datasource)) {
+                        req.setAttribute("message", "User \"" + Helpers.htmlSafe(user.getUsername()) + "\" created");
                         disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
 
                         // Set the default values for new users

@@ -79,7 +79,7 @@ public class UserViewServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
-        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
@@ -89,7 +89,7 @@ public class UserViewServlet extends HttpServlet {
         try {
             reqUid = reqUid.replaceAll("/", "");
             if (reqUid.equals("")) {
-                uid = oCurrentUser.getUid();
+                uid = currentUser.getUid();
             } else {
                 uid = Integer.parseInt(reqUid);
             }
@@ -97,31 +97,30 @@ public class UserViewServlet extends HttpServlet {
         } catch (NumberFormatException n) {
             uid = -1;
         } catch (NullPointerException n) {
-            uid = oCurrentUser.getUid();
+            uid = currentUser.getUid();
         }
 
         UserItem user = new UserItem(ds, uid);
 
         if (user.getUid() != null && user.getUid() == -2) {
+            // FIXME: exception handling bitte
             req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
             req.setAttribute("tab", "Error");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
         } else if (user.getUid() == null) {
             disp = app.getRequestDispatcher("/templates/404.jsp");
             req.setAttribute("message_warning", "User not found (" + reqUid + ")");
-        } else if (!(oCurrentUser.isAdmin()
-                || user.getUidCreator().equals(oCurrentUser.getUid())
-                || user.getUid().equals(oCurrentUser.getUid()))) {
+        } else if (!currentUser.hasEditAccessTo(user)) {
             req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
-            if (!oCurrentUser.getUid().equals(uid)) {
+            if (!currentUser.getUid().equals(uid)) {
                 req.setAttribute("tab", user.getUsername());
             }
 
-            req.setAttribute("oUser", user);
-            req.setAttribute("aFiles", user.getFiles(ds));
-            req.setAttribute("aUsers", user.getChildren(ds));
+            req.setAttribute("user", user);
+            req.setAttribute("files", user.getFiles(ds));
+            req.setAttribute("users", user.getChildren(ds));
             disp = app.getRequestDispatcher("/templates/UserView.jsp");
         }
         disp.forward(req, resp);
@@ -134,18 +133,19 @@ public class UserViewServlet extends HttpServlet {
                 && req.getParameter("action").equals("donotify")) {
 
             HttpSession session = req.getSession();
-            UserItem oCurrentUser = (UserItem) session.getAttribute("user");
+            UserItem currentUser = (UserItem) session.getAttribute("user");
             pathContext = req.getContextPath();
 
             int iFid = Integer.parseInt(req.getParameter("iFid"));
             String emailRecipient = req.getParameter("emailRecipient");
 
             ArrayList<String> errors = new ArrayList<String>();
-            FileItem oFile = new FileItem(ds, iFid);
+            FileItem file = new FileItem(ds, iFid);
 
-            if (oCurrentUser.isAdmin()
-                    || oFile.getOwnerUid().equals(oCurrentUser.getUid())) {
-                if (oFile.getFid() == null) {
+            // You must have edit access to the file in order to notify
+            // someone of it's existence
+            if (currentUser.hasEditAccessTo(file)) {
+                if (file.getFid() == null) {
                     errors.add("The file was not found");
                 }
                 // Email address sanity check
@@ -181,8 +181,8 @@ public class UserViewServlet extends HttpServlet {
                                 + (serverPort != null ? ":" + serverPort.toString() : "");
                         logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", URL_PREFIX);
                     }
-                    if (sendEmailNotification(oFile, oCurrentUser, emailValidated)) {
-                        req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + oFile.getName() + "\"");
+                    if (sendEmailNotification(file, currentUser, emailValidated)) {
+                        req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + file.getName() + "\"");
                     } else {
                         req.setAttribute("message_warning", "Failed to send email notification.");
                     }
@@ -192,7 +192,7 @@ public class UserViewServlet extends HttpServlet {
         doGet(req, resp);
     }
 
-    private boolean sendEmailNotification(FileItem oFile, UserItem oCurrentUser, InternetAddress emailRecipient) {
+    private boolean sendEmailNotification(FileItem file, UserItem currentUser, InternetAddress emailRecipient) {
         Properties props = System.getProperties();
         props.put("mail.smtp.host", SMTP_SERVER);
         props.put("mail.smtp.port", SMTP_SERVER_PORT);
@@ -200,33 +200,33 @@ public class UserViewServlet extends HttpServlet {
 
         try {
             MimeMessage msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(oCurrentUser.getEmail()));
+            msg.setFrom(new InternetAddress(currentUser.getEmail()));
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
             msg.setSender(SMTP_SENDER);
-            msg.setSubject("File " + oFile.getName() + " available for download");
+            msg.setSubject("File " + file.getName() + " available for download");
 
             MimeMultipart mp = new MimeMultipart();
             mp.setSubType("alternative");
 
             MimeBodyPart mbp1 = new MimeBodyPart();
-            mbp1.setText(oCurrentUser.getUsername() + " has made "
+            mbp1.setText(currentUser.getUsername() + " has made "
                     + "the following file available for download:\n"
-                    + "Filename: " + oFile.getName() + "\n"
-                    + "Filesize: " + FileItem.humanReadable(oFile.getSize()) + "\n\n"
-                    + oFile.getURL(URL_PREFIX + pathContext)
-                    + (oFile.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + oFile.getDaysUntilExpiration() + " day(s))")
+                    + "Filename: " + file.getName() + "\n"
+                    + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
+                    + file.getURL(URL_PREFIX + pathContext)
+                    + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))")
                     , "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
-                    + "<p>" + oCurrentUser.getUsername() + " has made the following \n"
+                    + "<p>" + currentUser.getUsername() + " has made the following \n"
                     + "file available for download:</p>\n"
                     + "<table>\n"
-                    + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + oFile.getName() + "</td></tr>\n"
-                    + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(oFile.getSize()) + "</td></tr>\n"
+                    + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + file.getName() + "</td></tr>\n"
+                    + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(file.getSize()) + "</td></tr>\n"
                     + "</table>\n"
-                    + "<p><a href=\"" + oFile.getURL(URL_PREFIX + pathContext) + "\">" + oFile.getURL(URL_PREFIX + pathContext) + "</a>\n"
-                    + (oFile.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + oFile.getDaysUntilExpiration() + " day(s))")
+                    + "<p><a href=\"" + file.getURL(URL_PREFIX + pathContext) + "\">" + file.getURL(URL_PREFIX + pathContext) + "</a>\n"
+                    + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))")
                     + "</p>\n", "text/html; charset=utf-8");
 
             /* Possibly attach image to make it look nicer

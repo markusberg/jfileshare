@@ -37,13 +37,15 @@ public class LogoutFilter implements Filter {
             request.getSession().removeAttribute("user");
             request.getSession().removeAttribute("authfiles");
             request.getSession().removeAttribute("uploadListener");
-            request.setAttribute("message", "You are now logged out");
         }
         if (request.getParameter("reason") != null && request.getParameter("reason").equals("inactivity")) {
-            logger.log(Level.INFO, "Logging out user {0} due to inactivity", user.getUserInfo());
             request.setAttribute("message", "You have been logged out due to inactivity");
+            logger.log(Level.INFO, "Logging out user {0} due to inactivity",
+                    (user == null ? "" : user.getUserInfo()));
         } else {
-            logger.log(Level.INFO, "User {0} logged out", user.getUserInfo());
+            request.setAttribute("message", "You are now logged out");
+            logger.log(Level.INFO, "User {0} logged out",
+                    (user == null ? "" : user.getUserInfo()));
         }
         filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(servletRequest, servletResponse);
     }

@@ -14,9 +14,9 @@
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
 
         <%
-                    if (request.getAttribute("oFile") != null) {
-                        FileItem file = (FileItem) request.getAttribute("oFile");
-                        ArrayList<FileItem.DownloadLog> downloadLogs = (ArrayList<FileItem.DownloadLog>) request.getAttribute("aDownloadLog");
+                    if (request.getAttribute("file") != null) {
+                        FileItem file = (FileItem) request.getAttribute("file");
+                        ArrayList<FileItem.DownloadLog> downloadLogs = (ArrayList<FileItem.DownloadLog>) request.getAttribute("downloadLogs");
                         if (!downloadLogs.isEmpty()) {
                             boolean even = false;
         %>

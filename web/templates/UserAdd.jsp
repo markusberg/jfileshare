@@ -65,8 +65,8 @@
                     </td>
                 </tr>
                 <%
-                            com.sectra.jfileshare.objects.UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-                            if (oCurrentUser.isAdmin()) {
+                            com.sectra.jfileshare.objects.UserItem currentUser = (UserItem) session.getAttribute("user");
+                            if (currentUser.isAdmin()) {
                                 Integer usertype = (Integer) request.getAttribute("validatedUsertype");
                 %>
                 <tr>

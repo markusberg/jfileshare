@@ -10,34 +10,34 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <%
-            if (request.getAttribute("oUser") != null) {
-                UserItem oUser = (UserItem) request.getAttribute("oUser");
+            if (request.getAttribute("user") != null) {
+                UserItem user = (UserItem) request.getAttribute("user");
         %>
         <h2>Confirm deletion</h2>
-        <form action="<%= request.getContextPath()%>/user/delete/<%= oUser.getUid()%>" method="post">
+        <form action="<%= request.getContextPath()%>/user/delete/<%= user.getUid()%>" method="post">
             <table id="singleentry">
                 <tr>
-                    <th>Userid: </th><td><%=oUser.getUid()%></td>
+                    <th>Userid: </th><td><%=user.getUid()%></td>
                 </tr>
                 <tr>
-                    <th>Username: </th><td><%=oUser.getUsername()%></td>
+                    <th>Username: </th><td><%=user.getUsername()%></td>
                 </tr>
                 <tr>
-                    <th>Email: </th><td><%=oUser.getEmail()%></td>
+                    <th>Email: </th><td><%=user.getEmail()%></td>
                 </tr>
                 <tr>
                     <th>User Level:</th>
                     <td>
-                        <%= oUser.isAdmin() ? "Administrator" : (oUser.isExternal() ? "External" : "Sectra Corporate")%>
+                        <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : "Sectra Corporate")%>
                     </td>
                 </tr>
                 <tr>
                     <th>Files: </th>
-                    <td><%=oUser.getSumFiles()%> <span class="note"><%=oUser.getSumFiles()>0 ? "(will be deleted)" : "" %></span></td>
+                    <td><%=user.getSumFiles()%> <span class="note"><%=user.getSumFiles()>0 ? "(will be deleted)" : "" %></span></td>
                 </tr>
                 <tr>
                     <th>Children: </th>
-                    <td><%=oUser.getSumChildren()%> <span class="note"><%=oUser.getSumChildren()>0 ? "(will be orphaned)" : "" %></span></td>
+                    <td><%=user.getSumChildren()%> <span class="note"><%=user.getSumChildren()>0 ? "(will be orphaned)" : "" %></span></td>
                 </tr>
             </table>
 

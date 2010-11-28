@@ -55,18 +55,18 @@ public class FileEditServlet extends HttpServlet {
         RequestDispatcher disp;
 
         String PathInfo = req.getPathInfo().substring(1);
-        int iFid = Integer.parseInt(PathInfo);
-        FileItem oFile = new FileItem(ds, iFid);
+        int fid = Integer.parseInt(PathInfo);
+        FileItem file = new FileItem(ds, fid);
 
         HttpSession session = req.getSession();
         UserItem User = (UserItem) session.getAttribute("user");
 
-        if (oFile.getFid() == null) {
+        if (file.getFid() == null) {
             req.setAttribute("message_critical", "File does not exist");
             req.setAttribute("tab", "404");
             disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (User.hasEditAccessTo(oFile)) {
-            req.setAttribute("oFile", oFile);
+        } else if (User.hasEditAccessTo(file)) {
+            req.setAttribute("file", file);
             req.setAttribute("tab", "Edit file");
             disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
         } else {
@@ -87,31 +87,31 @@ public class FileEditServlet extends HttpServlet {
             ServletContext app = getServletContext();
             RequestDispatcher disp;
 
-            int iFid = Integer.parseInt(req.getPathInfo().substring(1));
-            FileItem oFile = new FileItem(ds, iFid);
+            int fid = Integer.parseInt(req.getPathInfo().substring(1));
+            FileItem file = new FileItem(ds, fid);
 
             HttpSession session = req.getSession();
-            UserItem User = (UserItem) session.getAttribute("user");
+            UserItem user = (UserItem) session.getAttribute("user");
 
-            if (oFile.getFid() == null) {
+            if (file.getFid() == null) {
                 req.setAttribute("message_critical", "File does not exist");
                 req.setAttribute("tab", "404");
                 disp = app.getRequestDispatcher("/templates/Blank.jsp");
-            } else if (User.hasEditAccessTo(oFile)) {
+            } else if (user.hasEditAccessTo(file)) {
                 req.setAttribute("tab", "Edit file");
                 req.setAttribute("message", "Your changes to this file have been saved");
                 if (req.getParameter("bEnabled") != null
                         && req.getParameter("bEnabled").equals("true")) {
-                    oFile.setEnabled(true);
+                    file.setEnabled(true);
                 } else {
-                    oFile.setEnabled(false);
+                    file.setEnabled(false);
                 }
 
                 if (req.getParameter("bPermanent") != null
                         && req.getParameter("bPermanent").equals("true")) {
-                    oFile.setDateExpiration(null);
+                    file.setDateExpiration(null);
                 } else {
-                    oFile.setDaysToKeep(DAYS_FILE_RETENTION);
+                    file.setDaysToKeep(DAYS_FILE_RETENTION);
                 }
 
                 Integer iDownloads = null;
@@ -119,19 +119,19 @@ public class FileEditServlet extends HttpServlet {
                         && !req.getParameter("iDownloads").equals("")) {
                     iDownloads = new Integer(req.getParameter("iDownloads"));
                 }
-                oFile.setDownloads(iDownloads);
+                file.setDownloads(iDownloads);
 
                 if (req.getParameter("bUsePw") == null
                         || req.getParameter("bUsePw").equals("")) {
-                    oFile.setPwHash(null);
+                    file.setPwHash(null);
                 } else if (req.getParameter("bUsePw").equals("true")
                         && req.getParameter("sPassword") != null
                         && !req.getParameter("sPassword").equals("")) {
-                    oFile.setPwPlainText(req.getParameter("sPassword"));
+                    file.setPwPlainText(req.getParameter("sPassword"));
                 }
 
-                oFile.save(ds);
-                req.setAttribute("oFile", oFile);
+                file.save(ds);
+                req.setAttribute("file", file);
                 disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
             } else {
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");

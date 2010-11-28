@@ -60,23 +60,23 @@ public class FileDeleteServlet extends HttpServlet {
 
         String PathInfo = req.getPathInfo().substring(1);
         int iFid = Integer.parseInt(PathInfo);
-        FileItem oFile = new FileItem(ds, iFid);
+        FileItem file = new FileItem(ds, iFid);
 
-        UserItem User = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
 
-        if (User.hasEditAccessTo(oFile)) {
-            if (oFile.delete(ds, PATH_FILE_STORE)) {
-                UserItem oUser;
-                if (User.getUid().equals(oFile.getOwnerUid())) {
-                    oUser = User;
+        if (currentUser.hasEditAccessTo(file)) {
+            if (file.delete(ds, PATH_FILE_STORE)) {
+                UserItem user;
+                if (currentUser.getUid().equals(file.getOwnerUid())) {
+                    user = currentUser;
                 } else {
-                    oUser = new UserItem(ds, oFile.getOwnerUid());
-                    req.setAttribute("tab", oUser.getUsername());
+                    user = new UserItem(ds, file.getOwnerUid());
+                    req.setAttribute("tab", user.getUsername());
                 }
-                req.setAttribute("oUser", oUser);
-                req.setAttribute("aFiles", oUser.getFiles(ds));
-                req.setAttribute("aUsers", oUser.getChildren(ds));
-                req.setAttribute("message", "File <em>\"" + oFile.getName() + "\"</em> was successfully deleted");
+                req.setAttribute("user", user);
+                req.setAttribute("files", user.getFiles(ds));
+                req.setAttribute("users", user.getChildren(ds));
+                req.setAttribute("message", "File <em>\"" + file.getName() + "\"</em> was successfully deleted");
                 disp = app.getRequestDispatcher("/templates/UserView.jsp");
             } else {
                 req.setAttribute("message_critical", "File delete failed");
@@ -85,7 +85,7 @@ public class FileDeleteServlet extends HttpServlet {
             }
         } else {
             req.setAttribute("message_warning", "You don't have access to delete that file");
-            logger.log(Level.INFO, "Illegal file delete attempted by {0}", User.getUserInfo());
+            logger.log(Level.INFO, "Illegal file delete attempted by {0}", currentUser.getUserInfo());
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         }
         disp.forward(req, resp);

@@ -77,11 +77,11 @@ public class VacuumCleaner extends HttpServlet {
         // logger.info("Running scheduled vacuum of database");
 
         // Delete expired users
-        ArrayList<UserItem> aUsers = (ArrayList<UserItem>) getExpiredUsers(ds);
-        if (aUsers.size() > 0) {
-            logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", aUsers.size());
+        ArrayList<UserItem> users = (ArrayList<UserItem>) getExpiredUsers(ds);
+        if (users.size() > 0) {
+            logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", users.size());
         }
-        for (UserItem user : aUsers) {
+        for (UserItem user : users) {
             user.delete(ds, PATH_FILE_STORE);
         }
 
@@ -110,7 +110,7 @@ public class VacuumCleaner extends HttpServlet {
     }
 
     private ArrayList<UserItem> getExpiredUsers(DataSource ds) {
-        ArrayList<UserItem> aUsers = new ArrayList<UserItem>();
+        ArrayList<UserItem> users = new ArrayList<UserItem>();
         try {
             Connection dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from UserItems where dateExpiration<now() order by uid");
@@ -126,7 +126,7 @@ public class VacuumCleaner extends HttpServlet {
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
                 user.setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                aUsers.add(user);
+                users.add(user);
             }
 
             st.close();
@@ -134,7 +134,7 @@ public class VacuumCleaner extends HttpServlet {
         } catch (SQLException e) {
             logger.warning(e.toString());
         }
-        return aUsers;
+        return users;
     }
 
     private ArrayList<FileItem> getExpiredFiles(DataSource ds) {

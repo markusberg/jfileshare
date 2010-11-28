@@ -14,37 +14,37 @@
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
 
         <%
-                    if (request.getAttribute("oUser") != null) {
-                        UserItem oUser = (UserItem) request.getAttribute("oUser");
-                        UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-                        if (!oUser.getUid().equals(oCurrentUser.getUid())) {
+                    if (request.getAttribute("user") != null) {
+                        UserItem user = (UserItem) request.getAttribute("user");
+                        UserItem currentUser = (UserItem) session.getAttribute("user");
+                        if (!user.getUid().equals(currentUser.getUid())) {
         %>
 
         <table>
             <tr>
                 <th>Username:</th>
-                <td><%= oUser.getUsername()%>
-                    ( <a href="<%= request.getContextPath()%>/user/edit/<%= oUser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /> Edit User</a> )
+                <td><%= user.getUsername()%>
+                    ( <a href="<%= request.getContextPath()%>/user/edit/<%= user.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /> Edit User</a> )
                 </td>
             </tr>
             <tr>
                 <th>Email:</th>
-                <td><a href="mailto:<%=oUser.getEmail()%>"><%=oUser.getEmail()%></a></td>
+                <td><a href="mailto:<%=user.getEmail()%>"><%=user.getEmail()%></a></td>
             </tr>
             <tr>
                 <th>User Level:</th>
                 <td>
-                    <%= oUser.isAdmin() ? "Administrator" : (oUser.isExternal() ? "External" : "Sectra Corporate")%>
+                    <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : "Sectra Corporate")%>
                 </td>
             </tr>
             <tr>
                 <th>User expiration:</th>
-                <td><%= oUser.getDateExpiration() == null ? "N/A" : oUser.getDaysUntilExpiration() + " days"%></td>
+                <td><%= user.getDateExpiration() == null ? "N/A" : user.getDaysUntilExpiration() + " days"%></td>
             </tr>
         </table>
         <%
                                 }
-                                ArrayList<FileItem> files = (ArrayList<FileItem>) request.getAttribute("aFiles");
+                                ArrayList<FileItem> files = (ArrayList<FileItem>) request.getAttribute("files");
                                 if (files.isEmpty()) {
         %>
         <p>This user has no files.</p>
@@ -52,11 +52,11 @@
         %>
         <%@ include file="/WEB-INF/jspf/FileList.jspf" %>
         <%                                }
-                                if (!oCurrentUser.isExternal()) {
+                                if (!currentUser.isExternal()) {
         %>
-        <h2>Users administered by <%= oUser.getUsername()%></h2>
+        <h2>Users administered by <%= user.getUsername()%></h2>
         <%
-                                            ArrayList<UserItem> users = (ArrayList<UserItem>) request.getAttribute("aUsers");
+                                            ArrayList<UserItem> users = (ArrayList<UserItem>) request.getAttribute("users");
                                             if (users.isEmpty()) {
         %>
         <p>This user has no child users.</p>

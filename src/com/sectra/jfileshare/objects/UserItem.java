@@ -575,7 +575,7 @@ public class UserItem {
         if (this.isAdmin()) {
             logger.log(Level.INFO, "Administrator access to edit user {0}", user.getUserInfo());
             return true;
-        } else if (user.getUidCreator().equals(this.getUid())) {
+        } else if (this.isParentTo(user)) {
             logger.log(Level.INFO, "Creator access to edit user {0}", user.getUserInfo());
             return true;
         } else if (user.getUid().equals(this.getUid())) {
@@ -584,6 +584,10 @@ public class UserItem {
         }
         logger.log(Level.INFO, "User {0} does not have edit access to user {1}", new Object[]{this.getUserInfo(), user.getUserInfo()});
         return false;
+    }
+
+    public boolean isParentTo(UserItem user) {
+        return (user.getUidCreator().equals(this.getUid()));
     }
 }
 

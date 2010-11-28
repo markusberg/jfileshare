@@ -11,26 +11,26 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <%
-                    UserItem oCurrentUser = (UserItem) session.getAttribute("user");
-                    UserItem oUser = (UserItem) request.getAttribute("oUser");
+                    UserItem currentUser = (UserItem) session.getAttribute("user");
+                    UserItem user = (UserItem) request.getAttribute("user");
         %>
 
-        <form action="<%= request.getContextPath()%>/user/edit/<%=oUser.getUid()%>" method="post">
+        <form action="<%= request.getContextPath()%>/user/edit/<%=user.getUid()%>" method="post">
             <table id="singleentry">
                 <tr>
-                    <th>Userid: </th><td><%= oUser.getUid()%></td>
+                    <th>Userid: </th><td><%= user.getUid()%></td>
                 </tr>
                 <tr>
                     <th>Username: </th>
                     <td>
                         <%
-                                    if (oCurrentUser.isAdmin()) {
+                                    if (currentUser.isAdmin()) {
 
                         %>
                         <input type="text" name="username" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedUsername"))%>" />
                         <%
                                     } else {
-                                        out.print(oUser.getUsername());
+                                        out.print(user.getUsername());
                                     }
                         %>
                     </td>
@@ -53,7 +53,7 @@
 
                             // Only allow setting expiration on users that
                             // you have edit access to
-                            if (oCurrentUser.hasEditAccessTo(oUser)) {
+                            if (currentUser.isAdmin() || currentUser.isParentTo(user)) {
                 %>
                 <tr>
                     <th>Expiration:</th>
@@ -81,7 +81,7 @@
                 </tr>
                 <%
                             }
-                            if (oCurrentUser.isAdmin()) {
+                            if (currentUser.isAdmin()) {
                                 Integer usertype = (Integer) request.getAttribute("validatedUsertype");
                 %>
                 <tr>
