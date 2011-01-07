@@ -1,10 +1,11 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.UserItem;
+import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
-
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -51,36 +52,33 @@ public class UserDeleteServlet extends HttpServlet {
 
         ServletContext app = getServletContext();
         RequestDispatcher disp;
-        String jspForward = "";
-        HttpSession session = req.getSession();
-        UserItem currentUser = (UserItem) session.getAttribute("user");
 
-        UserItem user;
-        Integer uid = null;
         try {
-            String sUid = req.getPathInfo().substring(1);
-            if (sUid.equals("")) {
-                throw new NullPointerException();
+            HttpSession session = req.getSession();
+            UserItem currentUser = (UserItem) session.getAttribute("user");
+            UserItem user;
+            String reqUid = req.getPathInfo();
+            if (reqUid == null || reqUid.equals("/")) {
+                user = currentUser;
+            } else {
+                Integer uid = Integer.parseInt(reqUid.substring(1));
+                user = new UserItem(ds, uid);
             }
-            uid = Integer.parseInt(sUid);
-            user = new UserItem(ds, uid);
-        } catch (NullPointerException e) {
-            user = currentUser;
+            if (!currentUser.hasEditAccessTo(user)) {
+                req.setAttribute("message_critical", "You do not have access to delete that user");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } else {
+                req.setAttribute("user", user);
+                req.setAttribute("tab", "Delete user");
+                disp = app.getRequestDispatcher("/templates/UserDelete.jsp");
+            }
+        } catch (NoSuchUserException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
-
-        if (user.getUid() == null) {
-            logger.info("Attempting to delete nonexistent user");
-            req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(uid.toString()) + ")");
-            jspForward = "/templates/404.jsp";
-        } else if (!currentUser.hasEditAccessTo(user)) {
-            req.setAttribute("message_critical", "You do not have access to delete that user");
-            jspForward = "/templates/AccessDenied.jsp";
-        } else {
-            req.setAttribute("user", user);
-            req.setAttribute("tab", "Delete user");
-            jspForward = "/templates/UserDelete.jsp";
-        }
-        disp = app.getRequestDispatcher(jspForward);
         disp.forward(req, resp);
     }
 
@@ -94,26 +92,27 @@ public class UserDeleteServlet extends HttpServlet {
             ServletContext app = getServletContext();
             RequestDispatcher disp;
 
-            String jspForward = "";
             HttpSession session = req.getSession();
             UserItem CurrentUser = (UserItem) session.getAttribute("user");
             Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
-            UserItem User = new UserItem(ds, iUid);
-
-            if (User.getUid() == null) {
-                logger.info("Attempting to modify nonexistent user");
-                req.setAttribute("message_warning", "No such user (" + Helpers.htmlSafe(iUid.toString()) + ")");
-                jspForward = "/templates/404.jsp";
-            } else if (!CurrentUser.hasEditAccessTo(User)) {
-                req.setAttribute("message_critical", "You do not have access to modify user " + User.getUserInfo());
-                jspForward = "/templates/AccessDenied.jsp";
-            } else {
-                User.delete(ds, PATH_FILE_STORE);
-                req.setAttribute("message", "User " + User.getUserInfo() + " deleted");
-                req.setAttribute("tab", "Delete user");
-                jspForward = "/templates/Blank.jsp";
+            try {
+                UserItem User = new UserItem(ds, iUid);
+                if (!CurrentUser.hasEditAccessTo(User)) {
+                    req.setAttribute("message_critical", "You do not have access to modify user " + User.getUserInfo());
+                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+                } else {
+                    User.delete(ds, PATH_FILE_STORE);
+                    req.setAttribute("message", "User " + User.getUserInfo() + " deleted");
+                    req.setAttribute("tab", "Delete user");
+                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
+                }
+            } catch (NoSuchUserException e) {
+                req.setAttribute("message_warning", e.getMessage());
+                disp = app.getRequestDispatcher("/templates/404.jsp");
+            } catch (SQLException e) {
+                req.setAttribute("message_critical", e.getMessage());
+                disp = app.getRequestDispatcher("/templates/Error.jsp");
             }
-            disp = app.getRequestDispatcher(jspForward);
             disp.forward(req, resp);
         }
     }

@@ -58,14 +58,15 @@ public class UserItem {
     public UserItem() {
     }
 
-    public UserItem(DataSource ds, int uid) {
+    public UserItem(DataSource ds, int uid)
+            throws NoSuchUserException, SQLException {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from UserItems left outer join viewUserFiles using (uid) left outer join viewUserChildren using (uid) where uid=?");
             st.setInt(1, uid);
             ResultSet rs = st.executeQuery();
-            while (rs.next()) {
+            if (rs.first()) {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
                 setPwHash(rs.getString("UserItems.pwHash"));
@@ -78,28 +79,33 @@ public class UserItem {
                 setSumFiles(rs.getInt("sumFiles"));
                 setSumFilesize(rs.getDouble("sumFilesize"));
                 setSumChildren(rs.getInt("sumChildren"));
+            } else {
+                throw new NoSuchUserException("User not found");
             }
             st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+            throw new SQLException("Unable to connect to database. Please contact the system administrator.");
         } finally {
             if (dbConn != null) {
                 try {
                     dbConn.close();
                 } catch (SQLException e) {
+                    // ignore
                 }
             }
         }
     }
 
-    public UserItem(DataSource ds, String username) {
+    public UserItem(DataSource ds, String username)
+            throws NoSuchUserException, SQLException {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select * from UserItems where username=?");
             st.setString(1, username);
             ResultSet rs = st.executeQuery();
-            while (rs.next()) {
+            if (rs.first()) {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
                 setPwHash(rs.getString("UserItems.pwHash"));
@@ -109,10 +115,13 @@ public class UserItem {
                 setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
                 setUidCreator(rs.getInt("UserItems.uidCreator"));
+            } else {
+                throw new NoSuchUserException("User not found");
             }
             st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+            throw new SQLException("Unable to connect to database. Please contact the system administrator.");
         } finally {
             if (dbConn != null) {
                 try {
@@ -121,7 +130,6 @@ public class UserItem {
                 }
             }
         }
-
     }
 
     public String getUsername() {
@@ -536,19 +544,18 @@ public class UserItem {
      * Validate that the provided username is available
      * @param username
      * @return ArrayList of errors encountered
-     */
     public ArrayList<String> validateUserName(String username) {
-        ArrayList<String> errors = new ArrayList<String>();
-        if (username.equals("")) {
-            errors.add("Username is empty");
-        } else {
-            if (this.getUid() != null) {
-                errors.add("Username is already taken");
-            }
-        }
-        return errors;
+    ArrayList<String> errors = new ArrayList<String>();
+    if (username.equals("")) {
+    errors.add("Username is empty");
+    } else {
+    if (this.getUid() != null) {
+    errors.add("Username is already taken");
     }
-
+    }
+    return errors;
+    }
+     */
     /**
      * Does the user enjoy edit rights to the specified file
      * @param file
@@ -590,4 +597,3 @@ public class UserItem {
         return (user.getUidCreator().equals(this.getUid()));
     }
 }
-

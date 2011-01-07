@@ -1,10 +1,11 @@
 package com.sectra.jfileshare.servlets;
 
-import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.NoSuchFileException;
+import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
-
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -56,22 +57,26 @@ public class FileEditServlet extends HttpServlet {
 
         String PathInfo = req.getPathInfo().substring(1);
         int fid = Integer.parseInt(PathInfo);
-        FileItem file = new FileItem(ds, fid);
+        try {
+            FileItem file = new FileItem(ds, fid);
 
-        HttpSession session = req.getSession();
-        UserItem User = (UserItem) session.getAttribute("user");
+            HttpSession session = req.getSession();
+            UserItem User = (UserItem) session.getAttribute("user");
 
-        if (file.getFid() == null) {
-            req.setAttribute("message_critical", "File does not exist");
-            req.setAttribute("tab", "404");
-            disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (User.hasEditAccessTo(file)) {
-            req.setAttribute("file", file);
-            req.setAttribute("tab", "Edit file");
-            disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
-        } else {
-            req.setAttribute("message_critical", "You do not have access to edit that file");
-            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            if (User.hasEditAccessTo(file)) {
+                req.setAttribute("file", file);
+                req.setAttribute("tab", "Edit file");
+                disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
+            } else {
+                req.setAttribute("message_critical", "You do not have access to edit that file");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            }
+        } catch (NoSuchFileException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
         disp.forward(req, resp);
 
@@ -89,57 +94,60 @@ public class FileEditServlet extends HttpServlet {
             RequestDispatcher disp;
 
             int fid = Integer.parseInt(req.getPathInfo().substring(1));
-            FileItem file = new FileItem(ds, fid);
 
-            HttpSession session = req.getSession();
-            UserItem user = (UserItem) session.getAttribute("user");
+            try {
+                FileItem file = new FileItem(ds, fid);
 
-            if (file.getFid() == null) {
-                req.setAttribute("message_critical", "File does not exist");
-                req.setAttribute("tab", "404");
-                disp = app.getRequestDispatcher("/templates/Blank.jsp");
-            } else if (user.hasEditAccessTo(file)) {
-                req.setAttribute("tab", "Edit file");
-                req.setAttribute("message", "Your changes to this file have been saved");
-                if (req.getParameter("bEnabled") != null
-                        && req.getParameter("bEnabled").equals("true")) {
-                    file.setEnabled(true);
+                HttpSession session = req.getSession();
+                UserItem user = (UserItem) session.getAttribute("user");
+
+                if (user.hasEditAccessTo(file)) {
+                    req.setAttribute("tab", "Edit file");
+                    req.setAttribute("message", "Your changes to this file have been saved");
+                    if (req.getParameter("bEnabled") != null
+                            && req.getParameter("bEnabled").equals("true")) {
+                        file.setEnabled(true);
+                    } else {
+                        file.setEnabled(false);
+                    }
+
+                    if (req.getParameter("bPermanent") != null
+                            && req.getParameter("bPermanent").equals("true")) {
+                        file.setDateExpiration(null);
+                    } else {
+                        file.setDaysToKeep(DAYS_FILE_RETENTION);
+                    }
+
+                    Integer iDownloads = null;
+                    if (req.getParameter("iDownloads") != null
+                            && !req.getParameter("iDownloads").equals("")) {
+                        iDownloads = new Integer(req.getParameter("iDownloads"));
+                    }
+                    file.setDownloads(iDownloads);
+
+                    if (req.getParameter("bUsePw") == null
+                            || req.getParameter("bUsePw").equals("")) {
+                        file.setPwHash(null);
+                    } else if (req.getParameter("bUsePw").equals("true")
+                            && req.getParameter("sPassword") != null
+                            && !req.getParameter("sPassword").equals("")) {
+                        file.setPwPlainText(req.getParameter("sPassword"));
+                    }
+
+                    file.save(ds);
+                    req.setAttribute("file", file);
+                    disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
                 } else {
-                    file.setEnabled(false);
+                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 }
-
-                if (req.getParameter("bPermanent") != null
-                        && req.getParameter("bPermanent").equals("true")) {
-                    file.setDateExpiration(null);
-                } else {
-                    file.setDaysToKeep(DAYS_FILE_RETENTION);
-                }
-
-                Integer iDownloads = null;
-                if (req.getParameter("iDownloads") != null
-                        && !req.getParameter("iDownloads").equals("")) {
-                    iDownloads = new Integer(req.getParameter("iDownloads"));
-                }
-                file.setDownloads(iDownloads);
-
-                if (req.getParameter("bUsePw") == null
-                        || req.getParameter("bUsePw").equals("")) {
-                    file.setPwHash(null);
-                } else if (req.getParameter("bUsePw").equals("true")
-                        && req.getParameter("sPassword") != null
-                        && !req.getParameter("sPassword").equals("")) {
-                    file.setPwPlainText(req.getParameter("sPassword"));
-                }
-
-                file.save(ds);
-                req.setAttribute("file", file);
-                disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
-            } else {
-                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } catch (NoSuchFileException e) {
+                req.setAttribute("message_warning", e.getMessage());
+                disp = app.getRequestDispatcher("/templates/404.jsp");
+            } catch (SQLException e) {
+                req.setAttribute("message_critical", e.getMessage());
+                disp = app.getRequestDispatcher("/templates/Error.jsp");
             }
-
             disp.forward(req, resp);
         }
     }
 }
-

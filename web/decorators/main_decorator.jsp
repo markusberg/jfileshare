@@ -118,7 +118,7 @@
             </div>
 
             <div id="footer">
-                jfileshare version 1.3
+                jfileshare version 1.4 beta
             </div>
         </div>
 

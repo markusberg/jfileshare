@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 
@@ -201,7 +202,7 @@ public class FileReceiverServlet extends HttpServlet {
                     File tempfile = new File(this.PATH_TEMP, Integer.toString(currentUser.getUid()));
                     File finalfile = new File(this.PATH_STORE, Integer.toString(file.getFid()));
                     tempfile.renameTo(finalfile);
-                    logger.info("User " + currentUser.getUid() + " storing file \"" + file.getName() + "\" in the filestore");
+                    logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});
                     req.setAttribute("msg", "File '" + file.getName() + "' uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
                     req.setAttribute("javascript", "parent.uploadComplete('info');");
                 }

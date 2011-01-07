@@ -1,11 +1,12 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.UserItem;
+import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.logging.Level;
-
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
@@ -99,8 +100,18 @@ public class UserAddServlet extends HttpServlet {
 
                 // Check username uniqueness
                 String username = req.getParameter("username") == null ? "" : req.getParameter("username");
-                UserItem user = new UserItem(datasource, username);
-                errors.addAll(user.validateUserName(username));
+                UserItem user = null;
+                if (username.equals("")) {
+                    errors.add("Username is empty");
+                } else {
+                    try {
+                        user = new UserItem(datasource, username);
+                        errors.add("Username is already taken");
+                    } catch (NoSuchUserException ignored) {
+                    } catch (SQLException ignored) {
+                    }
+                }
+                user = new UserItem();
                 req.setAttribute("validatedUsername", username);
 
                 // Validate email address
@@ -174,9 +185,8 @@ public class UserAddServlet extends HttpServlet {
                         req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
 
                     } else {
-                        req.setAttribute("message_critical", "Unable to create user due to database error. Please try again, or contact your system administrator.");
-                        req.setAttribute("tab", "Error");
-                        disp = app.getRequestDispatcher("/templates/blank.jsp");
+                        req.setAttribute("message_critical", "Unable to create user due to database error. Please try again, or contact the server administrator.");
+                        disp = app.getRequestDispatcher("/templates/Error.jsp");
                     }
                 }
             }

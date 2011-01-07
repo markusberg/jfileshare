@@ -1,6 +1,14 @@
 package com.sectra.jfileshare.filters;
 
+import com.sectra.jfileshare.objects.NoSuchUserException;
+import com.sectra.jfileshare.objects.UserItem;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
@@ -16,12 +24,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.Context;
 import javax.sql.DataSource;
-
-import java.util.logging.Logger;
-
-import java.io.IOException;
-
-import com.sectra.jfileshare.objects.UserItem;
 
 public class LoginFilter implements Filter {
 
@@ -76,19 +78,20 @@ public class LoginFilter implements Filter {
             String pwPlaintext = req.getParameter("login_password");
 
             if (username != null && pwPlaintext != null) {
-                UserItem user = new UserItem(ds, username);
-                if (user.getUid() == null || !user.authenticated(pwPlaintext)) {
+                try {
+                    UserItem user = new UserItem(ds, username);
+                    if (!user.authenticated(pwPlaintext)) {
+                        throw new NoSuchUserException();
+                    } else {
+                        logger.log(Level.INFO, "User {0} is now logged in", user.getUserInfo());
+                        user.saveLastLogin(ds);
+                        session.setAttribute("user", user);
+                        return true;
+                    }
+                } catch (NoSuchUserException e) {
                     req.setAttribute("message_warning", "Non-existent user or incorrect password");
-                } else {
-                    logger.log(Level.INFO, "User {0} is now logged in", user.getUserInfo());
-                    user.saveLastLogin(ds);
-                    session.setAttribute("user", user);
-                    return true;
-                }
-                if (1 == -2) {
-                    // FIXME: redo this part
-                    // Have the UserItem constructor throw an exception in case there's a db error
-                    req.setAttribute("message_critical", "Unable to connect to the database. Please contact the system administrator.");
+                } catch (SQLException e) {
+                    req.setAttribute("message_critical", e.toString());
                 }
             }
         }

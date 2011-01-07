@@ -1,16 +1,18 @@
 package com.sectra.jfileshare.servlets;
 
-import java.util.logging.Level;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletContext;
-import javax.servlet.RequestDispatcher;
+import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.NoSuchUserException;
+import com.sectra.jfileshare.objects.NoSuchFileException;
+import com.sectra.jfileshare.objects.UserItem;
+import com.sectra.jfileshare.utils.Helpers;
 
-import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.SQLException;
+
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -26,15 +28,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletContext;
+import javax.servlet.RequestDispatcher;
 
-import java.util.logging.Logger;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import com.sectra.jfileshare.objects.UserItem;
-import com.sectra.jfileshare.objects.FileItem;
-import com.sectra.jfileshare.utils.Helpers;
+import javax.sql.DataSource;
 
 public class UserViewServlet extends HttpServlet {
 
@@ -83,45 +86,39 @@ public class UserViewServlet extends HttpServlet {
         ServletContext app = getServletContext();
         RequestDispatcher disp;
 
-        String reqUid = req.getPathInfo();
-        Integer uid;
-
         try {
-            reqUid = reqUid.replaceAll("/", "");
-            if (reqUid.equals("")) {
+            String reqUid = req.getPathInfo();
+            Integer uid;
+            if (reqUid == null || reqUid.equals("/")) {
                 uid = currentUser.getUid();
             } else {
-                uid = Integer.parseInt(reqUid);
+                try {
+                    uid = Integer.parseInt(reqUid.substring(1));
+                } catch (NumberFormatException n) {
+                    throw new NoSuchUserException("Invalid uid");
+                }
             }
-            logger.log(Level.INFO, "Requesting uid: {0}", reqUid);
-        } catch (NumberFormatException n) {
-            uid = -1;
-        } catch (NullPointerException n) {
-            uid = currentUser.getUid();
-        }
+            UserItem user = new UserItem(ds, uid);
 
-        UserItem user = new UserItem(ds, uid);
+            if (!currentUser.hasEditAccessTo(user)) {
+                req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } else {
+                if (!currentUser.getUid().equals(uid)) {
+                    req.setAttribute("tab", user.getUsername());
+                }
 
-        if (user.getUid() != null && user.getUid() == -2) {
-            // FIXME: exception handling bitte
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/Blank.jsp");
-        } else if (user.getUid() == null) {
+                req.setAttribute("user", user);
+                req.setAttribute("files", user.getFiles(ds));
+                req.setAttribute("users", user.getChildren(ds));
+                disp = app.getRequestDispatcher("/templates/UserView.jsp");
+            }
+        } catch (NoSuchUserException e) {
+            req.setAttribute("message_warning", e.getMessage());
             disp = app.getRequestDispatcher("/templates/404.jsp");
-            req.setAttribute("message_warning", "User not found (" + reqUid + ")");
-        } else if (!currentUser.hasEditAccessTo(user)) {
-            req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
-            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-        } else {
-            if (!currentUser.getUid().equals(uid)) {
-                req.setAttribute("tab", user.getUsername());
-            }
-
-            req.setAttribute("user", user);
-            req.setAttribute("files", user.getFiles(ds));
-            req.setAttribute("users", user.getChildren(ds));
-            disp = app.getRequestDispatcher("/templates/UserView.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
         disp.forward(req, resp);
     }
@@ -140,53 +137,57 @@ public class UserViewServlet extends HttpServlet {
             String emailRecipient = req.getParameter("emailRecipient");
 
             ArrayList<String> errors = new ArrayList<String>();
-            FileItem file = new FileItem(ds, iFid);
+            try {
+                FileItem file = new FileItem(ds, iFid);
 
-            // You must have edit access to the file in order to notify
-            // someone of it's existence
-            if (currentUser.hasEditAccessTo(file)) {
-                if (file.getFid() == null) {
-                    errors.add("The file was not found");
-                }
-                // Email address sanity check
-                InternetAddress emailValidated = new InternetAddress();
-                try {
-                    emailValidated = new InternetAddress(emailRecipient);
-                    emailValidated.validate();
-                } catch (AddressException e) {
-                    errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
-                }
-
-                if (errors.size() > 0) {
-                    String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                    for (String emsg : errors) {
-                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+                // You must have edit access to the file in order to notify
+                // someone of it's existence
+                if (currentUser.hasEditAccessTo(file)) {
+                    if (file.getFid() == null) {
+                        errors.add("The file was not found");
                     }
-                    errormessage = errormessage.concat("</ul>\n");
-                    req.setAttribute("message_critical", errormessage);
-                } else {
-                    // Everything checks out. Let's send the email notification
-                    if (URL_PREFIX.equals("")) {
-                        // We need to figure out the absolute path to the servlet
-                        String httpScheme = req.getScheme();
-                        String serverName = req.getServerName();
-                        Integer serverPort = (Integer) req.getServerPort();
-                        if ((serverPort == 80 && httpScheme.equals("http"))
-                            || (serverPort == 443 && httpScheme.equals("https"))) {
-                            serverPort = null;
+                    // Email address sanity check
+                    InternetAddress emailValidated = new InternetAddress();
+                    try {
+                        emailValidated = new InternetAddress(emailRecipient);
+                        emailValidated.validate();
+                    } catch (AddressException e) {
+                        errors.add("\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address");
+                    }
+
+                    if (errors.size() > 0) {
+                        String errormessage = "Email notification failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                        for (String emsg : errors) {
+                            errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                         }
-
-                        URL_PREFIX = httpScheme + "://"
-                                + serverName
-                                + (serverPort != null ? ":" + serverPort.toString() : "");
-                        logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", URL_PREFIX);
-                    }
-                    if (sendEmailNotification(file, currentUser, emailValidated)) {
-                        req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + file.getName() + "\"");
+                        errormessage = errormessage.concat("</ul>\n");
+                        req.setAttribute("message_critical", errormessage);
                     } else {
-                        req.setAttribute("message_warning", "Failed to send email notification.");
+                        // Everything checks out. Let's send the email notification
+                        if (URL_PREFIX.equals("")) {
+                            // We need to figure out the absolute path to the servlet
+                            String httpScheme = req.getScheme();
+                            String serverName = req.getServerName();
+                            Integer serverPort = (Integer) req.getServerPort();
+                            if ((serverPort == 80 && httpScheme.equals("http"))
+                                    || (serverPort == 443 && httpScheme.equals("https"))) {
+                                serverPort = null;
+                            }
+
+                            URL_PREFIX = httpScheme + "://"
+                                    + serverName
+                                    + (serverPort != null ? ":" + serverPort.toString() : "");
+                            logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", URL_PREFIX);
+                        }
+                        if (sendEmailNotification(file, currentUser, emailValidated)) {
+                            req.setAttribute("message", "Email notification has been sent to " + Helpers.htmlSafe(emailRecipient) + " regarding the file \"" + file.getName() + "\"");
+                        } else {
+                            req.setAttribute("message_warning", "Failed to send email notification.");
+                        }
                     }
                 }
+            } catch (NoSuchFileException ignored) {
+            } catch (SQLException ignored) {
             }
         }
         doGet(req, resp);
@@ -214,8 +215,7 @@ public class UserViewServlet extends HttpServlet {
                     + "Filename: " + file.getName() + "\n"
                     + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
                     + file.getURL(URL_PREFIX + pathContext)
-                    + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))")
-                    , "utf-8");
+                    + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))"), "utf-8");
 
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent("<h1>File available for download</h1>"
@@ -255,4 +255,3 @@ public class UserViewServlet extends HttpServlet {
         }
     }
 }
-

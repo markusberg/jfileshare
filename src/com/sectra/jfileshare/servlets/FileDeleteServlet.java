@@ -2,11 +2,13 @@ package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.NoSuchFileException;
+import com.sectra.jfileshare.objects.NoSuchUserException;
 
 import java.io.IOException;
 import java.util.logging.Level;
-
 import java.util.logging.Logger;
+import java.sql.SQLException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -60,37 +62,44 @@ public class FileDeleteServlet extends HttpServlet {
 
         String PathInfo = req.getPathInfo().substring(1);
         int iFid = Integer.parseInt(PathInfo);
-        FileItem file = new FileItem(ds, iFid);
+        try {
+            FileItem file = new FileItem(ds, iFid);
+            UserItem currentUser = (UserItem) session.getAttribute("user");
 
-        UserItem currentUser = (UserItem) session.getAttribute("user");
-
-        if (currentUser.hasEditAccessTo(file)) {
-            if (file.delete(ds, PATH_FILE_STORE)) {
-                UserItem user;
-                if (currentUser.getUid().equals(file.getOwnerUid())) {
-                    user = currentUser;
+            if (currentUser.hasEditAccessTo(file)) {
+                if (file.delete(ds, PATH_FILE_STORE)) {
+                    // FIXME: this is ugly. Should be ajax instead.
+                    UserItem user = null;
+                    if (currentUser.getUid().equals(file.getOwnerUid())) {
+                        user = currentUser;
+                    } else {
+                        try {
+                            user = new UserItem(ds, file.getOwnerUid());
+                        } catch (NoSuchUserException ignored) {
+                        } catch (SQLException ignored) {
+                        }
+                        req.setAttribute("tab", user.getUsername());
+                    }
+                    req.setAttribute("user", user);
+                    req.setAttribute("files", user.getFiles(ds));
+                    req.setAttribute("users", user.getChildren(ds));
+                    req.setAttribute("message", "File <em>\"" + file.getName() + "\"</em> was successfully deleted");
+                    disp = app.getRequestDispatcher("/templates/UserView.jsp");
                 } else {
-                    user = new UserItem(ds, file.getOwnerUid());
-                    req.setAttribute("tab", user.getUsername());
+                    req.setAttribute("message_critical", "File delete failed");
+                    disp = app.getRequestDispatcher("/templates/Error.jsp");
                 }
-                req.setAttribute("user", user);
-                req.setAttribute("files", user.getFiles(ds));
-                req.setAttribute("users", user.getChildren(ds));
-                req.setAttribute("message", "File <em>\"" + file.getName() + "\"</em> was successfully deleted");
-                disp = app.getRequestDispatcher("/templates/UserView.jsp");
             } else {
-                req.setAttribute("message_critical", "File delete failed");
-                req.setAttribute("tab", "Error");
-                disp = app.getRequestDispatcher("/templates/Blank.jsp");
+                req.setAttribute("message_warning", "You don't have access to delete that file");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             }
-        } else {
-            req.setAttribute("message_warning", "You don't have access to delete that file");
-            logger.log(Level.INFO, "Illegal file delete attempted by {0}", currentUser.getUserInfo());
-            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+        } catch (NoSuchFileException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
         disp.forward(req, resp);
     }
 }
-
-
-

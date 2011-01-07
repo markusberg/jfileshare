@@ -41,14 +41,16 @@ public class FileItem {
     public FileItem() {
     }
 
-    public FileItem(DataSource ds, int fid) {
+    public FileItem(DataSource ds, int fid)
+            throws NoSuchFileException, SQLException {
         Connection dbConn = null;
+        PreparedStatement st = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.uid=UserItems.uid and FileItems.fid=?");
+            st = dbConn.prepareStatement("select FileItems.*, UserItems.* from FileItems, UserItems where FileItems.uid=UserItems.uid and FileItems.fid=?");
             st.setInt(1, fid);
             ResultSet rs = st.executeQuery();
-            while (rs.next()) {
+            if (rs.first()) {
                 setFid(rs.getInt("FileItems.fid"));
                 setName(rs.getString("FileItems.name"));
                 setType(rs.getString("FileItems.type"));
@@ -71,12 +73,17 @@ public class FileItem {
                 setOwnerUid(rs.getInt("UserItems.uid"));
                 setOwnerUsername(rs.getString("UserItems.username"));
                 setOwnerEmail(rs.getString("UserItems.email"));
-
+            } else {
+                logger.info("File not found in database");
+                throw new NoSuchFileException("File not found");
             }
-            st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
+            throw new SQLException("Unable to connect to the database. Please contact the system administrator.");
         } finally {
+            if (st != null) {
+                st.close();
+            }
             if (dbConn != null) {
                 try {
                     dbConn.close();
@@ -113,7 +120,7 @@ public class FileItem {
 
     public void setName(String name) {
         if (name.contains("\\")) {
-            name = name.substring(name.lastIndexOf("\\")+1);
+            name = name.substring(name.lastIndexOf("\\") + 1);
         }
         this.name = name;
     }

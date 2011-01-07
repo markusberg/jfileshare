@@ -1,7 +1,13 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -17,11 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.RequestDispatcher;
 
 import javax.sql.DataSource;
-
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class FileLogServlet extends HttpServlet {
 
@@ -52,30 +53,29 @@ public class FileLogServlet extends HttpServlet {
         int fid = Integer.parseInt(PathInfo);
 
         ServletContext app = getServletContext();
-        RequestDispatcher disp = null;
+        RequestDispatcher disp;
+        try {
+            FileItem file = new FileItem(ds, fid);
 
-        FileItem file = new FileItem(ds, fid);
-
-        if (file.getFid() != null && file.getFid() == -2) {
-            req.setAttribute("message_critical", "Unable to connect to database. Please contact your system administrator.");
-            req.setAttribute("tab", "Error");
-            disp = app.getRequestDispatcher("/templates/blank.jsp");
-        } else if (file.getFid() == null) {
-            logger.info("File not found");
-            req.setAttribute("message_warning", "The requested file is not found");
-            disp = app.getRequestDispatcher("/templates/404.jsp");
-        } else if (!currentUser.hasEditAccessTo(file)) {
-            req.setAttribute("message_critical", "You don't have access to view the logs of this file");
-            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-        } else {
-            req.setAttribute("file", file);
-            ArrayList downloadLogs = file.getLogs(ds);
-            req.setAttribute("downloadLogs", downloadLogs);
-            if (downloadLogs.isEmpty()) {
-                req.setAttribute("message", "This file (" + file.getName() + ") has never been downloaded");
+            if (!currentUser.hasEditAccessTo(file)) {
+                req.setAttribute("message_critical", "You don't have access to view the logs of this file");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } else {
+                req.setAttribute("file", file);
+                ArrayList downloadLogs = file.getLogs(ds);
+                req.setAttribute("downloadLogs", downloadLogs);
+                if (downloadLogs.isEmpty()) {
+                    req.setAttribute("message", "This file (" + file.getName() + ") has never been downloaded");
+                }
+                req.setAttribute("tab", "File log");
+                disp = app.getRequestDispatcher("/templates/FileLog.jsp");
             }
-            req.setAttribute("tab", "File log");
-            disp = app.getRequestDispatcher("/templates/FileLog.jsp");
+        } catch (NoSuchFileException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
         disp.forward(req, resp);
     }

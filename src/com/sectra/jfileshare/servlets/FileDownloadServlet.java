@@ -1,10 +1,11 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.NoSuchFileException;
 
 import java.io.File;
 import java.io.FileInputStream;
-
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -52,29 +53,33 @@ public class FileDownloadServlet extends HttpServlet {
 
         Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
         String md5sum = req.getParameter("md5");
-        FileItem file = new FileItem(ds, fid);
-        File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
-
-        logger.info("Preparing to stream file");
-        resp.setContentType(file.getType());
-        resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
-        resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
-
-        FileInputStream instream = new FileInputStream(fileOnDisk);
-        ServletOutputStream outstream = resp.getOutputStream();
-
         try {
-            IOUtils.copyLarge(instream, outstream);
-        } finally {
-            if (instream != null) {
-                instream.close();
+            FileItem file = new FileItem(ds, fid);
+            File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
+
+            logger.info("Preparing to stream file");
+            resp.setContentType(file.getType());
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
+            resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
+
+            FileInputStream instream = new FileInputStream(fileOnDisk);
+            ServletOutputStream outstream = resp.getOutputStream();
+
+            try {
+                IOUtils.copyLarge(instream, outstream);
+            } finally {
+                if (instream != null) {
+                    instream.close();
+                }
+                if (outstream != null) {
+                    outstream.close();
+                }
             }
-            if (outstream != null) {
-                outstream.close();
-            }
+            String ipAddr = req.getRemoteAddr();
+            file.logDownload(ds, ipAddr);
+        } catch (NoSuchFileException ignore) {
+        } catch (SQLException ignore) {
         }
-        String ipAddr = req.getRemoteAddr();
-        file.logDownload(ds, ipAddr);
     }
 
     @Override
