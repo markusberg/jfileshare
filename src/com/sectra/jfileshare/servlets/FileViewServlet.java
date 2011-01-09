@@ -26,11 +26,16 @@ public class FileViewServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         ServletContext app = getServletContext();
         RequestDispatcher disp;
         req.setAttribute("tab", "File");
         disp = app.getRequestDispatcher("/templates/FileView.jsp");
         disp.forward(req, resp);
+    }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        doGet(req, resp);
     }
 }
