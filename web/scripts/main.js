@@ -29,14 +29,33 @@ function getAjaxObject() {
 
 var LogoutTimer = (function(){
     var idTimer;
+    var timeStart = 0;
+    var timeTimeout = 1000*60*30;
     return {
         start: function() {
             idTimer = setTimeout(function() {
                 window.location=contextPath+"/logout?reason=inactivity";
-            }, 1000*60*30);
+            }, timeTimeout);
+            var dateNow = new Date();
+            timeStart = dateNow.getTime();
         },
         stop: function() {
+            timeStart = 0;
             clearTimeout(idTimer);
+        },
+        restart: function() {
+            this.stop();
+            this.start();
+        },
+        forceLogout: function() {
+            window.location=contextPath+"/logout?reason=sessionexpired";
+        },
+        getTimeUntilLogout: function() {
+            if (timeStart == 0) {
+                return 0;
+            }
+            var dateNow = new Date();
+            return timeStart + timeTimeout - dateNow.getTime();
         }
     };
 })();

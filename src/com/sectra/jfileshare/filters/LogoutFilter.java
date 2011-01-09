@@ -42,6 +42,10 @@ public class LogoutFilter implements Filter {
             request.setAttribute("message", "You have been logged out due to inactivity");
             logger.log(Level.INFO, "Logging out user {0} due to inactivity",
                     (user == null ? "" : user.getUserInfo()));
+        } else if (request.getParameter("reason") != null && request.getParameter("reason").equals("sessionexpired")) {
+            request.setAttribute("message", "You have been logged out because your session has expired");
+            logger.log(Level.INFO, "Logging out user {0} because the session expired",
+                    (user == null ? "" : user.getUserInfo()));
         } else {
             request.setAttribute("message", "You are now logged out");
             logger.log(Level.INFO, "User {0} logged out",

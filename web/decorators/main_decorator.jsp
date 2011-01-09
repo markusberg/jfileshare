@@ -14,13 +14,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=8" />
 
         <title>SECTRA file distribution facility <decorator:title /></title>
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.3" type="text/css" />
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.4" type="text/css" />
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
                     // Add javascript for session timeout
                     if (user != null) {
         %>
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=1.3"></script>
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=1.4"></script>
         <script type="text/javascript">
             var contextPath = "<%=request.getContextPath()%>";
             LogoutTimer.start();
@@ -118,10 +118,23 @@
             </div>
 
             <div id="footer">
-                jfileshare version 1.4 beta
+                jfileshare version 1.4 beta<br/>
+                <span id="dbgLogoutTimer"></span> seconds until logout
             </div>
         </div>
 
+        <%
+                    if (user != null) {
+        %>
+        <script type="text/javascript">
+            var domTimer = document.getElementById("dbgLogoutTimer");
+            function updateTimer() {
+                domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000);
+            }
+            var tempTimer = setInterval("updateTimer()", 1000);
+        </script>
+        <%                    }
+        %>
     </body>
 
 </html>

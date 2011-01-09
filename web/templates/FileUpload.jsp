@@ -9,15 +9,15 @@
 
             function uploadComplete(status) {
                 clearTimeout(uploadProgress);
-                LogoutTimer.start();
                 updateProgress(0, 0);
                 ToggleVisibility('UploadForm');
                 ToggleVisibility('Status');
 
-                statusbox = document.createElement('div');
-                statusbox.setAttribute('id', 'messagebox_'+status);
-                statusbox.innerHTML = domUploadIFrame.document.getElementById("msg").innerHTML;
-                domContent.insertBefore(statusbox, domContent.firstChild);
+                LogoutTimer.start();
+                var messageBox = document.createElement('div');
+                messageBox.setAttribute('id', 'messagebox_'+status);
+                messageBox.innerHTML = domUploadIFrame.document.getElementById("msg").innerHTML;
+                domContent.insertBefore(messageBox, domContent.firstChild);
             }
 
             function processXMLResponse() {
@@ -36,7 +36,7 @@
 
 
             function checkUploadProgress() {
-                var url = contextPath + "/ajax/filereceiver";
+                var url = contextPath + "/ajax/file/receiver";
                 if ( oAjax != null ) {
                     // A request is already in progress.
                     return;
@@ -104,7 +104,7 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <div id="UploadForm" style="display: block;">
-            <form action="<%=request.getContextPath()%>/ajax/filereceiver" method="post" onsubmit="initUpload();" target="UploadIFrame" enctype="multipart/form-data">
+            <form action="<%=request.getContextPath()%>/ajax/file/receiver" method="post" onsubmit="initUpload();" target="UploadIFrame" enctype="multipart/form-data">
                 <table>
                     <tr>
                         <th style="text-align:right;">Select file to upload:</th>

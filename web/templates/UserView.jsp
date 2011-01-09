@@ -8,11 +8,57 @@
         <title>Administration</title>
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/file.css" type="text/css" />
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/user.css" type="text/css" />
+
+        <script type="text/javascript">
+
+            function processXMLResponse() {
+                if ( oAjax.readyState == 4 && oAjax.status == 200 ) {
+                    var xml = oAjax.responseXML;
+                    var status = xml.getElementsByTagName("status")[0].firstChild.data;
+                    if (status=="sessionexpired") {
+                        LogoutTimer.forceLogout();
+                    } else {
+                        var msg = xml.getElementsByTagName("msg")[0].firstChild.data;
+                        generateMessageBox(status, msg);
+                    }
+                    oAjax = null;
+                }
+            }
+
+            function generateMessageBox(status, msg) {
+                var messageBox = document.createElement('div');
+                messageBox.setAttribute('id', 'messagebox_'+status);
+                messageBox.innerHTML = msg;
+                domMessageBox.appendChild(messageBox);
+                LogoutTimer.restart();
+            }
+
+            function fileNotify(fid) {
+                // Clear any previous status messages
+                domMessageBox = document.getElementById("MessageBox");
+                domMessageBox.innerHTML = "";
+                var domEmailRecipient = document.getElementById("email_"+fid);
+
+                oAjax = getAjaxObject();
+                oAjax.onreadystatechange = processXMLResponse;
+                var url = "<%= request.getContextPath()%>/ajax/file/notification";
+                var params = "iFid="+fid+"&emailRecipient="+domEmailRecipient.value;
+                oAjax.open("POST", url, true);
+                oAjax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                oAjax.send(params);
+            }
+
+            var domMessageBox;
+            var oAjax;
+
+        </script>
+
     </head>
 
     <body>
-        <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
-
+        <div id="MessageBox">
+            <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
+        </div>
         <%
                     if (request.getAttribute("user") != null) {
                         UserItem user = (UserItem) request.getAttribute("user");

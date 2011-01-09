@@ -77,9 +77,9 @@ public class FileReceiverServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        PrintWriter out = res.getWriter();
+        PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession();
         FileUploadListener listener = null;
         StringBuilder buffy = new StringBuilder();
@@ -91,7 +91,7 @@ public class FileReceiverServlet extends HttpServlet {
         if (session != null) {
             listener = (FileUploadListener) session.getAttribute("uploadListener");
         }
-        res.setContentType("text/xml;charset=UTF-8");
+        resp.setContentType("text/xml;charset=UTF-8");
         buffy.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         buffy.append("<response>\n");
 
@@ -112,7 +112,7 @@ public class FileReceiverServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
@@ -220,7 +220,7 @@ public class FileReceiverServlet extends HttpServlet {
             }
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/AjaxDummy.jsp");
-            disp.forward(req, res);
+            disp.forward(req, resp);
         }
     }
 

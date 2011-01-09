@@ -38,7 +38,6 @@
         <filter-name>setcharacterencoding</filter-name>
         <url-pattern>/ajax/*</url-pattern>
     </filter-mapping>
-
     <filter-mapping>
         <filter-name>setcharacterencoding</filter-name>
         <url-pattern>/user/*</url-pattern>
@@ -158,6 +157,10 @@
         <servlet-class>com.sectra.jfileshare.servlets.UserViewServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>AjaxFileNotification</servlet-name>
+        <servlet-class>com.sectra.jfileshare.ajax.FileNotificationServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>AjaxFileReceiver</servlet-name>
         <servlet-class>com.sectra.jfileshare.ajax.FileReceiverServlet</servlet-class>
     </servlet>
@@ -226,8 +229,12 @@
         <url-pattern>/user/view/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>AjaxFileNotification</servlet-name>
+        <url-pattern>/ajax/file/notification</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>AjaxFileReceiver</servlet-name>
-        <url-pattern>/ajax/filereceiver</url-pattern>
+        <url-pattern>/ajax/file/receiver</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>PasswordReset</servlet-name>

@@ -19,10 +19,8 @@
         <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days"%></td>
         <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads()%></td>
         <td><%= file.getPwHash() == null ? "no" : "yes"%></td>
-        <td><form action="<%= request.getContextPath()%>/user/view/<%= file.getOwnerUid()%>" method="post">
-                <input type="hidden" name="action" value="donotify" />
-                <input type="hidden" name="iFid" value="<%=file.getFid()%>" />
-                <input type="text" name="emailRecipient" />
+        <td><form action="<%= request.getContextPath()%>/ajax/file/notification" method="post" onsubmit="fileNotify('<%= file.getFid()%>'); return false;">
+                <input type="text" name="emailRecipient" id="email_<%= file.getFid()%>"/>
                 <input type="submit" name="submit" value="Notify" /></form>
         </td>
         <td><a href="<%= file.getURL(request.getContextPath())%>">url</a></td>
