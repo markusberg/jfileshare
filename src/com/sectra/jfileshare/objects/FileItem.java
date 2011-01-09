@@ -4,6 +4,7 @@ import com.sectra.jfileshare.utils.Jcrypt;
 import com.sectra.jfileshare.utils.Sha512Crypt;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.ArrayList;
@@ -19,8 +20,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-public class FileItem {
-
+public class FileItem implements Serializable {
     private Integer fid;
     private String name;
     private String type;

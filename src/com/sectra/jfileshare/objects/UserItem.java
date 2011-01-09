@@ -4,6 +4,7 @@ import com.sectra.jfileshare.utils.Jcrypt;
 import com.sectra.jfileshare.utils.Sha512Crypt;
 
 import java.io.File;
+import java.io.Serializable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,7 +24,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.AddressException;
 import javax.sql.DataSource;
 
-public class UserItem {
+public class UserItem implements Serializable {
 
     private String username;
     private String pwHash;

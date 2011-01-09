@@ -1,11 +1,9 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.FileItem;
-import com.sectra.jfileshare.objects.NoSuchFileException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -38,7 +36,6 @@ public class FileDownloadServlet extends HttpServlet {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
             pathFileStore = getServletContext().getInitParameter("PATH_STORE").toString();
-
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -50,36 +47,29 @@ public class FileDownloadServlet extends HttpServlet {
         // By the time we get here, the fileauthfilter has done the sanity
         // checking and authentication already. We can jump right into
         // serving the file.
+        FileItem file = (FileItem) req.getAttribute("file");
+        File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
 
-        Integer fid = Integer.parseInt(req.getPathInfo().substring(1));
-        String md5sum = req.getParameter("md5");
+        logger.info("Preparing to stream file");
+        resp.setContentType(file.getType());
+        resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
+        resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
+
+        FileInputStream instream = new FileInputStream(fileOnDisk);
+        ServletOutputStream outstream = resp.getOutputStream();
+
         try {
-            FileItem file = new FileItem(ds, fid);
-            File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
-
-            logger.info("Preparing to stream file");
-            resp.setContentType(file.getType());
-            resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
-            resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
-
-            FileInputStream instream = new FileInputStream(fileOnDisk);
-            ServletOutputStream outstream = resp.getOutputStream();
-
-            try {
-                IOUtils.copyLarge(instream, outstream);
-            } finally {
-                if (instream != null) {
-                    instream.close();
-                }
-                if (outstream != null) {
-                    outstream.close();
-                }
+            IOUtils.copyLarge(instream, outstream);
+        } finally {
+            if (instream != null) {
+                instream.close();
             }
-            String ipAddr = req.getRemoteAddr();
-            file.logDownload(ds, ipAddr);
-        } catch (NoSuchFileException ignore) {
-        } catch (SQLException ignore) {
+            if (outstream != null) {
+                outstream.close();
+            }
         }
+        String ipAddr = req.getRemoteAddr();
+        file.logDownload(ds, ipAddr);
     }
 
     @Override
