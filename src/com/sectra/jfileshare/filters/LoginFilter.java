@@ -14,6 +14,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import javax.servlet.ServletException;
@@ -56,13 +57,18 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpSession session = req.getSession();
+        HttpServletResponse resp = (HttpServletResponse) response;
 
+        String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
         if (CheckUser(req, session)) {
-            chain.doFilter(request, response);
+            // Sending a redirect instead of just forwarding to the correct page.
+            // This makes the backing back to this page not force a re-post of the login form
+            // chain.doFilter(request, response);
+            resp.sendRedirect(urlPattern);
         } else {
             // User not logged in or login error.
             // Save the url and divert to the login page.
-            req.setAttribute("urlPattern", req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo()));
+            req.setAttribute("urlPattern", urlPattern);
             filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }
