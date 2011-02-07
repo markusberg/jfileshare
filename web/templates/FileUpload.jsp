@@ -111,6 +111,10 @@
                         <td><input id="fileinput" type="file" name="file" /></td>
                     </tr>
                     <tr>
+                        <th></th>
+                        <td class="note">Note: maximum file size is <%=com.sectra.jfileshare.objects.FileItem.humanReadable(Integer.parseInt(config.getInitParameter("FILESIZE_MAX").toString()) %></td>
+                    </tr>
+                    <tr>
                         <th style="text-align:right;">File password:</th>
                         <td><input type="text" name="password" />
                             <span class="note">Note: leave blank in order to leave file without password protection</span>
