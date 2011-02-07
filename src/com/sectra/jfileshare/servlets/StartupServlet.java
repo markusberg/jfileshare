@@ -120,8 +120,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "alter table DownloadLogs CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table UserItems CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table FileItems CONVERT TO CHARACTER SET utf8");
-                alterDatabase(dbConn, "update FileItems set name='Beräkning.zip' where fid=21");
-
+                
                 // create views
                 alterDatabase(dbConn, "create VIEW viewUserFiles as select uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by uid");
                 alterDatabase(dbConn, "create VIEW viewUserChildren as select uidCreator as uid, count(uid) as sumChildren from UserItems where uidCreator is not null group by uidCreator");
