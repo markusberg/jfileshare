@@ -60,11 +60,15 @@ public class LoginFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
-        if (CheckUser(req, session)) {
+
+        if (session.getAttribute("user") != null) {
+            // First check if we are already logged in
+            chain.doFilter(request, response);
+        } else if (CheckUser(req, session)) {
             // Sending a redirect instead of just forwarding to the correct page.
             // This makes the backing back to this page not force a re-post of the login form
-            // chain.doFilter(request, response);
-            resp.sendRedirect(urlPattern);
+            // resp.sendRedirect(urlPattern);
+            chain.doFilter(request, response);
         } else {
             // User not logged in or login error.
             // Save the url and divert to the login page.
@@ -73,12 +77,14 @@ public class LoginFilter implements Filter {
         }
     }
 
+    /**
+     * Verify the provided username and password
+     * @param req
+     * @param session
+     * @return
+     */
     private boolean CheckUser(HttpServletRequest req, HttpSession session) {
-        // First check if we are already logged in
-        if (session.getAttribute("user") != null) {
-            return true;
-        }
-        // Second, check if we are logging in right now
+        // Check if we are logging in right now
         if ("login".equals(req.getParameter("action"))) {
             String username = req.getParameter("login_username");
             String pwPlaintext = req.getParameter("login_password");
