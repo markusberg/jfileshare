@@ -46,7 +46,7 @@ public class FileNotificationServlet extends HttpServlet {
     private String SMTP_SERVER;
     private String SMTP_SERVER_PORT;
     private InternetAddress SMTP_SENDER;
-    private String URL_PREFIX;
+    private String urlPrefix;
     private String pathContext;
 
     @Override
@@ -65,8 +65,6 @@ public class FileNotificationServlet extends HttpServlet {
             SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
             SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
 
-            URL_PREFIX = context.getInitParameter("URL_PREFIX").toString();
-
             SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
             SMTP_SENDER.validate();
 
@@ -81,21 +79,7 @@ public class FileNotificationServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         pathContext = req.getContextPath();
-        if (URL_PREFIX.equals("")) {
-            // We need to figure out the absolute path to the servlet
-            String httpScheme = req.getScheme();
-            String serverName = req.getServerName();
-            Integer serverPort = (Integer) req.getServerPort();
-            if ((serverPort == 80 && httpScheme.equals("http"))
-                    || (serverPort == 443 && httpScheme.equals("https"))) {
-                serverPort = null;
-            }
-
-            URL_PREFIX = httpScheme + "://"
-                    + serverName
-                    + (serverPort != null ? ":" + serverPort.toString() : "");
-            logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", URL_PREFIX);
-        }
+        urlPrefix = Helpers.getUrlPrefix(req);
 
         PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession();
@@ -183,7 +167,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "the following file available for download:\n"
                 + "Filename: " + file.getName() + "\n"
                 + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
-                + file.getURL(URL_PREFIX + pathContext)
+                + file.getURL(urlPrefix + pathContext)
                 + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))"), "utf-8");
 
         MimeBodyPart mbp2 = new MimeBodyPart();
@@ -194,7 +178,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + file.getName() + "</td></tr>\n"
                 + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(file.getSize()) + "</td></tr>\n"
                 + "</table>\n"
-                + "<p><a href=\"" + file.getURL(URL_PREFIX + pathContext) + "\">" + file.getURL(URL_PREFIX + pathContext) + "</a>\n"
+                + "<p><a href=\"" + file.getURL(urlPrefix + pathContext) + "\">" + file.getURL(urlPrefix + pathContext) + "</a>\n"
                 + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))")
                 + "</p>\n", "text/html; charset=utf-8");
 

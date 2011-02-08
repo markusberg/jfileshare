@@ -104,21 +104,7 @@ public class PasswordResetServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         pathContext = req.getContextPath();
-        if (urlPrefix.equals("")) {
-            // We need to figure out the absolute path to the servlet
-            String httpScheme = req.getScheme();
-            String serverName = req.getServerName();
-            Integer serverPort = (Integer) req.getServerPort();
-            if ((serverPort == 80 && httpScheme.equals("http"))
-                    || (serverPort == 443 && httpScheme.equals("https"))) {
-                serverPort = null;
-            }
-
-            urlPrefix = httpScheme + "://"
-                    + serverName
-                    + (serverPort != null ? ":" + serverPort.toString() : "");
-            logger.log(Level.INFO, "No url prefix specified. Calculating: {0}", urlPrefix);
-        }
+        urlPrefix = Helpers.getUrlPrefix(req);
 
         if (req.getParameter("action") != null
                 && req.getParameter("action").equals("PasswordResetRequest")) {
