@@ -47,7 +47,6 @@ import org.apache.commons.io.IOUtils;
  * @author markus
  */
 public class FileReceiverServlet extends HttpServlet {
-
     private DataSource ds;
     private String PATH_TEMP;
     private String PATH_STORE;
@@ -85,7 +84,7 @@ public class FileReceiverServlet extends HttpServlet {
         StringBuilder buffy = new StringBuilder();
         long bytesRead = 0L;
         long contentLength = 0L;
-        logger.info("Upload progress is running");
+        // logger.info("Upload progress is running");
 
         // Make sure the session has started
         if (session != null) {
