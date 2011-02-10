@@ -77,7 +77,6 @@ public class FileAuthenticationFilter implements Filter {
 
         try {
             FileItem file = new FileItem(ds, fid);
-            request.setAttribute("file", file);
 
             UserItem currentUser = (UserItem) session.getAttribute("user");
             if (file.getDownloads() != null) {
@@ -87,6 +86,7 @@ public class FileAuthenticationFilter implements Filter {
             if (!file.getMd5sum().equals(md5sum)) {
                 throw new NoSuchFileException();
             } else if (currentUser != null && currentUser.hasEditAccessTo(file)) {
+                request.setAttribute("file", file);
                 chain.doFilter(request, response);
             } else if (!file.isEnabled()) {
                 logger.info("File found, but it's disabled");
@@ -98,6 +98,7 @@ public class FileAuthenticationFilter implements Filter {
                 filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(request, response);
             } else if (file.getPwHash() == null) {
                 logger.info("File does not require authentication");
+                request.setAttribute("file", file);
                 chain.doFilter(request, response);
             } else if (!authenticated(file, session, req)) {
                 // Send to password-screen
@@ -107,6 +108,7 @@ public class FileAuthenticationFilter implements Filter {
                 filterconfig.getServletContext().getRequestDispatcher("/templates/FilePassword.jsp").forward(request, response);
             } else {
                 // Everything appears to check out
+                request.setAttribute("file", file);
                 chain.doFilter(request, response);
             }
         } catch (NoSuchFileException e) {
