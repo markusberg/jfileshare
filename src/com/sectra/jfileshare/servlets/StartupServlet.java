@@ -59,6 +59,7 @@ public class StartupServlet extends HttpServlet {
 
         TableInit();
         dbUpdate1();
+        dbUpdate14();
     }
 
     private void TableInit() {
@@ -80,6 +81,38 @@ public class StartupServlet extends HttpServlet {
         }
     }
 
+    private void dbUpdate14() {
+        Connection dbConn = null;
+        try {
+            dbConn = datasource.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("show tables like 'Config'");
+            st.execute();
+            ResultSet rs = st.getResultSet();
+            if (!rs.next()) {
+                logger.info("Need to update database to level 1.4");
+                // create table for application configuration
+                alterDatabase(dbConn, "CREATE TABLE `Config` ("
+                        + "`key` varchar(64) NOT NULL, "
+                        + "`value` varchar(128) NOT NULL, "
+                        + "PRIMARY KEY (`key`)) "
+                        + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+            } else {
+                logger.info("Database is already at level 1.4");
+            }
+        } catch (SQLException ignored) {
+            logger.info(ignored.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+
+        }
+    }
+
     private void dbUpdate1() {
         Connection dbConn = null;
         try {
@@ -88,7 +121,7 @@ public class StartupServlet extends HttpServlet {
             st.execute();
             ResultSet rs = st.getResultSet();
             if (rs.next()) {
-                logger.info("Need to update database");
+                logger.info("Need to update database to level 1");
                 alterDatabase(dbConn, "alter table FileItems add column allowTinyUrl tinyint(1) NOT NULL default 0");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN name name varchar(255) NOT NULL");
                 alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN type type varchar(100) NOT NULL");
@@ -168,13 +201,10 @@ public class StartupServlet extends HttpServlet {
         }
     }
 
-    private void alterDatabase(Connection dbConn, String sqlStatement) {
-        try {
-            Statement st = dbConn.createStatement();
-            int i = st.executeUpdate(sqlStatement);
-
-            logger.log(Level.INFO, "db update returned: {0}", Integer.toString(i));
-        } catch (SQLException ignored) {
-        }
+    private void alterDatabase(Connection dbConn, String sqlStatement)
+            throws SQLException {
+        Statement st = dbConn.createStatement();
+        int i = st.executeUpdate(sqlStatement);
+        logger.log(Level.INFO, "db update returned: {0}", Integer.toString(i));
     }
 }

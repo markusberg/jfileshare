@@ -3,11 +3,20 @@ package com.sectra.jfileshare.objects;
 import java.io.File;
 import java.io.Serializable;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
+import javax.sql.DataSource;
 
 /**
  * Simple config object for the webapp
@@ -93,5 +102,30 @@ public class Conf implements Serializable {
 
     public void setSmtpServerPort(int port) {
         smtpServerPort = port;
+    }
+
+    public boolean save(DataSource ds) {
+        Connection dbConn = null;
+        PreparedStatement st = null;
+        try {
+            dbConn = ds.getConnection();
+            st = dbConn.prepareStatement("update Config set key=?,value=? where key=?");
+            st.setString(1, "asdf");
+            st.setString(2, "asdf");
+            st.setString(3, "asdf");
+            st.executeUpdate();
+            st.close();
+            return true;
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+            return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 }
