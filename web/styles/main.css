@@ -138,4 +138,9 @@ table th {
     text-decoration: none;
 }
 
-
+#dbgConsole {
+    padding: 1em;
+    border: 1px solid #ccc;
+    margin-top: 1em;
+    font-size: 0.8em;
+}

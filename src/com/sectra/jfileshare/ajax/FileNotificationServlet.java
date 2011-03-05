@@ -122,21 +122,23 @@ public class FileNotificationServlet extends HttpServlet {
         } catch (AddressException e) {
             buffy.append("\t<status>warning</status>\n");
             buffy.append("\t<msg>Unable to send email. ".concat(e.getMessage()).concat("</msg>\n"));
-            // "\"" + Helpers.htmlSafe(emailRecipient) + "\" does not look like a valid email address";
         } catch (MessagingException e) {
             logger.log(Level.WARNING, "Unable to send notification email: {0}", e.toString());
             buffy.append("\t<status>critical</status>\n");
-            buffy.append("\t<msg>Failed to send email notification.");
+            buffy.append("\t<msg>Failed to send email notification. ");
             buffy.append("Reason unknown. Please try again later, or contact ");
-            buffy.append("the server administrator.\n");
-            buffy.append(e.toString().concat("</msg>\n"));
+            buffy.append("the server administrator.</msg>\n");
+            buffy.append("\t<stacktrace>");
+            buffy.append(e.toString().concat("</stacktrace>\n"));
         } catch (NullPointerException ignore) {
             // This will happen if there's no currentUser object
-            // We'll just send an empty xml response
+            // We'll just send a sessionexpired-message to the UA to
+            // trigger a logout.
             buffy.append("\t<status>sessionexpired</status>\n");
         } catch (Exception e) {
             buffy.append("\t<status>warning</status>\n");
-            buffy.append("\t<msg>".concat(e.getMessage()).concat("</msg>\n"));
+            buffy.append("\t<msg>Unknown error</msg>\n");
+            buffy.append("\t<stacktrace>".concat(e.getMessage()).concat("</stacktrace>\n"));
         }
 
         buffy.append("</response>\n");
@@ -146,7 +148,9 @@ public class FileNotificationServlet extends HttpServlet {
         out.close();
     }
 
-    private void sendEmailNotification(FileItem file, UserItem currentUser, InternetAddress emailRecipient)
+    private void sendEmailNotification(FileItem file,
+            UserItem currentUser,
+            InternetAddress emailRecipient)
             throws MessagingException {
         Properties props = System.getProperties();
         props.put("mail.smtp.host", SMTP_SERVER);

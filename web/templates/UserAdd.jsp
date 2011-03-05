@@ -11,7 +11,7 @@
 
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
-        <p>It's important that all fields are filled out correctly</p>
+        <p>Please ensure that all fields are filled out correctly</p>
 
         <form action="<%= request.getContextPath()%>/user/add" method="post">
 
@@ -83,8 +83,10 @@
                             }
                 %>
 
+                <tr><td>&nbsp;</td></tr>
                 <tr>
-                    <td colspan="2">
+                    <td></td>
+                    <td>
                         <input type="hidden" name="action" value="adduser" />
                         <input type="submit" name="submit" value="Add user" />
                     </td>

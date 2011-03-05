@@ -1,13 +1,18 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.util.logging.Level;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -15,6 +20,7 @@ import javax.naming.NamingException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import javax.sql.DataSource;
@@ -24,6 +30,7 @@ public class StartupServlet extends HttpServlet {
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(StartupServlet.class.getName());
+    private Conf conf = new Conf();
 
     @Override
     public void init(ServletConfig config)
@@ -33,9 +40,23 @@ public class StartupServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             datasource = (DataSource) env.lookup("jdbc/jfileshare");
+
+            ServletContext app = getServletContext();
+            conf.setDaysFileRetention(Integer.parseInt(app.getInitParameter("DAYS_FILE_RETENTION")));
+            conf.setDaysUserExpiration(Integer.parseInt(app.getInitParameter("DAYS_USER_EXPIRATION")));
+            conf.setFileSizeMax(Long.parseLong(app.getInitParameter("FILESIZE_MAX")));
+            conf.setPathStore(app.getInitParameter("PATH_STORE"));
+            conf.setPathTemp(app.getInitParameter("PATH_TEMP"));
+            conf.setSmtpSender(app.getInitParameter("SMTP_SENDER"));
+            conf.setSmtpServer(app.getInitParameter("SMTP_SERVER"));
+            conf.setSmtpServerPort(Integer.parseInt(app.getInitParameter("SMTP_SERVER_PORT")));
         } catch (NamingException excep) {
             throw new ServletException(excep);
         }
+
+        ServletContext context = getServletContext();
+        context.setAttribute("conf", conf);
+
         TableInit();
         dbUpdate1();
     }
@@ -120,7 +141,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "alter table DownloadLogs CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table UserItems CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table FileItems CONVERT TO CHARACTER SET utf8");
-                
+
                 // create views
                 alterDatabase(dbConn, "create VIEW viewUserFiles as select uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by uid");
                 alterDatabase(dbConn, "create VIEW viewUserChildren as select uidCreator as uid, count(uid) as sumChildren from UserItems where uidCreator is not null group by uidCreator");

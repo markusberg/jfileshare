@@ -71,6 +71,11 @@
                             "/user/admin",
                             request.getServletPath().equals("/user/admin"),
                             user.isAdmin()));
+
+                    tablist.add(new Tab("Admin",
+                            "/admin",
+                            request.getServletPath().equals("/admin"),
+                            user.isAdmin()));
                 }
 
                 tablist.add(new Tab(tabExplicit,
@@ -119,22 +124,25 @@
 
             <div id="footer">
                 jfileshare version 1.4 beta<br/>
-                <span id="dbgLogoutTimer"></span> seconds until logout
             </div>
-        </div>
 
-        <%
-                    if (user != null) {
-        %>
-        <script type="text/javascript">
-            var domTimer = document.getElementById("dbgLogoutTimer");
-            function updateTimer() {
-                domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000);
-            }
-            var tempTimer = setInterval("updateTimer()", 1000);
-        </script>
-        <%                    }
-        %>
+            <%
+                        if (user != null) {
+            %>
+            <div id="dbgConsole">
+                <div style="font-weight: bold; margin-bottom: 1em;">Debug console</div>
+                <span id="dbgLogoutTimer"></span>
+            </div>
+            <script type="text/javascript">
+                var domTimer = document.getElementById("dbgLogoutTimer");
+                function updateTimer() {
+                domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000) + " seconds until logout";
+                }
+                var tempTimer = setInterval("updateTimer()", 1000);
+            </script>
+            <%                    }
+            %>
+        </div>
     </body>
 
 </html>

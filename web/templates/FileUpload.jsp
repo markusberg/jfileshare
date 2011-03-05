@@ -113,7 +113,7 @@
                     </tr>
                     <tr>
                         <th></th>
-                        <td class="note">Note: maximum file size is <%=FileItem.humanReadable(Long.parseLong(application.getInitParameter("FILESIZE_MAX").toString())) %></td>
+                        <td class="note">Note: the maximum allowed file size is <%=FileItem.humanReadable(Long.parseLong(application.getInitParameter("FILESIZE_MAX").toString())) %></td>
                     </tr>
                     <tr>
                         <th style="text-align:right;">File password:</th>
@@ -121,6 +121,7 @@
                             <span class="note">Note: leave blank in order to leave file without password protection</span>
                         </td>
                     </tr>
+                    <tr><td>&nbsp;</td></tr>
                     <tr>
                         <td></td>
                         <td><input type="submit" name="submit" value="Upload file" /></td>

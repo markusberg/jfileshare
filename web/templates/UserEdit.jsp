@@ -98,11 +98,15 @@
                             }
                 %>
 
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="hidden" name="action" value="updateuser" />
+                        <input type="submit" name="update" value="Update user" />
+                    </td>
+                </tr>
             </table>
-            <p>
-                <input type="hidden" name="action" value="updateuser" />
-                <input type="submit" name="update" value="Update user" />
-            </p>
         </form>
     </body>
 </html>

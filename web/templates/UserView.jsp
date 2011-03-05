@@ -19,16 +19,26 @@
                         LogoutTimer.forceLogout();
                     } else {
                         var msg = xml.getElementsByTagName("msg")[0].firstChild.data;
-                        generateMessageBox(status, msg);
+                        var stacktrace = '';
+                        var xmlStacktrace = xml.getElementsByTagName("stacktrace")[0];
+                        if (xmlStacktrace != undefined) {
+                            stacktrace = xmlStacktrace.firstChild.data;
+                        }
+                        generateMessageBox(status, msg, stacktrace);
                     }
                     oAjax = null;
                 }
             }
 
-            function generateMessageBox(status, msg) {
+            function generateMessageBox(status, msg, stacktrace) {
                 var messageBox = document.createElement('div');
                 messageBox.setAttribute('id', 'messagebox_'+status);
                 messageBox.innerHTML = msg;
+                if (stacktrace != '') {
+                    var strace = document.createElement('pre');
+                    strace.innerHTML = stacktrace;
+                    messageBox.appendChild(strace);
+                }
                 domMessageBox.appendChild(messageBox);
                 LogoutTimer.restart();
             }

@@ -93,11 +93,15 @@
                                         </tr>
                                          */
                 %>
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="hidden" name="action" value="savefile" />
+                        <input type="submit" name="submit" value="Save" />
+                    </td>
+                </tr>
             </table>
-            <p>
-                <input type="hidden" name="action" value="savefile" />
-                <input type="submit" name="submit" value="Save" />
-            </p>
         </form>
         <%
                     }
