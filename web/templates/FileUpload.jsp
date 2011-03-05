@@ -18,7 +18,7 @@
                 var messageBox = document.createElement('div');
                 messageBox.setAttribute('id', 'messagebox_'+status);
                 messageBox.innerHTML = domUploadIFrame.document.getElementById("msg").innerHTML;
-                domContent.insertBefore(messageBox, domContent.firstChild);
+                domMessageBoxes.appendChild(messageBox);
             }
 
             function processXMLResponse() {
@@ -83,18 +83,15 @@
                 domStatusText = document.getElementById("StatusText");
                 uploadProgress = setInterval("checkUploadProgress()", 1000);
                 domUploadIFrame = document.getElementById("UploadIFrame").contentWindow;
-                domContent = document.getElementById("content");
-
-                if ( domContent.firstChild.id != 'UploadForm') {
-                    domContent.removeChild(domContent.firstChild);
-                }
+                domMessageBoxes = document.getElementById("MessageBoxes");
+                domMessageBoxes.innerHTML = '';
             }
 
             var domProgressBar;
             var domBar;
             var domStatusText;
             var domUploadIFrame;
-            var domContent;
+            var domMessageBoxes;
             var uploadProgress;
             var oAjax = null;
 

@@ -39,14 +39,14 @@
                     strace.innerHTML = stacktrace;
                     messageBox.appendChild(strace);
                 }
-                domMessageBox.appendChild(messageBox);
+                domMessageBoxes.appendChild(messageBox);
                 LogoutTimer.restart();
             }
 
             function fileNotify(fid) {
                 // Clear any previous status messages
-                domMessageBox = document.getElementById("MessageBox");
-                domMessageBox.innerHTML = "";
+                domMessageBoxes = document.getElementById("MessageBoxes");
+                domMessageBoxes.innerHTML = "";
                 var domEmailRecipient = document.getElementById("email_"+fid);
 
                 oAjax = getAjaxObject();
@@ -58,7 +58,7 @@
                 oAjax.send(params);
             }
 
-            var domMessageBox;
+            var domMessageBoxes;
             var oAjax;
 
         </script>
@@ -66,9 +66,7 @@
     </head>
 
     <body>
-        <div id="MessageBox">
-            <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
-        </div>
+        <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <%
                     if (request.getAttribute("user") != null) {
                         UserItem user = (UserItem) request.getAttribute("user");
