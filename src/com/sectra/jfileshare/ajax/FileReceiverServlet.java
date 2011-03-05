@@ -159,12 +159,13 @@ public class FileReceiverServlet extends HttpServlet {
 
                         try {
                             filestream = new FileOutputStream(this.PATH_TEMP + "/" + Integer.toString(currentUser.getUid()));
-
-                            logger.info("Calculating md5 sum");
                             MessageDigest md = MessageDigest.getInstance("MD5");
                             outstream = new DigestOutputStream(filestream, md);
                             long filesize = IOUtils.copyLarge(instream, outstream);
 
+                            if (filesize==0) {
+                                throw new Exception("File is empty.");
+                            }
                             md = outstream.getMessageDigest();
                             file.setMd5sum(toHex(md.digest()));
                             file.setSize(filesize);
@@ -212,7 +213,7 @@ public class FileReceiverServlet extends HttpServlet {
                 req.setAttribute("msg", "Unable to upload file");
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (Exception e) {
-                req.setAttribute("msg", "Unable to upload file");
+                req.setAttribute("msg", "Unable to upload file. ".concat(e.getMessage()));
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } finally {
                 session.setAttribute("uploadListener", null);
