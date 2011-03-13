@@ -30,32 +30,17 @@ public class StartupServlet extends HttpServlet {
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(StartupServlet.class.getName());
-    private Conf conf = new Conf();
 
     @Override
     public void init(ServletConfig config)
             throws ServletException {
         super.init(config);
-
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             datasource = (DataSource) env.lookup("jdbc/jfileshare");
-
-            ServletContext app = getServletContext();
-            conf.setDaysFileRetention(Integer.parseInt(app.getInitParameter("DAYS_FILE_RETENTION")));
-            conf.setDaysUserExpiration(Integer.parseInt(app.getInitParameter("DAYS_USER_EXPIRATION")));
-            conf.setFileSizeMax(Long.parseLong(app.getInitParameter("FILESIZE_MAX")));
-            conf.setPathStore(app.getInitParameter("PATH_STORE"));
-            conf.setPathTemp(app.getInitParameter("PATH_TEMP"));
-            conf.setSmtpSender(app.getInitParameter("SMTP_SENDER"));
-            conf.setSmtpServer(app.getInitParameter("SMTP_SERVER"));
-            conf.setSmtpServerPort(Integer.parseInt(app.getInitParameter("SMTP_SERVER_PORT")));
         } catch (NamingException excep) {
             throw new ServletException(excep);
         }
-
-        ServletContext context = getServletContext();
-        context.setAttribute("conf", conf);
 
         TableInit();
         dbUpdate1();
@@ -85,18 +70,19 @@ public class StartupServlet extends HttpServlet {
         Connection dbConn = null;
         try {
             dbConn = datasource.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("show tables like 'Config'");
+            PreparedStatement st = dbConn.prepareStatement("show tables like 'Conf'");
             st.execute();
             ResultSet rs = st.getResultSet();
             if (!rs.next()) {
                 logger.info("Need to update database to level 1.4");
                 // create table for application configuration
-                alterDatabase(dbConn, "CREATE TABLE `Config` ("
+                alterDatabase(dbConn, "CREATE TABLE `Conf` ("
                         + "`key` varchar(64) NOT NULL, "
-                        + "`value` varchar(128) NOT NULL, "
+                        + "`value` varchar(128) NULL DEFAULT NULL, "
                         + "PRIMARY KEY (`key`)) "
                         + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
+                // populate the new table with init-values
+                confCreate();
             } else {
                 logger.info("Database is already at level 1.4");
             }
@@ -111,6 +97,47 @@ public class StartupServlet extends HttpServlet {
             }
 
         }
+    }
+
+    /***
+     * Seed the newly created Config table with initial key/values
+     * @return
+     */
+    private void confCreate() {
+        Connection dbConn = null;
+        PreparedStatement st = null;
+        try {
+            dbConn = datasource.getConnection();
+            ServletContext app = getServletContext();
+            st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
+            commitKeyValuePair(st, "daysFileRetention", app.getInitParameter("DAYS_FILE_RETENTION"));
+            commitKeyValuePair(st, "daysUserExpiration", app.getInitParameter("DAYS_USER_EXPIRATION"));
+            commitKeyValuePair(st, "fileSizeMax", app.getInitParameter("FILESIZE_MAX"));
+            commitKeyValuePair(st, "pathStore", app.getInitParameter("PATH_STORE"));
+            commitKeyValuePair(st, "pathTemp", app.getInitParameter("PATH_TEMP"));
+            commitKeyValuePair(st, "smtpServer", app.getInitParameter("SMTP_SERVER"));
+            commitKeyValuePair(st, "smtpServerPort", app.getInitParameter("SMTP_SERVER_PORT"));
+            commitKeyValuePair(st, "smtpSender", app.getInitParameter("SMTP_SENDER"));
+            commitKeyValuePair(st, "brandingCompany", "Sectra");
+            commitKeyValuePair(st, "brandingLogo", ""); 
+            commitKeyValuePair(st, "dbVersion", "1.4");
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    private void commitKeyValuePair(PreparedStatement st, String key, String value)
+            throws SQLException {
+        st.setString(1, value);
+        st.setString(2, key);
+        st.executeUpdate();
     }
 
     private void dbUpdate1() {

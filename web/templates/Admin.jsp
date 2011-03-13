@@ -12,35 +12,41 @@
         <%
                     Conf conf = (Conf) getServletContext().getAttribute("conf");
         %>
-        <p>Note that this is still only experimental. No changes made here will
-            actually be saved anywhere.</p>
         <form action="<%= request.getContextPath()%>/admin" method="post">
             <table>
                 <tr>
+                    <th>Company name: </th>
+                    <td>
+                        <input type="text" name="brandingCompany" value="<%= conf.getBrandingCompany()%>" />
+                        <span class="note">Note: The company name will be displayed in the user interface, and in
+                        emails sent from the jfileshare app</span>
+                    </td>
+                </tr>
+                <tr>
                     <th>Path to filestore: </th>
-                    <td><input type="text" value="<%= conf.getPathStore()%>" /></td>
+                    <td><input type="text" name="pathStore" value="<%= conf.getPathStore()%>" /></td>
                 </tr>
                 <tr>
                     <th>Path to tempstore: </th>
-                    <td><input type="text" value="<%= conf.getPathTemp()%>" /></td>
+                    <td><input type="text" name="pathTemp" value="<%= conf.getPathTemp()%>" /></td>
                 </tr>
                 <tr>
                     <th>Smtp server and port: </th>
-                    <td><input type="text" value="<%= conf.getSmtpServer()%>" />
-                        <input type="text" value="<%= Integer.toString(conf.getSmtpServerPort())%>" size="4" />
+                    <td><input type="text" name="smtpServer" value="<%= conf.getSmtpServer()%>" />
+                        <input type="text" name="smtpServerPort" value="<%= Integer.toString(conf.getSmtpServerPort())%>" size="4" />
                     </td>
                 </tr>
                 <tr>
                     <th>File retention: </th>
-                    <td><input type="text" value="<%= Integer.toString(conf.getDaysFileRetention())%>" size="4" /> days</td>
+                    <td><input type="text" name="daysFileRetention" value="<%= Integer.toString(conf.getDaysFileRetention())%>" size="4" /> days</td>
                 </tr>
                 <tr>
                     <th>Default user expiration: </th>
-                    <td><input type="text" value="<%= Integer.toString(conf.getDaysUserExpiration())%>" size="4" /> days</td>
+                    <td><input type="text" name="daysUserExpiration" value="<%= Integer.toString(conf.getDaysUserExpiration())%>" size="4" /> days</td>
                 </tr>
                 <tr>
                     <th>Maximum allowed file size: </th>
-                    <td><input type="text" value="<%= conf.getFileSizeMax()%>" /> bytes</td>
+                    <td><input type="text" name="fileSizeMax" value="<%= conf.getFileSizeMax()%>" /> bytes</td>
                 </tr>
                 <tr><td>&nbsp;</td></tr>
                 <tr>

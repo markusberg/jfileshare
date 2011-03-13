@@ -76,7 +76,6 @@ public class AdminServlet extends HttpServlet {
             throws ServletException, IOException {
         if (req.getParameter("action") != null
                 && req.getParameter("action").equals("login")) {
-            // This POST is the result of a login
             doGet(req, resp);
         } else {
             ServletContext app = getServletContext();
@@ -88,31 +87,31 @@ public class AdminServlet extends HttpServlet {
             if (user.isAdmin()) {
                 req.setAttribute("conf", conf);
                 disp = app.getRequestDispatcher("/templates/Admin.jsp");
+
+                // FIXME: No sanity checking on the user input
+                conf.setBrandingCompany(req.getParameter("brandingCompany"));
+                conf.setBrandingLogo(req.getParameter("brandingLogo"));
+                conf.setPathStore(req.getParameter("pathStore"));
+                conf.setPathTemp(req.getParameter("pathTemp"));
+                conf.setSmtpServer(req.getParameter("smtpServer"));
+                conf.setSmtpServerPort(Integer.parseInt(req.getParameter("smtpServerPort")));
+                conf.setDaysFileRetention(Integer.parseInt(req.getParameter("daysFileRetention")));
+                conf.setDaysUserExpiration(Integer.parseInt(req.getParameter("daysUserExpiration")));
+                conf.setFileSizeMax(Long.parseLong(req.getParameter("fileSizeMax")));
+
+                if (conf.save(ds)) {
+                    req.setAttribute("message", "Changes saved");
+                    app.setAttribute("conf", conf);
+                } else {
+                    req.setAttribute("message_warning", "Unable to save changes");
+                }
+
             } else {
                 req.setAttribute("message_critical", "Access Denied");
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             }
 
             disp.forward(req, resp);
-
-
-            /*
-            ServletContext app = getServletContext();
-            RequestDispatcher disp;
-
-            Connection dbConn = null;
-            try {
-            dbConn = ds.getConnection();
-            } catch (SQLException ignore) {
-            } finally {
-            if (dbConn != null) {
-            try {
-            dbConn.close();
-            } catch (SQLException ignore) {
-            }
-            }
-            }
-             */
         }
     }
 }

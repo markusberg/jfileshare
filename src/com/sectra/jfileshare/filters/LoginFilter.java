@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.filters;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.objects.UserItem;
 
@@ -36,7 +37,6 @@ public class LoginFilter implements Filter {
     @Override
     public void init(FilterConfig config)
             throws ServletException {
-        logger.info("Running LoginFilter");
         try {
             this.filterconfig = config;
             Context env = (Context) new InitialContext().lookup("java:comp/env");
@@ -57,12 +57,11 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpSession session = req.getSession();
-        HttpServletResponse resp = (HttpServletResponse) response;
-
+        // HttpServletResponse resp = (HttpServletResponse) response;
         String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
 
         if (session.getAttribute("user") != null) {
-            // First check if we are already logged in
+            // we're already logged in
             chain.doFilter(request, response);
         } else if (CheckUser(req, session)) {
             // Sending a redirect instead of just forwarding to the correct page.
