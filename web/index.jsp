@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <html>
 
     <head>
@@ -16,9 +17,13 @@
     <body>
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
 
-        <p>Welcome to the Sectra File Sharing facility. This web application
+        <p>Welcome to the 
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+            File Sharing facility. This web application
             is intended for registered users
-            only. If you're a Sectra corporate user, or if you already have an
+            only. If you're a
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+            corporate user, or if you already have an
             account you are welcome to login:</p>
 
         <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern") %>" method="post">

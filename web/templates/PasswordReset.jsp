@@ -32,9 +32,14 @@
                     <td style="text-align: right;">Verify new password: </td>
                     <td><input type="password" name="password2" /></td>
                 </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>
+                        <input type="hidden" name="action" value="PasswordReset" />
+                        <input type="submit" value="Set new password" />
+                    </td>
+                </tr>
             </table>
-            <input type="hidden" name="action" value="PasswordReset" />
-            <input type="submit" value="Set new password" />
         </form>
         <%
                             } else {
@@ -43,11 +48,10 @@
         <form action="<%= request.getContextPath()%>/passwordreset" method="post">
             <p>Use this form if you've forgotten your password.
                 If you're a 
-                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany()%>
                 corporate user, your username is the same as
                 your regular login username.
-            </p>
-            <p>Instructions will be sent to your email address.
+                Instructions will be sent to your email address.
             </p>
             <p>Your username: <input type="text" name="username" id="FocusMe" />
                 <input type="submit" value="Reset my password" />
