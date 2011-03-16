@@ -23,6 +23,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Domain name: </th>
+                    <td>
+                        <input type="text" name="brandingDomain" value="<%= conf.getBrandingDomain()%>" />
+                        <span class="note">
+                            Note: This domain name will be used during auto-creation of accounts. If user <strong>"xyz"</strong>
+                            requests a password reset, and that user doesn't exist in the database, the reset instructions are
+                            sent to xyz@&lt;domain-name&gt;.
+                        </span>
+                    </td>
+                </tr>
+                <tr>
                     <th>Path to filestore: </th>
                     <td><input type="text" name="pathStore" value="<%= conf.getPathStore()%>" /></td>
                 </tr>

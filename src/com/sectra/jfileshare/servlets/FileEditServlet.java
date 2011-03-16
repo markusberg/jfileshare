@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
@@ -33,7 +34,6 @@ public class FileEditServlet extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileEditServlet.class.getName());
-    private int DAYS_FILE_RETENTION;
 
     @Override
     public void init(ServletConfig config)
@@ -43,7 +43,6 @@ public class FileEditServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            DAYS_FILE_RETENTION = Integer.parseInt(getServletContext().getInitParameter("DAYS_FILE_RETENTION").toString());
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -100,6 +99,7 @@ public class FileEditServlet extends HttpServlet {
 
                 HttpSession session = req.getSession();
                 UserItem user = (UserItem) session.getAttribute("user");
+                Conf conf = (Conf) getServletContext().getAttribute("conf");
 
                 if (user.hasEditAccessTo(file)) {
                     req.setAttribute("tab", "Edit file");
@@ -115,7 +115,7 @@ public class FileEditServlet extends HttpServlet {
                             && req.getParameter("bPermanent").equals("true")) {
                         file.setDateExpiration(null);
                     } else {
-                        file.setDaysToKeep(DAYS_FILE_RETENTION);
+                        file.setDaysToKeep(conf.getDaysFileRetention());
                     }
 
                     Integer iDownloads = null;

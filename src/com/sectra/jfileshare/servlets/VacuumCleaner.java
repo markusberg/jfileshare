@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.UserItem;
 
@@ -30,7 +31,6 @@ public class VacuumCleaner extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
-    private String PATH_FILE_STORE;
     private long VACUUM_INTERVAL = 1000 * 60 * 10;
     private Timer timer = null;
 
@@ -42,12 +42,9 @@ public class VacuumCleaner extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            PATH_FILE_STORE = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
         }
-        // vacuum();
-
         timer = new Timer();
         timer.scheduleAtFixedRate(new PerformVacuum(), 0, VACUUM_INTERVAL);
     }
@@ -75,6 +72,7 @@ public class VacuumCleaner extends HttpServlet {
      */
     private void vacuum() {
         // logger.info("Running scheduled vacuum of database");
+        Conf conf = (Conf) getServletContext().getAttribute("conf");
 
         // Delete expired users
         ArrayList<UserItem> users = (ArrayList<UserItem>) getExpiredUsers(ds);
@@ -82,7 +80,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", users.size());
         }
         for (UserItem user : users) {
-            user.delete(ds, PATH_FILE_STORE);
+            user.delete(ds, getPathStore());
         }
 
         // Delete expired files
@@ -91,7 +89,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.log(Level.INFO, "Vacuuming {0} expired file(s) from the database", files.size());
         }
         for (FileItem file : files) {
-            file.delete(ds, PATH_FILE_STORE);
+            file.delete(ds, getPathStore());
         }
 
         // Delete password requests older than 2 days
@@ -107,6 +105,30 @@ public class VacuumCleaner extends HttpServlet {
             dbConn.close();
         } catch (SQLException e) {
         }
+    }
+
+    private String getPathStore() {
+        Connection dbConn = null;
+        String pathFileStore = null;
+        try {
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select value from Conf where `key`=\"pathFileStore\"");
+            ResultSet rs = st.executeQuery();
+            if (rs.first()) {
+                pathFileStore = rs.getString("Conf.value");
+            }
+            st.close();
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException ignore) {
+                }
+            }
+        }
+        return pathFileStore;
     }
 
     private ArrayList<UserItem> getExpiredUsers(DataSource ds) {

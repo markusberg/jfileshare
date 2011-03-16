@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.ajax;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
@@ -34,21 +35,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletContext;
 
 import javax.sql.DataSource;
 
 public class FileNotificationServlet extends HttpServlet {
-
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileNotificationServlet.class.getName());
-    private String SMTP_SERVER;
-    private String SMTP_SERVER_PORT;
-    private InternetAddress SMTP_SENDER;
-    private String urlPrefix;
-    private String pathContext;
-
+    
     @Override
     public void init(ServletConfig config)
             throws ServletException {
@@ -57,30 +51,14 @@ public class FileNotificationServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-
-            ServletContext context = getServletContext();
-            SMTP_SERVER = context.getInitParameter("SMTP_SERVER").toString();
-            SMTP_SERVER = SMTP_SERVER.equals("") ? "localhost" : SMTP_SERVER;
-
-            SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
-            SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
-
-            SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
-            SMTP_SENDER.validate();
-
         } catch (NamingException e) {
             throw new ServletException(e);
-        } catch (AddressException e) {
-            logger.log(Level.WARNING, "SMTP_SENDER address is invalid: {0}", e.toString());
         }
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        pathContext = req.getContextPath();
-        urlPrefix = Helpers.getUrlPrefix(req);
-
         PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession();
         StringBuilder buffy = new StringBuilder();
@@ -152,15 +130,17 @@ public class FileNotificationServlet extends HttpServlet {
             UserItem currentUser,
             InternetAddress emailRecipient)
             throws MessagingException {
+        Conf conf = (Conf) getServletContext().getAttribute("conf");
+
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", SMTP_SERVER);
-        props.put("mail.smtp.port", SMTP_SERVER_PORT);
+        props.put("mail.smtp.host", conf.getSmtpServer());
+        props.put("mail.smtp.port", conf.getSmtpServerPort());
         Session session = Session.getInstance(props, null);
 
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(currentUser.getEmail()));
         msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-        msg.setSender(SMTP_SENDER);
+        msg.setSender(conf.getSmtpSender());
         msg.setSubject("File " + file.getName() + " available for download");
 
         MimeMultipart mp = new MimeMultipart();
@@ -171,7 +151,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "the following file available for download:\n"
                 + "Filename: " + file.getName() + "\n"
                 + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
-                + file.getURL(urlPrefix + pathContext)
+                + file.getURL(conf.getBaseUrl())
                 + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))"), "utf-8");
 
         MimeBodyPart mbp2 = new MimeBodyPart();
@@ -182,7 +162,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + file.getName() + "</td></tr>\n"
                 + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(file.getSize()) + "</td></tr>\n"
                 + "</table>\n"
-                + "<p><a href=\"" + file.getURL(urlPrefix + pathContext) + "\">" + file.getURL(urlPrefix + pathContext) + "</a>\n"
+                + "<p><a href=\"" + file.getURL(conf.getBaseUrl()) + "\">" + file.getURL(conf.getBaseUrl()) + "</a>\n"
                 + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + " day(s))")
                 + "</p>\n", "text/html; charset=utf-8");
 

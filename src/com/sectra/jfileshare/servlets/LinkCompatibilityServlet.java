@@ -15,7 +15,6 @@ import javax.servlet.ServletException;
  * @author markus
  */
 public class LinkCompatibilityServlet extends HttpServlet {
-
     private static final Logger logger =
             Logger.getLogger(LinkCompatibilityServlet.class.getName());
 

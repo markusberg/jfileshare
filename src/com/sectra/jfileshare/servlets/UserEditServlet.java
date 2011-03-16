@@ -1,8 +1,8 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.NoSuchUserException;
-import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -27,11 +27,9 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserEditServlet extends HttpServlet {
-
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserEditServlet.class.getName());
-    private Integer DAYS_UNTIL_EXPIRATION;
 
     @Override
     public void init(ServletConfig config)
@@ -41,7 +39,6 @@ public class UserEditServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            DAYS_UNTIL_EXPIRATION = Integer.parseInt(getServletContext().getInitParameter("DAYS_USER_EXPIRATION").toString());
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -50,8 +47,8 @@ public class UserEditServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         ServletContext app = getServletContext();
+        Conf conf = (Conf) app.getAttribute("conf");
         RequestDispatcher disp;
 
         try {
@@ -77,7 +74,7 @@ public class UserEditServlet extends HttpServlet {
                 req.setAttribute("validatedPassword1", "");
                 req.setAttribute("validatedPassword2", "");
                 req.setAttribute("validatedBExpiration", user.getDateExpiration() == null ? false : true);
-                req.setAttribute("validatedDaysUntilExpiration", user.getDateExpiration() == null ? DAYS_UNTIL_EXPIRATION : user.getDaysUntilExpiration());
+                req.setAttribute("validatedDaysUntilExpiration", user.getDateExpiration() == null ? conf.getDaysUserExpiration() : user.getDaysUntilExpiration());
                 req.setAttribute("validatedUsertype", user.getUserType());
 
                 disp = app.getRequestDispatcher("/templates/UserEdit.jsp");
@@ -100,6 +97,7 @@ public class UserEditServlet extends HttpServlet {
             doGet(req, resp);
         } else {
             ServletContext app = getServletContext();
+            Conf conf = (Conf) app.getAttribute("conf");
             RequestDispatcher disp;
 
             HttpSession session = req.getSession();
@@ -152,7 +150,7 @@ public class UserEditServlet extends HttpServlet {
 
                     // Validate expiration
                     Boolean requestedBExpiration = user.getDateExpiration() == null ? false : true;
-                    Integer requestedDaysUntilExpiration = DAYS_UNTIL_EXPIRATION;
+                    Integer requestedDaysUntilExpiration = conf.getDaysUserExpiration();
                     if (currentUser.isAdmin()
                             || currentUser.isParentTo(user)) {
                         if (req.getParameter("bExpiration") != null
@@ -163,7 +161,7 @@ public class UserEditServlet extends HttpServlet {
                         }
                         requestedDaysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
                         if (requestedDaysUntilExpiration < 1) {
-                            requestedDaysUntilExpiration = DAYS_UNTIL_EXPIRATION;
+                            requestedDaysUntilExpiration = conf.getDaysUserExpiration();
                         } else if (requestedDaysUntilExpiration > 365) {
                             requestedDaysUntilExpiration = 365;
                         }

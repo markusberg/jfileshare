@@ -1,7 +1,5 @@
 package com.sectra.jfileshare.servlets;
 
-import com.sectra.jfileshare.objects.FileItem;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 

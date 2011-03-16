@@ -1,3 +1,4 @@
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <html>
 
@@ -41,7 +42,9 @@
 
         <form action="<%= request.getContextPath()%>/passwordreset" method="post">
             <p>Use this form if you've forgotten your password.
-                If you're a Sectra corporate user, your username is the same as 
+                If you're a 
+                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+                corporate user, your username is the same as
                 your regular login username.
             </p>
             <p>Instructions will be sent to your email address.

@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.ajax;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.UserItem;
 
@@ -47,13 +48,10 @@ import org.apache.commons.io.IOUtils;
  * @author markus
  */
 public class FileReceiverServlet extends HttpServlet {
+
     private DataSource ds;
-    private String PATH_TEMP;
-    private String PATH_STORE;
-    private int DAYS_FILE_RETENTION;
     private static final Logger logger =
             Logger.getLogger(FileReceiverServlet.class.getName());
-    private long FILE_SIZE_MAX;
 
     @Override
     public void init(ServletConfig config)
@@ -63,13 +61,6 @@ public class FileReceiverServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-
-            ServletContext context = getServletContext();
-            PATH_TEMP = context.getInitParameter("PATH_TEMP").toString();
-            PATH_STORE = context.getInitParameter("PATH_STORE").toString();
-            DAYS_FILE_RETENTION = Integer.parseInt(context.getInitParameter("DAYS_FILE_RETENTION").toString());
-            FILE_SIZE_MAX = Long.valueOf(context.getInitParameter("FILESIZE_MAX").toString());
-
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -116,12 +107,11 @@ public class FileReceiverServlet extends HttpServlet {
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
         if (currentUser != null && ServletFileUpload.isMultipartContent(req)) {
-
+            Conf conf = (Conf) getServletContext().getAttribute("conf");
             // keep files of up to 10 MiB in memory 10485760
-            FileItemFactory factory = new DiskFileItemFactory(10485760, new File(this.PATH_TEMP));
+            FileItemFactory factory = new DiskFileItemFactory(10485760, new File(conf.getPathTemp()));
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(FILE_SIZE_MAX);
-            // logger.info("Max filesize: " + FileItem.humanReadable(FILE_SIZE_MAX));
+            upload.setSizeMax(conf.getFileSizeMax());
 
             // set file upload progress listener
             FileUploadListener listener = new FileUploadListener();
@@ -154,16 +144,16 @@ public class FileReceiverServlet extends HttpServlet {
                     } else {
                         // This is the file you're looking for
                         file.setName(item.getName());
-                        file.setType(item.getContentType()==null?"application/octet-stream":item.getContentType());
+                        file.setType(item.getContentType() == null ? "application/octet-stream" : item.getContentType());
                         file.setOwnerUid(currentUser.getUid());
 
                         try {
-                            filestream = new FileOutputStream(this.PATH_TEMP + "/" + Integer.toString(currentUser.getUid()));
+                            filestream = new FileOutputStream(conf.getPathTemp() + "/" + Integer.toString(currentUser.getUid()));
                             MessageDigest md = MessageDigest.getInstance("MD5");
                             outstream = new DigestOutputStream(filestream, md);
                             long filesize = IOUtils.copyLarge(instream, outstream);
 
-                            if (filesize==0) {
+                            if (filesize == 0) {
                                 throw new Exception("File is empty.");
                             }
                             md = outstream.getMessageDigest();
@@ -193,21 +183,21 @@ public class FileReceiverServlet extends HttpServlet {
                     }
                 }
                 /* All done. Save the new file */
-                file.setDaysToKeep(DAYS_FILE_RETENTION);
+                file.setDaysToKeep(conf.getDaysFileRetention());
 
                 if (!file.save(ds)) {
                     req.setAttribute("msg", "Unable to contact the database");
                     req.setAttribute("javascript", "parent.uploadComplete('critical');");
                 } else {
-                    File tempfile = new File(this.PATH_TEMP, Integer.toString(currentUser.getUid()));
-                    File finalfile = new File(this.PATH_STORE, Integer.toString(file.getFid()));
+                    File tempfile = new File(conf.getPathTemp(), Integer.toString(currentUser.getUid()));
+                    File finalfile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
                     tempfile.renameTo(finalfile);
                     logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});
                     req.setAttribute("msg", "File '" + file.getName() + "' uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
                     req.setAttribute("javascript", "parent.uploadComplete('info');");
                 }
             } catch (SizeLimitExceededException e) {
-                req.setAttribute("msg", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(FILE_SIZE_MAX));
+                req.setAttribute("msg", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(conf.getFileSizeMax()));
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (FileUploadException e) {
                 req.setAttribute("msg", "Unable to upload file");

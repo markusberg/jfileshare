@@ -90,6 +90,7 @@ public class AdminServlet extends HttpServlet {
 
                 // FIXME: No sanity checking on the user input
                 conf.setBrandingCompany(req.getParameter("brandingCompany"));
+                conf.setBrandingDomain(req.getParameter("brandingDomain"));
                 conf.setBrandingLogo(req.getParameter("brandingLogo"));
                 conf.setPathStore(req.getParameter("pathStore"));
                 conf.setPathTemp(req.getParameter("pathTemp"));

@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.utils.Helpers;
@@ -43,15 +44,9 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class PasswordResetServlet extends HttpServlet {
-
     private DataSource datasource = null;
     private static final Logger logger =
             Logger.getLogger(PasswordResetServlet.class.getName());
-    private String SMTP_SERVER = "localhost";
-    private String SMTP_SERVER_PORT = "25";
-    private InternetAddress SMTP_SENDER;
-    private String urlPrefix;
-    private String pathContext;
 
     @Override
     public void init(ServletConfig config)
@@ -61,23 +56,9 @@ public class PasswordResetServlet extends HttpServlet {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             datasource = (DataSource) env.lookup("jdbc/jfileshare");
 
-            ServletContext context = getServletContext();
-            SMTP_SERVER = context.getInitParameter("SMTP_SERVER").toString();
-            SMTP_SERVER = SMTP_SERVER.equals("") ? "localhost" : SMTP_SERVER;
-
-            SMTP_SERVER_PORT = context.getInitParameter("SMTP_SERVER_PORT").toString();
-            SMTP_SERVER_PORT = SMTP_SERVER_PORT.equals("") ? "25" : SMTP_SERVER_PORT;
-
-            urlPrefix = context.getInitParameter("URL_PREFIX").toString();
-
-            SMTP_SENDER = new InternetAddress(context.getInitParameter("SMTP_SENDER").toString());
-            SMTP_SENDER.validate();
-
         } catch (NamingException e) {
             logger.log(Level.SEVERE, "Throwing exception: {0}", e.toString());
             throw new ServletException(e);
-        } catch (AddressException e) {
-            logger.log(Level.WARNING, "SMTP_SENDER address is incorrect: {0}", e.toString());
         }
     }
 
@@ -103,9 +84,7 @@ public class PasswordResetServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        pathContext = req.getContextPath();
-        urlPrefix = Helpers.getUrlPrefix(req);
-
+        Conf conf = (Conf) getServletContext().getAttribute("conf");
         if (req.getParameter("action") != null
                 && req.getParameter("action").equals("PasswordResetRequest")) {
             String username = req.getParameter("username");
@@ -117,9 +96,9 @@ public class PasswordResetServlet extends HttpServlet {
                 user = new UserItem(datasource, username);
             } catch (NoSuchUserException e) {
                 // Doesn't exist in database.
-                // Assume that this is a Sectra Corporate user
+                // Assume that this is a Corporate-internal user
                 user = new UserItem();
-                user.setEmail(username.concat("@sectra.se"));
+                user.setEmail(username.concat("@").concat(conf.getBrandingDomain()));
             } catch (SQLException e) {
                 req.setAttribute("message_critical", e.toString());
                 disp = app.getRequestDispatcher("/templates/Error.jsp");
@@ -131,7 +110,7 @@ public class PasswordResetServlet extends HttpServlet {
                     emailRecipient.validate();
                     String key = Sha512Crypt.Sha512_crypt(user.getEmail(), null, 0);
                     key = key.substring(key.length() - 50, key.length());
-                    if (SendResetInstructions(emailRecipient, key)
+                    if (SendResetInstructions(emailRecipient, key, conf)
                             && StoreRecoveryKey(username, user.getEmail(), key)) {
                         if (user.getUid() == null) {
                             req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
@@ -158,7 +137,7 @@ public class PasswordResetServlet extends HttpServlet {
                 user = new UserItem(datasource, (String) UserInfo.get("username"));
             } catch (NoSuchUserException e) {
                 // Account didn't exist prior to pwreset attempt.
-                // Thus, this is a Sectra Corporate user
+                // Thus, this is an internal user
                 user = new UserItem();
                 user.setUserType(UserItem.TYPE_INTERNAL);
             } catch (SQLException e) {
@@ -196,44 +175,46 @@ public class PasswordResetServlet extends HttpServlet {
         }
     }
 
-    private boolean SendResetInstructions(InternetAddress emailRecipient, String key) {
+    private boolean SendResetInstructions(InternetAddress emailRecipient, String key, Conf conf) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", SMTP_SERVER);
-        props.put("mail.smtp.port", SMTP_SERVER_PORT);
+        props.put("mail.smtp.host", conf.getSmtpServer());
+        props.put("mail.smtp.port", conf.getSmtpServerPort());
         Session session = Session.getInstance(props, null);
 
         try {
             MimeMessage msg = new MimeMessage(session);
             msg.setFrom(emailRecipient);
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-            msg.setSender(SMTP_SENDER);
+            msg.setSender(conf.getSmtpSender());
 
             msg.setSubject("Reset Password Instructions");
 
             MimeMultipart mp = new MimeMultipart();
             mp.setSubType("alternative");
 
-            String txtBody = "A new password to your Sectra jfileshare account has been \n"
+            String txtBody = "A new password to your " + conf.getBrandingCompany()
+                    + " jfileshare account has been \n"
                     + "requested. Please follow this link in order to select a new password:\n"
-                    + urlPrefix + pathContext + "/passwordreset/" + key + "\n"
+                    + conf.getBaseUrl() + "/passwordreset/" + key + "\n"
                     + "(note: this link will be active for 48 hours)\n\n"
                     + "If you did not make this request, simply ignore this message and your\n"
                     + "password will remain unchanged.\n\n"
                     + "--\n"
                     + "Best regards\n"
-                    + "The Sectra jfileshare system";
+                    + "The " + conf.getBrandingCompany() + " jfileshare system";
             MimeBodyPart mbp1 = new MimeBodyPart();
             mbp1.setText(txtBody);
 
-            String htmlBody = "<p>A new password to your Sectra jfileshare account has been requested. \n"
+            String htmlBody = "<p>A new password to your " + conf.getBrandingCompany()
+                    + " jfileshare account has been requested. \n"
                     + "Please follow this link in order to select a new password:<br />\n"
-                    + "<a href=\"" + urlPrefix + pathContext + "/passwordreset/" + key + "\">" + urlPrefix + pathContext + "/passwordreset/" + key + "</a><br />\n"
+                    + "<a href=\"" + conf.getBaseUrl() + "/passwordreset/" + key + "\">" + conf.getBaseUrl() + "/passwordreset/" + key + "</a><br />\n"
                     + "<em>(note: this link will be active for 48 hours)</em></p>\n\n"
                     + "<p>If you did not make this request, simply ignore this message and your \n"
                     + "password will remain unchanged.</p>\n"
                     + "<hr />\n"
                     + "<p>Best regards<br />\n"
-                    + "The Sectra jfileshare system</p>\n";
+                    + "The " + conf.getBrandingCompany() + " jfileshare system</p>\n";
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent(htmlBody, "text/html");
 

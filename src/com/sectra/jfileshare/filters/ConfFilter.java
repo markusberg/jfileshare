@@ -11,6 +11,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -49,6 +50,9 @@ public class ConfFilter implements Filter {
         Conf conf = (Conf) filterconfig.getServletContext().getAttribute("conf");
         if (conf == null) {
             conf = new Conf(ds);
+            conf.setUrlPrefix(request);
+            HttpServletRequest req = (HttpServletRequest) request;
+            conf.setContextPath(req.getContextPath());
             filterconfig.getServletContext().setAttribute("conf", conf);
         }
         chain.doFilter(request, response);

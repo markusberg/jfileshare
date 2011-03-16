@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page import="com.sectra.jfileshare.objects.UserItem"%>
 <%@page import="com.sectra.jfileshare.utils.Helpers"%>
 <html>
@@ -89,7 +90,9 @@
                     <td>
                         <select name="usertype">
                             <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
-                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>Sectra internal</option>
+                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>
+                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+                                internal</option>
                             <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>
                     </td>

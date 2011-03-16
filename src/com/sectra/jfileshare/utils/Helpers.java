@@ -3,8 +3,6 @@ package com.sectra.jfileshare.utils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class Helpers {
 
     /**
@@ -31,24 +29,5 @@ public class Helpers {
         field = field.replaceAll("<", "&lt;");
         field = field.replaceAll(">", "&gt;");
         return field;
-    }
-
-    /**
-     * Figure out the absolute path to the server in order to construct proper links
-     * @param req
-     * @return
-     */
-    public static String getUrlPrefix(HttpServletRequest req) {
-        String httpScheme = req.getScheme();
-        String serverName = req.getServerName();
-        Integer serverPort = (Integer) req.getServerPort();
-        if ((serverPort == 80 && httpScheme.equals("http"))
-                || (serverPort == 443 && httpScheme.equals("https"))) {
-            serverPort = null;
-        }
-
-        return httpScheme + "://"
-                + serverName
-                + (serverPort != null ? ":" + serverPort.toString() : "");
     }
 }

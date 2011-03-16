@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 
 import java.io.File;
@@ -24,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 public class FileDownloadServlet extends HttpServlet {
 
     private DataSource ds;
-    private String pathFileStore;
     private static final Logger logger =
             Logger.getLogger(FileDownloadServlet.class.getName());
 
@@ -35,7 +35,6 @@ public class FileDownloadServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            pathFileStore = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -47,8 +46,9 @@ public class FileDownloadServlet extends HttpServlet {
         // By the time we get here, the fileauthfilter has done the sanity
         // checking and authentication already. We can jump right into
         // serving the file.
+        Conf conf = (Conf) getServletContext().getAttribute("conf");
         FileItem file = (FileItem) req.getAttribute("file");
-        File fileOnDisk = new File(pathFileStore + "/" + file.getFid().toString());
+        File fileOnDisk = new File(conf.getPathStore() + "/" + file.getFid().toString());
 
         logger.info("Preparing to stream file");
         resp.setContentType(file.getType());

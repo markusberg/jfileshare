@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page import="com.sectra.jfileshare.objects.UserItem"%>
 <%@page import="java.util.ArrayList"%>
 <html>
@@ -28,7 +29,7 @@
                 <tr>
                     <th>User Level:</th>
                     <td>
-                        <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : "Sectra Corporate")%>
+                        <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() + " Corporate")%>
                     </td>
                 </tr>
                 <tr>

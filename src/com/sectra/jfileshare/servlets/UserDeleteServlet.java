@@ -1,8 +1,8 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.NoSuchUserException;
-import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,11 +26,9 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserDeleteServlet extends HttpServlet {
-
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserDeleteServlet.class.getName());
-    private String PATH_FILE_STORE;
 
     @Override
     public void init(ServletConfig config)
@@ -40,7 +38,6 @@ public class UserDeleteServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            PATH_FILE_STORE = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -90,6 +87,7 @@ public class UserDeleteServlet extends HttpServlet {
             doGet(req, resp);
         } else {
             ServletContext app = getServletContext();
+            Conf conf = (Conf) app.getAttribute("conf");
             RequestDispatcher disp;
 
             HttpSession session = req.getSession();
@@ -101,7 +99,7 @@ public class UserDeleteServlet extends HttpServlet {
                     req.setAttribute("message_critical", "You do not have access to modify user " + User.getUserInfo());
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
-                    User.delete(ds, PATH_FILE_STORE);
+                    User.delete(ds, conf.getPathStore());
                     req.setAttribute("message", "User " + User.getUserInfo() + " deleted");
                     req.setAttribute("tab", "Delete user");
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");

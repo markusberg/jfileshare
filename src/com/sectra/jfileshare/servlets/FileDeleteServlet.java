@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
@@ -33,11 +34,9 @@ import javax.sql.DataSource;
  * @since   1.5
  */
 public class FileDeleteServlet extends HttpServlet {
-
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileDeleteServlet.class.getName());
-    private String PATH_FILE_STORE;
 
     @Override
     public void init(ServletConfig config)
@@ -47,7 +46,6 @@ public class FileDeleteServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             ds = (DataSource) env.lookup("jdbc/jfileshare");
-            PATH_FILE_STORE = getServletContext().getInitParameter("PATH_STORE").toString();
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -67,7 +65,8 @@ public class FileDeleteServlet extends HttpServlet {
             UserItem currentUser = (UserItem) session.getAttribute("user");
 
             if (currentUser.hasEditAccessTo(file)) {
-                if (file.delete(ds, PATH_FILE_STORE)) {
+                Conf conf = (Conf) getServletContext().getAttribute("conf");
+                if (file.delete(ds, conf.getPathStore())) {
                     // FIXME: this is ugly. Should be ajax instead.
                     UserItem user = null;
                     if (currentUser.getUid().equals(file.getOwnerUid())) {

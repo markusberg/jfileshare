@@ -1,3 +1,4 @@
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.sectra.jfileshare.objects.FileItem"%>
 <html>
@@ -47,7 +48,9 @@
                 <tr>
                     <th>Permanent: </th>
                     <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked" : ""%> />
-                        <span class="note">Non-permanent files will be automatically removed after <%= Integer.parseInt(getServletContext().getInitParameter("DAYS_FILE_RETENTION").toString())%> days</span>
+                        <span class="note">Non-permanent files will be automatically removed after
+                            <%= ((Conf) getServletContext().getAttribute("conf")).getDaysFileRetention().toString()%>
+                            days</span>
                     </td>
                 </tr>
                 <tr>

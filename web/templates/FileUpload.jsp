@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page import="com.sectra.jfileshare.objects.FileItem"%>
 <html>
 
@@ -110,7 +111,7 @@
                     </tr>
                     <tr>
                         <th></th>
-                        <td class="note">Note: the maximum allowed file size is <%=FileItem.humanReadable(Long.parseLong(application.getInitParameter("FILESIZE_MAX").toString())) %></td>
+                        <td class="note">Note: the maximum allowed file size is <%=FileItem.humanReadable(((Conf) getServletContext().getAttribute("conf")).getFileSizeMax()) %></td>
                     </tr>
                     <tr>
                         <th style="text-align:right;">File password:</th>

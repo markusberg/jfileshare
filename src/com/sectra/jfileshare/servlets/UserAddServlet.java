@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.utils.Helpers;
@@ -26,11 +27,9 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class UserAddServlet extends HttpServlet {
-
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(UserAddServlet.class.getName());
-    private Integer DAYS_USER_EXPIRATION;
 
     @Override
     public void init(ServletConfig config)
@@ -40,9 +39,6 @@ public class UserAddServlet extends HttpServlet {
         try {
             Context env = (Context) new InitialContext().lookup("java:comp/env");
             datasource = (DataSource) env.lookup("jdbc/jfileshare");
-            ServletContext context = getServletContext();
-            DAYS_USER_EXPIRATION = Integer.parseInt(context.getInitParameter("DAYS_USER_EXPIRATION").toString());
-
         } catch (NamingException e) {
             throw new ServletException(e);
         }
@@ -63,12 +59,13 @@ public class UserAddServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
             // Set the default values for new users
+            Conf conf = (Conf) getServletContext().getAttribute("conf");
             req.setAttribute("validatedUsername", "");
             req.setAttribute("validatedEmail", "");
             req.setAttribute("validatedPassword1", "");
             req.setAttribute("validatedPassword2", "");
             req.setAttribute("validatedBExpiration", true);
-            req.setAttribute("validatedDaysUntilExpiration", DAYS_USER_EXPIRATION);
+            req.setAttribute("validatedDaysUntilExpiration", conf.getDaysUserExpiration());
             req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
 
             disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
@@ -90,6 +87,7 @@ public class UserAddServlet extends HttpServlet {
             UserItem currentUser = (UserItem) session.getAttribute("user");
             RequestDispatcher disp;
             ServletContext app = getServletContext();
+            Conf conf = (Conf) app.getAttribute("conf");
 
             if (currentUser.isExternal()) {
                 logger.log(Level.INFO, "{0} has insufficient access to create users", currentUser.getUserInfo());
@@ -119,7 +117,7 @@ public class UserAddServlet extends HttpServlet {
                 req.setAttribute("validatedEmail", req.getParameter("email"));
 
                 // Validate the amount of time account will be active
-                Integer daysUntilExpiration = this.DAYS_USER_EXPIRATION;
+                Integer daysUntilExpiration = conf.getDaysUserExpiration();
                 if (req.getParameter("daysUserExpiration") != null) {
                     Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
                     if (UserItem.DAY_MAP.containsKey(requestedExpiration)) {
@@ -181,7 +179,7 @@ public class UserAddServlet extends HttpServlet {
                         req.setAttribute("validatedPassword1", "");
                         req.setAttribute("validatedPassword2", "");
                         req.setAttribute("validatedBExpiration", true);
-                        req.setAttribute("validatedDaysUntilExpiration", DAYS_USER_EXPIRATION);
+                        req.setAttribute("validatedDaysUntilExpiration", conf.getDaysUserExpiration());
                         req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
 
                     } else {

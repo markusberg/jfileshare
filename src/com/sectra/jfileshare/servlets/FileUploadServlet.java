@@ -9,7 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
 import javax.servlet.RequestDispatcher;
 
-// import com.sectra.jfileshare.objects.UserItem;
 public class FileUploadServlet extends HttpServlet {
 
     @Override

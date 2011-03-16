@@ -119,6 +119,7 @@ public class StartupServlet extends HttpServlet {
             commitKeyValuePair(st, "smtpServerPort", app.getInitParameter("SMTP_SERVER_PORT"));
             commitKeyValuePair(st, "smtpSender", app.getInitParameter("SMTP_SENDER"));
             commitKeyValuePair(st, "brandingCompany", "Sectra");
+            commitKeyValuePair(st, "brandingDomain", "sectra.se");
             commitKeyValuePair(st, "brandingLogo", ""); 
             commitKeyValuePair(st, "dbVersion", "1.4");
         } catch (SQLException e) {

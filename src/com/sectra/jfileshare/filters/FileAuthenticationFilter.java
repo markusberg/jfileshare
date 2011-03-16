@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.Enumeration;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -30,20 +29,10 @@ import javax.servlet.ServletResponse;
 import javax.sql.DataSource;
 
 public class FileAuthenticationFilter implements Filter {
-
     private FilterConfig filterconfig;
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileAuthenticationFilter.class.getName());
-
-    private void listAttributes(ServletRequest request)
-            throws IOException, ServletException {
-        for (Enumeration en = request.getAttributeNames(); en.hasMoreElements();) {
-            String name = (String) en.nextElement();
-            Object value = request.getAttribute(name);
-            logger.log(Level.INFO, "attribute: {0}={1}", new Object[]{name, value.toString()});
-        }
-    }
 
     @Override
     public void init(FilterConfig filterConfig)
