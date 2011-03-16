@@ -44,6 +44,7 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class PasswordResetServlet extends HttpServlet {
+
     private DataSource datasource = null;
     private static final Logger logger =
             Logger.getLogger(PasswordResetServlet.class.getName());
@@ -117,6 +118,7 @@ public class PasswordResetServlet extends HttpServlet {
                         } else {
                             req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + user.getUsername() + "\".");
                         }
+                        disp = app.getRequestDispatcher("/templates/Blank.jsp");
                     } else {
                         req.setAttribute("message_critical", "Unable to send email. This is likely a server error. Please try again later, or contact the server administrator");
                     }
@@ -156,6 +158,7 @@ public class PasswordResetServlet extends HttpServlet {
                     user.save(datasource);
                     req.setAttribute("message", "Password for user <strong>" + (String) UserInfo.get("username") + "</strong> has been reset. You can now login with your newly selected password.");
                     this.DropRecoveryKey((String) UserInfo.get("key"));
+                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
                 } else {
                     String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
                     for (String emsg : errors) {
@@ -168,7 +171,6 @@ public class PasswordResetServlet extends HttpServlet {
                 }
             }
             disp.forward(req, resp);
-
         } else {
             // Fallback to default page if required fields are missing
             doGet(req, resp);
