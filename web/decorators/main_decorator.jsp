@@ -1,3 +1,4 @@
+<%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@ page import="com.sectra.jfileshare.objects.UserItem" %>
 <%@ page import="com.sectra.jfileshare.utils.Tab" %>
 <%@ page import="java.util.ArrayList" %>
@@ -25,6 +26,16 @@
             var contextPath = "<%=request.getContextPath()%>";
             LogoutTimer.start();
         </script>
+        <%
+                    }
+                    Conf conf = (Conf) getServletContext().getAttribute("conf");
+                    if (conf.getBrandingLogo() != null) {
+        %>
+        <style type="text/css">
+            #container {
+                background: #ddd url(<%= conf.getBrandingLogo()%>) no-repeat top right;
+            }
+        </style>
         <%
                     }
         %>
@@ -136,7 +147,7 @@
             <script type="text/javascript">
                 var domTimer = document.getElementById("dbgLogoutTimer");
                 function updateTimer() {
-                domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000) + " seconds until logout";
+                    domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000) + " seconds until logout";
                 }
                 var tempTimer = setInterval("updateTimer()", 1000);
             </script>

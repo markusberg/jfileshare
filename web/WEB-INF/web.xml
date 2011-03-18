@@ -85,6 +85,10 @@
         <url-pattern>/file/download/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
+        <filter-name>fileAuthentication</filter-name>
+        <url-pattern>/file/get/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>login</filter-name>
         <url-pattern>/admin</url-pattern>
     </filter-mapping>
@@ -216,6 +220,7 @@
     <servlet-mapping>
         <servlet-name>FileDownload</servlet-name>
         <url-pattern>/file/download/*</url-pattern>
+        <url-pattern>/file/get/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FileEdit</servlet-name>

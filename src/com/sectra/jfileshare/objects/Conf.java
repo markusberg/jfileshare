@@ -99,7 +99,7 @@ public class Conf {
     }
 
     public void setBrandingLogo(String value) {
-        brandingLogo = value;
+        brandingLogo = (value != null && value.equals("")) ? null : value;
     }
 
     public Integer getDaysFileRetention() {

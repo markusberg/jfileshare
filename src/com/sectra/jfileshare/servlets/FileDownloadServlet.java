@@ -52,7 +52,8 @@ public class FileDownloadServlet extends HttpServlet {
 
         logger.info("Preparing to stream file");
         resp.setContentType(file.getType());
-        resp.setHeader("Content-disposition", "attachment; filename=\"" + file.getName() + "\"");
+        String disposition = req.getServletPath().equals("/file/get") ? "inline" : "attachment";
+        resp.setHeader("Content-disposition", disposition+"; filename=\"" + file.getName() + "\"");
         resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
 
         FileInputStream instream = new FileInputStream(fileOnDisk);

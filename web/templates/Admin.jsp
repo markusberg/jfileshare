@@ -18,18 +18,35 @@
                     <th>Company name: </th>
                     <td>
                         <input type="text" name="brandingCompany" value="<%= conf.getBrandingCompany()%>" />
-                        <span class="note">Note: The company name will be displayed in the user interface, and in
-                        emails sent from the jfileshare app</span>
+                    </td>
+                    <td>
+                        <span class="note">
+                            Note: The company name will be displayed in the user interface, and in
+                            emails sent from the jfileshare app
+                        </span>
                     </td>
                 </tr>
                 <tr>
                     <th>Domain name: </th>
                     <td>
                         <input type="text" name="brandingDomain" value="<%= conf.getBrandingDomain()%>" />
+                    </td>
+                    <td>
                         <span class="note">
                             Note: This domain name will be used during auto-creation of accounts. If user <strong>"xyz"</strong>
                             requests a password reset, and that user doesn't exist in the database, the reset instructions are
                             sent to xyz@&lt;domain-name&gt;.
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Company logo url: </th>
+                    <td>
+                        <input type="text" name="brandingLogo" value="<%= (conf.getBrandingLogo() == null ? "" : conf.getBrandingLogo())%>" />
+                    </td>
+                    <td>
+                        <span class="note">
+                            Note: Leave blank to use the default logo
                         </span>
                     </td>
                 </tr>
@@ -43,9 +60,8 @@
                 </tr>
                 <tr>
                     <th>Smtp server and port: </th>
-                    <td><input type="text" name="smtpServer" value="<%= conf.getSmtpServer()%>" />
-                        <input type="text" name="smtpServerPort" value="<%= Integer.toString(conf.getSmtpServerPort())%>" size="4" />
-                    </td>
+                    <td><input type="text" name="smtpServer" value="<%= conf.getSmtpServer()%>" /></td>
+                    <td><input type="text" name="smtpServerPort" value="<%= Integer.toString(conf.getSmtpServerPort())%>" size="4" /></td>
                 </tr>
                 <tr>
                     <th>File retention: </th>
@@ -57,7 +73,8 @@
                 </tr>
                 <tr>
                     <th>Maximum allowed file size: </th>
-                    <td><input type="text" name="fileSizeMax" value="<%= conf.getFileSizeMax()%>" /> bytes</td>
+                    <td><input type="text" name="fileSizeMax" value="<%= conf.getFileSizeMax()%>" /></td>
+                    <td>bytes</td>
                 </tr>
                 <tr><td>&nbsp;</td></tr>
                 <tr>

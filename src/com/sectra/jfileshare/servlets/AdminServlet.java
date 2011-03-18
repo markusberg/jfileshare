@@ -5,12 +5,6 @@ import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.ResultSet;
-
 import java.util.logging.Logger;
 
 import javax.naming.Context;
