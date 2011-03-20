@@ -65,7 +65,7 @@ public class UserAddServlet extends HttpServlet {
             req.setAttribute("validatedPassword1", "");
             req.setAttribute("validatedPassword2", "");
             req.setAttribute("validatedBExpiration", true);
-            req.setAttribute("validatedDaysUntilExpiration", conf.getDaysUserExpiration());
+            req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
             req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
 
             disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
@@ -117,20 +117,20 @@ public class UserAddServlet extends HttpServlet {
                 req.setAttribute("validatedEmail", req.getParameter("email"));
 
                 // Validate the amount of time account will be active
-                Integer daysUntilExpiration = conf.getDaysUserExpiration();
+                Integer daysUserExpiration = conf.getDaysUserExpiration();
                 if (req.getParameter("daysUserExpiration") != null) {
                     Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
                     if (UserItem.DAY_MAP.containsKey(requestedExpiration)) {
-                        daysUntilExpiration = requestedExpiration;
+                        daysUserExpiration = requestedExpiration;
                     }
                 }
-                req.setAttribute("validatedDaysUntilExpiration", daysUntilExpiration);
+                req.setAttribute("validatedDaysUserExpiration", daysUserExpiration);
 
                 // See if the expiration-box is checked
                 if (req.getParameter("bExpiration") != null
                         && req.getParameter("bExpiration").equals("true")) {
                     req.setAttribute("validatedBExpiration", true);
-                    user.setDaysUntilExpiration(daysUntilExpiration);
+                    user.setDaysUntilExpiration(daysUserExpiration);
                 } else {
                     req.setAttribute("validatedBExpiration", false);
                 }
@@ -179,7 +179,7 @@ public class UserAddServlet extends HttpServlet {
                         req.setAttribute("validatedPassword1", "");
                         req.setAttribute("validatedPassword2", "");
                         req.setAttribute("validatedBExpiration", true);
-                        req.setAttribute("validatedDaysUntilExpiration", conf.getDaysUserExpiration());
+                        req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
                         req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
 
                     } else {

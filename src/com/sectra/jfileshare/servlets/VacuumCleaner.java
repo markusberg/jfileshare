@@ -170,7 +170,7 @@ public class VacuumCleaner extends HttpServlet {
                 file.setFid(rs.getInt("fid"));
                 file.setName(rs.getString("name"));
                 file.setType(rs.getString("type"));
-                file.setSize(rs.getDouble("size"));
+                file.setSize(rs.getLong("size"));
                 file.setMd5sum(rs.getString("md5sum"));
                 file.setDownloads(rs.getInt("downloads"));
                 file.setPwHash(rs.getString("pwHash"));

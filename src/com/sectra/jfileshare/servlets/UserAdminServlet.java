@@ -78,7 +78,7 @@ public class UserAdminServlet extends HttpServlet {
 
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("SELECT * FROM UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) ORDER BY sumFilesize DESC");
+            PreparedStatement st = dbConn.prepareStatement("SELECT * FROM UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) ORDER BY sumFileSize DESC");
             st.execute();
             ResultSet rs = st.getResultSet();
 
@@ -94,7 +94,7 @@ public class UserAdminServlet extends HttpServlet {
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
                 user.setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                user.setSumFilesize(rs.getDouble("sumFilesize"));
+                user.setSumFileSize(rs.getLong("sumFileSize"));
                 user.setSumFiles(rs.getInt("sumFiles"));
                 user.setSumChildren(rs.getInt("sumChildren"));
                 allUsers.add(user);

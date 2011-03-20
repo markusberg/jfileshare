@@ -1,10 +1,10 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.Conf;
+import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
-
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -56,7 +56,25 @@ public class AdminServlet extends HttpServlet {
         Conf conf = (Conf) app.getAttribute("conf");
 
         if (User.isAdmin()) {
-            req.setAttribute("conf", conf);
+            req.setAttribute("validatedBrandingOrg", conf.getBrandingOrg());
+            req.setAttribute("validatedBrandingDomain", conf.getBrandingDomain());
+            req.setAttribute("validatedBrandingLogo", conf.getBrandingLogo());
+
+            req.setAttribute("validatedPathStore", conf.getPathStore());
+            req.setAttribute("validatedPathTemp", conf.getPathTemp());
+            req.setAttribute("validatedDaysFileRetention", conf.getDaysFileRetention());
+
+            int[] fs = FileItem.getFileSize(conf.getFileSizeMax());
+            req.setAttribute("validatedFileSizeMax", fs[1]);
+            req.setAttribute("validatedFileSizeUnit", fs[0]);
+
+            req.setAttribute("validatedSmtpServer", conf.getSmtpServer());
+            req.setAttribute("validatedSmtpServerPort", conf.getSmtpServerPort());
+            req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
+
+            req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+            req.setAttribute("dbVersion", conf.getDbVersion());
+
             disp = app.getRequestDispatcher("/templates/Admin.jsp");
         } else {
             req.setAttribute("message_critical", "Access Denied");
@@ -79,20 +97,40 @@ public class AdminServlet extends HttpServlet {
             Conf conf = (Conf) app.getAttribute("conf");
 
             if (user.isAdmin()) {
-                req.setAttribute("conf", conf);
                 disp = app.getRequestDispatcher("/templates/Admin.jsp");
 
                 // FIXME: No sanity checking on the user input
-                conf.setBrandingCompany(req.getParameter("brandingCompany"));
+                conf.setBrandingOrg(req.getParameter("brandingOrg"));
+                req.setAttribute("validatedBrandingOrg", conf.getBrandingOrg());
                 conf.setBrandingDomain(req.getParameter("brandingDomain"));
+                req.setAttribute("validatedBrandingDomain", conf.getBrandingDomain());
                 conf.setBrandingLogo(req.getParameter("brandingLogo"));
+                req.setAttribute("validatedBrandingLogo", conf.getBrandingLogo());
+
                 conf.setPathStore(req.getParameter("pathStore"));
+                req.setAttribute("validatedPathStore", conf.getPathStore());
                 conf.setPathTemp(req.getParameter("pathTemp"));
-                conf.setSmtpServer(req.getParameter("smtpServer"));
-                conf.setSmtpServerPort(Integer.parseInt(req.getParameter("smtpServerPort")));
+                req.setAttribute("validatedPathTemp", conf.getPathTemp());
                 conf.setDaysFileRetention(Integer.parseInt(req.getParameter("daysFileRetention")));
+                req.setAttribute("validatedDaysFileRetention", conf.getDaysFileRetention());
+
+                conf.setSmtpServer(req.getParameter("smtpServer"));
+                req.setAttribute("validatedSmtpServer", conf.getSmtpServer());
+                conf.setSmtpServerPort(Integer.parseInt(req.getParameter("smtpServerPort")));
+                req.setAttribute("validatedSmtpServerPort", conf.getSmtpServerPort());
+                conf.setSmtpSender(req.getParameter("smtpSender"));
+                req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
+
+                long validatedFileSizeMax = Long.parseLong(req.getParameter("fileSizeMax"));
+                int validatedFileSizeUnit = Integer.parseInt(req.getParameter("fileSizeUnit"));
+
+                conf.setFileSizeMax(validatedFileSizeMax * (long) Math.pow(1024, validatedFileSizeUnit));
+                req.setAttribute("validatedFileSizeMax", validatedFileSizeMax);
+                req.setAttribute("validatedFileSizeUnit", validatedFileSizeUnit);
+
                 conf.setDaysUserExpiration(Integer.parseInt(req.getParameter("daysUserExpiration")));
-                conf.setFileSizeMax(Long.parseLong(req.getParameter("fileSizeMax")));
+                req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+                req.setAttribute("dbVersion", conf.getDbVersion());
 
                 if (conf.save(ds)) {
                     req.setAttribute("message", "Changes saved");
@@ -105,7 +143,6 @@ public class AdminServlet extends HttpServlet {
                 req.setAttribute("message_critical", "Access Denied");
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             }
-
             disp.forward(req, resp);
         }
     }

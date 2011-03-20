@@ -35,7 +35,7 @@ public class UserItem implements Serializable {
     private Timestamp dateLastLogin;
     private Timestamp dateExpiration;
     private Integer uidCreator;
-    private Double sumFilesize;
+    private long sumFileSize;
     private int sumFiles;
     private int sumChildren;
     public static final int TYPE_ADMIN = 1;
@@ -78,7 +78,7 @@ public class UserItem implements Serializable {
                 setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
                 setUidCreator(rs.getInt("UserItems.uidCreator"));
                 setSumFiles(rs.getInt("sumFiles"));
-                setSumFilesize(rs.getDouble("sumFilesize"));
+                setSumFileSize(rs.getLong("sumFileSize"));
                 setSumChildren(rs.getInt("sumChildren"));
             } else {
                 throw new NoSuchUserException("User not found");
@@ -209,27 +209,27 @@ public class UserItem implements Serializable {
     }
 
     public Integer getUidCreator() {
-        return this.uidCreator;
+        return uidCreator;
     }
 
-    public void setUidCreator(Integer uidCreator) {
-        this.uidCreator = uidCreator;
+    public void setUidCreator(Integer value) {
+        uidCreator = value;
     }
 
-    public double getSumFilesize() {
-        return this.sumFilesize;
+    public long getSumFileSize() {
+        return sumFileSize;
     }
 
     public int getSumFiles() {
-        return this.sumFiles;
+        return sumFiles;
     }
 
     public int getSumChildren() {
-        return this.sumChildren;
+        return sumChildren;
     }
 
-    public void setSumFilesize(double sumFilesize) {
-        this.sumFilesize = sumFilesize;
+    public void setSumFileSize(long value) {
+        sumFileSize = value;
     }
 
     public void setSumFiles(int sumFiles) {
@@ -409,7 +409,7 @@ public class UserItem implements Serializable {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where uidCreator=? ORDER BY sumFilesize DESC");
+            PreparedStatement st = dbConn.prepareStatement("select * from UserItems LEFT OUTER JOIN viewUserFiles USING (uid) LEFT OUTER JOIN viewUserChildren USING (uid) where uidCreator=? ORDER BY sumFileSize DESC");
             st.setInt(1, this.getUid());
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -426,7 +426,7 @@ public class UserItem implements Serializable {
                 user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
                 user.setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
                 user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                user.setSumFilesize(rs.getDouble("sumFilesize"));
+                user.setSumFileSize(rs.getLong("sumFilesize"));
                 user.setSumFiles(rs.getInt("sumFiles"));
                 user.setSumChildren(rs.getInt("sumChildren"));
                 aChildren.add(user);
@@ -462,7 +462,7 @@ public class UserItem implements Serializable {
                 file.setFid(rs.getInt("FileItems.fid"));
                 file.setName(rs.getString("FileItems.name"));
                 file.setType(rs.getString("FileItems.type"));
-                file.setSize(rs.getDouble("FileItems.size"));
+                file.setSize(rs.getLong("FileItems.size"));
                 file.setMd5sum(rs.getString("FileItems.md5sum"));
                 file.setEnabled(rs.getBoolean("FileItems.enabled"));
                 file.setDownloads(rs.getInt("FileItems.downloads"));

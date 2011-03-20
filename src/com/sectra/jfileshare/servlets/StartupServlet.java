@@ -44,7 +44,7 @@ public class StartupServlet extends HttpServlet {
 
         TableInit();
         dbUpdate1();
-        dbUpdate14();
+        dbUpdate2();
     }
 
     private void TableInit() {
@@ -66,7 +66,7 @@ public class StartupServlet extends HttpServlet {
         }
     }
 
-    private void dbUpdate14() {
+    private void dbUpdate2() {
         Connection dbConn = null;
         try {
             dbConn = datasource.getConnection();
@@ -74,7 +74,16 @@ public class StartupServlet extends HttpServlet {
             st.execute();
             ResultSet rs = st.getResultSet();
             if (!rs.next()) {
-                logger.info("Need to update database to level 1.4");
+                logger.info("Need to update database to db level 2");
+                // fix the filesize column to be a bigint instead of a double
+                alterDatabase(dbConn, "alter table FileItems CHANGE COLUMN size "
+                        + "size bigint UNSIGNED NOT NULL DEFAULT 0;");
+                // Recreate the viewUserFiles to use correct capitalization
+                alterDatabase(dbConn, "drop view viewUserFiles");
+                alterDatabase(dbConn, "create VIEW viewUserFiles as select uid, "
+                        + "count(fid) as sumFiles, sum(size) as sumFileSize from "
+                        + "FileItems group by uid");
+
                 // create table for application configuration
                 alterDatabase(dbConn, "CREATE TABLE `Conf` ("
                         + "`key` varchar(64) NOT NULL, "
@@ -84,7 +93,7 @@ public class StartupServlet extends HttpServlet {
                 // populate the new table with init-values
                 confCreate();
             } else {
-                logger.info("Database is already at level 1.4");
+                logger.info("Database is already at level 2");
             }
         } catch (SQLException ignored) {
             logger.info(ignored.toString());
@@ -118,10 +127,10 @@ public class StartupServlet extends HttpServlet {
             commitKeyValuePair(st, "smtpServer", app.getInitParameter("SMTP_SERVER"));
             commitKeyValuePair(st, "smtpServerPort", app.getInitParameter("SMTP_SERVER_PORT"));
             commitKeyValuePair(st, "smtpSender", app.getInitParameter("SMTP_SENDER"));
-            commitKeyValuePair(st, "brandingCompany", "Sectra");
+            commitKeyValuePair(st, "brandingOrg", "Sectra");
             commitKeyValuePair(st, "brandingDomain", "sectra.se");
-            commitKeyValuePair(st, "brandingLogo", ""); 
-            commitKeyValuePair(st, "dbVersion", "1.4");
+            commitKeyValuePair(st, "brandingLogo", "");
+            commitKeyValuePair(st, "dbVersion", "2");
         } catch (SQLException e) {
             logger.severe(e.toString());
         } finally {

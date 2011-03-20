@@ -15,16 +15,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.logging.Level;
 
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 public class FileItem implements Serializable {
+
     private Integer fid;
     private String name;
     private String type;
-    private Double size;
+    private Long size;
     private String md5sum;
     private Integer downloads;
     private String pwHash;
@@ -54,7 +56,7 @@ public class FileItem implements Serializable {
                 setFid(rs.getInt("FileItems.fid"));
                 setName(rs.getString("FileItems.name"));
                 setType(rs.getString("FileItems.type"));
-                setSize(rs.getDouble("FileItems.size"));
+                setSize(rs.getLong("FileItems.size"));
                 setMd5sum(rs.getString("FileItems.md5sum"));
                 setEnabled(rs.getBoolean("FileItems.enabled"));
                 setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
@@ -98,7 +100,7 @@ public class FileItem implements Serializable {
      * @param iDays
      */
     public void setDaysToKeep(int iDays) {
-        long millis = iDays * 1000 * 60 * 60 * 24;
+        long millis = (long) iDays * 1000 * 60 * 60 * 24;
         setDateExpiration(new Timestamp(System.currentTimeMillis() + millis));
     }
 
@@ -110,8 +112,8 @@ public class FileItem implements Serializable {
         return fid;
     }
 
-    public void setFid(int fid) {
-        this.fid = fid;
+    public void setFid(Integer value) {
+        fid = value;
     }
 
     public String getName() {
@@ -119,6 +121,8 @@ public class FileItem implements Serializable {
     }
 
     public void setName(String name) {
+        // Internet Explorer sends the complete file path of the uploaded
+        // file iff the server is in "Trusted Sites". We strip this info out.
         if (name.contains("\\")) {
             name = name.substring(name.lastIndexOf("\\") + 1);
         }
@@ -129,44 +133,44 @@ public class FileItem implements Serializable {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(String value) {
+        type = value;
     }
 
-    public double getSize() {
-        return this.size;
+    public long getSize() {
+        return size;
     }
 
-    public void setSize(double size) {
-        this.size = size;
+    public void setSize(long value) {
+        size = value;
     }
 
     public String getMd5sum() {
         return md5sum;
     }
 
-    public void setMd5sum(String md5sum) {
-        this.md5sum = md5sum;
+    public void setMd5sum(String value) {
+        md5sum = value;
     }
 
     public Integer getDownloads() {
-        return this.downloads;
+        return downloads;
     }
 
-    public void setDownloads(Integer iDownloads) {
-        this.downloads = iDownloads;
+    public void setDownloads(Integer value) {
+        downloads = value;
     }
 
     public String getPwHash() {
         return pwHash;
     }
 
-    public void setPwHash(String pwHash) {
-        this.pwHash = pwHash;
+    public void setPwHash(String value) {
+        pwHash = value;
     }
 
     public void setPwPlainText(String pwProvided) {
-        this.pwHash = Sha512Crypt.Sha512_crypt(pwProvided, null, 0);
+        pwHash = Sha512Crypt.Sha512_crypt(pwProvided, null, 0);
         // com.sectra.jfileshare.utils.Jcrypt.crypt(pwPlainText);
     }
 
@@ -174,60 +178,60 @@ public class FileItem implements Serializable {
         return dateCreation;
     }
 
-    public void setDateCreation(Timestamp dateCreation) {
-        this.dateCreation = dateCreation;
+    public void setDateCreation(Timestamp value) {
+        dateCreation = value;
     }
 
     public Timestamp getDateExpiration() {
         return dateExpiration;
     }
 
-    public void setDateExpiration(Timestamp expiration) {
-        this.dateExpiration = expiration;
+    public void setDateExpiration(Timestamp value) {
+        dateExpiration = value;
     }
 
-    public void setOwnerUid(Integer iUid) {
-        this.ownerUid = iUid;
+    public void setOwnerUid(Integer value) {
+        ownerUid = value;
     }
 
     public Integer getOwnerUid() {
-        return this.ownerUid;
+        return ownerUid;
     }
 
-    public void setOwnerUsername(String username) {
-        this.ownerUsername = username;
+    public void setOwnerUsername(String value) {
+        ownerUsername = value;
     }
 
     public String getOwnerUsername() {
-        return this.ownerUsername;
+        return ownerUsername;
     }
 
-    public void setOwnerEmail(String email) {
-        this.ownerEmail = email;
+    public void setOwnerEmail(String value) {
+        ownerEmail = value;
     }
 
     public String getOwnerEmail() {
-        return this.ownerEmail;
+        return ownerEmail;
     }
 
     public String getURL(String urlPrefix) {
-        return urlPrefix + "/file/view/" + this.getFid() + "?md5=" + this.getMd5sum();
+        return urlPrefix + "/file/view/" + getFid() + "?md5=" + getMd5sum();
     }
 
     public boolean getAllowTinyUrl() {
-        return this.allowTinyUrl;
+        return allowTinyUrl;
     }
 
-    public void setAllowTinyUrl(boolean allowTinyUrl) {
-        this.allowTinyUrl = allowTinyUrl;
+    public void setAllowTinyUrl(boolean value) {
+        allowTinyUrl = value;
     }
 
     public boolean isEnabled() {
-        return this.enabled;
+        return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setEnabled(boolean value) {
+        enabled = value;
     }
 
     public boolean save(DataSource ds) {
@@ -375,7 +379,7 @@ public class FileItem implements Serializable {
         return Sha512Crypt.verifyPassword(pwProvided, this.pwHash);
     }
 
-    public Integer getDaysUntilExpiration() {
+    public int getDaysUntilExpiration() {
         double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
         long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
         return (int) daysLeft;
@@ -385,25 +389,33 @@ public class FileItem implements Serializable {
      * Human readable file size
      *
      * @param filesize For example 4020234934
-     * @return Human readable file size, e.g. "4.02 GiB"
+     * @return Human readable file size, e.g. "4.02 MiB"
      */
-    public static String humanReadable(double filesize) {
+    public static String humanReadable(long filesize) {
         DecimalFormat df = new DecimalFormat("0.#");
+        int[] fs = getFileSize(filesize);
+        return fs[1] + " " + unitsFileSize[fs[0]];
+    }
+    public static final String[] unitsFileSize = {
+        "B",
+        "KiB",
+        "MiB",
+        "GiB",
+        "TiB",
+        "PiB",
+        "EiB",
+        "ZiB",
+        "YiB"
+    };
 
-        if (filesize < 4096) {
-            return (int) filesize + " B";
+    public static int[] getFileSize(Long size) {
+        int unit = 0;
+        while (!(size < 1024)) {
+            unit++;
+            size = size / 1024;
         }
-
-        if (filesize < (1024 * 1024)) {
-            return df.format(filesize / 1024) + " KiB";
-        }
-
-        if (filesize < (1024 * 1024 * 1024)) {
-            return df.format(filesize / (1024 * 1024)) + " MiB";
-        }
-
-        return df.format(filesize / (1024 * 1024 * 1024)) + " GiB";
-
+        int[] result = { unit, size.intValue() };
+        return result;
     }
 
     public ArrayList<DownloadLog> getLogs(DataSource ds) {

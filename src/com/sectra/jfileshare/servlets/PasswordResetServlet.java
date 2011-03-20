@@ -194,7 +194,7 @@ public class PasswordResetServlet extends HttpServlet {
             MimeMultipart mp = new MimeMultipart();
             mp.setSubType("alternative");
 
-            String txtBody = "A new password to your " + conf.getBrandingCompany()
+            String txtBody = "A new password to your " + conf.getBrandingOrg()
                     + " jfileshare account has been \n"
                     + "requested. Please follow this link in order to select a new password:\n"
                     + conf.getBaseUrl() + "/passwordreset/" + key + "\n"
@@ -203,11 +203,11 @@ public class PasswordResetServlet extends HttpServlet {
                     + "password will remain unchanged.\n\n"
                     + "--\n"
                     + "Best regards\n"
-                    + "The " + conf.getBrandingCompany() + " jfileshare system";
+                    + "The " + conf.getBrandingOrg() + " jfileshare system";
             MimeBodyPart mbp1 = new MimeBodyPart();
             mbp1.setText(txtBody);
 
-            String htmlBody = "<p>A new password to your " + conf.getBrandingCompany()
+            String htmlBody = "<p>A new password to your " + conf.getBrandingOrg()
                     + " jfileshare account has been requested. \n"
                     + "Please follow this link in order to select a new password:<br />\n"
                     + "<a href=\"" + conf.getBaseUrl() + "/passwordreset/" + key + "\">" + conf.getBaseUrl() + "/passwordreset/" + key + "</a><br />\n"
@@ -216,7 +216,7 @@ public class PasswordResetServlet extends HttpServlet {
                     + "password will remain unchanged.</p>\n"
                     + "<hr />\n"
                     + "<p>Best regards<br />\n"
-                    + "The " + conf.getBrandingCompany() + " jfileshare system</p>\n";
+                    + "The " + conf.getBrandingOrg() + " jfileshare system</p>\n";
             MimeBodyPart mbp2 = new MimeBodyPart();
             mbp2.setContent(htmlBody, "text/html");
 

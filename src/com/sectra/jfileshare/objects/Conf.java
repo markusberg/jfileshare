@@ -20,18 +20,18 @@ import javax.sql.DataSource;
  */
 public class Conf {
 
-    private String brandingCompany;
+    private String brandingOrg;
     private String brandingDomain;
     private String brandingLogo;
     private String contextPath;
-    private Integer daysFileRetention;
-    private Integer daysUserExpiration;
-    private Double dbVersion;
-    private Long fileSizeMax;
+    private int daysFileRetention;
+    private int daysUserExpiration;
+    private int dbVersion;
+    private long fileSizeMax;
     private String pathStore;
     private String pathTemp;
     private String smtpServer = "localhost";
-    private Integer smtpServerPort = 25;
+    private int smtpServerPort = 25;
     private InternetAddress smtpSender;
     private String urlPrefix;
     private static final Logger logger =
@@ -43,10 +43,10 @@ public class Conf {
         try {
             dbConn = ds.getConnection();
             st = dbConn.prepareStatement("select value from Conf where `key`=?");
-            setBrandingCompany(fetchValueFromDatabase(st, "brandingCompany"));
+            setBrandingOrg(fetchValueFromDatabase(st, "brandingOrg"));
             setBrandingDomain(fetchValueFromDatabase(st, "brandingDomain"));
             setBrandingLogo(fetchValueFromDatabase(st, "brandingLogo"));
-            setDbVersion(Double.parseDouble(fetchValueFromDatabase(st, "dbVersion")));
+            setDbVersion(Integer.parseInt(fetchValueFromDatabase(st, "dbVersion")));
             setDaysFileRetention(Integer.parseInt(fetchValueFromDatabase(st, "daysFileRetention")));
             setDaysUserExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysUserExpiration")));
             setFileSizeMax(Long.parseLong(fetchValueFromDatabase(st, "fileSizeMax")));
@@ -78,12 +78,12 @@ public class Conf {
         }
     }
 
-    public String getBrandingCompany() {
-        return brandingCompany;
+    public String getBrandingOrg() {
+        return brandingOrg;
     }
 
-    public void setBrandingCompany(String value) {
-        brandingCompany = value;
+    public void setBrandingOrg(String value) {
+        brandingOrg = value;
     }
 
     public String getBrandingDomain() {
@@ -102,35 +102,35 @@ public class Conf {
         brandingLogo = (value != null && value.equals("")) ? null : value;
     }
 
-    public Integer getDaysFileRetention() {
+    public int getDaysFileRetention() {
         return daysFileRetention;
     }
 
-    public void setDaysFileRetention(Integer value) {
+    public void setDaysFileRetention(int value) {
         daysFileRetention = value;
     }
 
-    public Integer getDaysUserExpiration() {
+    public int getDaysUserExpiration() {
         return daysUserExpiration;
     }
 
-    public void setDaysUserExpiration(Integer value) {
+    public void setDaysUserExpiration(int value) {
         daysUserExpiration = value;
     }
 
-    public Double getDbVersion() {
+    public int getDbVersion() {
         return dbVersion;
     }
 
-    public void setDbVersion(Double value) {
+    public void setDbVersion(int value) {
         dbVersion = value;
     }
 
-    public Long getFileSizeMax() {
+    public long getFileSizeMax() {
         return fileSizeMax;
     }
 
-    public void setFileSizeMax(Long value) {
+    public void setFileSizeMax(long value) {
         fileSizeMax = value;
     }
 
@@ -156,8 +156,9 @@ public class Conf {
 
     public void setSmtpSender(String value) {
         try {
-            smtpSender = new InternetAddress(value);
-            smtpSender.validate();
+            InternetAddress temp = new InternetAddress(value);
+            temp.validate();
+            smtpSender = temp;
         } catch (AddressException e) {
             logger.info("Smtp sender address doesn't validate");
         }
@@ -171,11 +172,11 @@ public class Conf {
         smtpServer = value;
     }
 
-    public Integer getSmtpServerPort() {
+    public int getSmtpServerPort() {
         return smtpServerPort;
     }
 
-    public void setSmtpServerPort(Integer value) {
+    public void setSmtpServerPort(int value) {
         smtpServerPort = value;
     }
 
@@ -185,7 +186,7 @@ public class Conf {
         try {
             dbConn = ds.getConnection();
             st = dbConn.prepareStatement("update Conf set `value`=? where `key`=?");
-            commitKeyValuePair(st, "brandingCompany", brandingCompany);
+            commitKeyValuePair(st, "brandingOrg", brandingOrg);
             commitKeyValuePair(st, "brandingDomain", brandingDomain);
             commitKeyValuePair(st, "brandingLogo", brandingLogo);
             commitKeyValuePair(st, "daysFileRetention", Integer.toString(daysFileRetention));
@@ -226,7 +227,6 @@ public class Conf {
     /**
      * Figure out the absolute path to the server in order to construct proper links
      * @param req
-     * @return
      */
     public void setUrlPrefix(ServletRequest req) {
         String httpScheme = req.getScheme();
