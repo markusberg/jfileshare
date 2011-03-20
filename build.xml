@@ -81,7 +81,7 @@
 -->
 
 <path id="catalina.classpath">
-   <fileset dir="${catalina.home}/server/lib" includes="catalina-ant.jar" />
+   <fileset dir="${catalina.home}/lib" includes="catalina-ant.jar" />
 </path>
 
   <taskdef name="deploy"   classname="org.apache.catalina.ant.DeployTask">
@@ -179,17 +179,7 @@
     <pathelement location="${fileupload.jar}"/>
     <pathelement location="${io.jar}"/>
 
-    <!-- Include all elements that Tomcat exposes to applications -->
-    <pathelement location="${catalina.home}/common/classes"/>
-
-    <fileset dir="${catalina.home}/common/endorsed">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${catalina.home}/common/lib">
-      <include name="*.jar"/>
-    </fileset>
-    <pathelement location="${catalina.home}/shared/classes"/>
-    <fileset dir="${catalina.home}/shared/lib">
+    <fileset dir="${catalina.home}/lib">
       <include name="*.jar"/>
     </fileset>
 
