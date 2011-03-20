@@ -115,7 +115,7 @@
                     </tr>
                     <tr>
                         <th style="text-align:right;">File password:</th>
-                        <td><input type="text" name="password" />
+                        <td><input type="text" class="textentry" name="password" />
                             <span class="note">Note: leave blank in order to leave file without password protection</span>
                         </td>
                     </tr>

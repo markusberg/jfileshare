@@ -49,13 +49,13 @@
                     <th>Permanent: </th>
                     <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked" : ""%> />
                         <span class="note">Non-permanent files will be automatically removed after
-                            <%= ((Conf) getServletContext().getAttribute("conf")).getDaysFileRetention().toString()%>
+                            <%= ((Conf) getServletContext().getAttribute("conf")).getDaysFileRetention()%>
                             days</span>
                     </td>
                 </tr>
                 <tr>
                     <th>Downloads allowed: </th>
-                    <td><input style="width: 4em; text-align: right;" type="text" name="iDownloads" value="<%= file.getDownloads() == null ? "" : file.getDownloads()%>" />
+                    <td><input type="text" class="intentry" name="iDownloads" value="<%= file.getDownloads() == null ? "" : file.getDownloads()%>" />
                         <span class="note">Integer to specify maximum number of allowed downloads or leave blank for no limit</span>
                     </td>
                 </tr>
@@ -78,7 +78,7 @@
                     <td></td>
                     <td>
                         <div id="Password"<%=displaystyle%>>
-                            <input type="text" name="sPassword" />
+                            <input type="text" class="textentry" name="sPassword" />
                             <%
                                                     if (file.getPwHash() != null) {
                             %>

@@ -32,7 +32,11 @@ body {
 }
 
 input.textentry {
-    width: 15em;
+    width: 12em;
+}
+input.intentry {
+    width: 3em;
+    text-align: right;
 }
 /* Link styles */
 

@@ -25,12 +25,12 @@
             <p>Reset password for user <strong><%=username%></strong>:</p>
             <table>
                 <tr>
-                    <td style="text-align: right;">New password: </td>
-                    <td><input type="password" name="password1" id="FocusMe" /></td>
+                    <th>New password: </th>
+                    <td><input type="password" class="textentry" name="password1" id="FocusMe" /></td>
                 </tr>
                 <tr>
-                    <td style="text-align: right;">Verify new password: </td>
-                    <td><input type="password" name="password2" /></td>
+                    <th>Verify new password: </th>
+                    <td><input type="password" class="textentry" name="password2" /></td>
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
@@ -48,12 +48,12 @@
         <form action="<%= request.getContextPath()%>/passwordreset" method="post">
             <p>Use this form if you've forgotten your password.
                 If you're a 
-                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany()%>
+                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
                 corporate user, your username is the same as
                 your regular login username.
                 Instructions will be sent to your email address.
             </p>
-            <p>Your username: <input type="text" name="username" id="FocusMe" />
+            <p>Your username: <input type="text" class="textentry" name="username" id="FocusMe" />
                 <input type="submit" value="Reset my password" />
                 <input type="hidden" name="action" value="PasswordResetRequest" />
             </p>

@@ -29,7 +29,7 @@
                 <tr>
                     <th>User Level:</th>
                     <td>
-                        <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() + " Corporate")%>
+                        <%= user.isAdmin() ? "Administrator" : (user.isExternal() ? "External" : ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() + " Corporate")%>
                     </td>
                 </tr>
                 <tr>

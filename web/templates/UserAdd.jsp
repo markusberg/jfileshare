@@ -41,7 +41,7 @@
                 <tr>
                     <%
                                 boolean bExpiration = (Boolean) request.getAttribute("validatedBExpiration");
-                                int daysUntilExpiration = (Integer) request.getAttribute("validatedDaysUntilExpiration");
+                                int daysUserExpiration = (Integer) request.getAttribute("validatedDaysUserExpiration");
                     %>
                     <th>Expiration:</th>
                     <td><input id="bExpiration" type="checkbox" name="bExpiration" value="true"<%=bExpiration ? " checked=\"checked\"" : ""%> onchange="ToggleVisibility('ExpirationBlock', 'table-row-group');"/></td>
@@ -55,7 +55,7 @@
                                 <%
                                             for (Integer day : UserItem.DAY_MAP.keySet()) {
                                                 out.print("<option value=\"" + day + "\"");
-                                                out.print(day.equals(daysUntilExpiration) ? " selected=\"selected\"" : "");
+                                                out.print(day.equals(daysUserExpiration) ? " selected=\"selected\"" : "");
                                                 out.print(">" + UserItem.DAY_MAP.get(day) + "</option>\n");
                                             }
                                 %>
@@ -76,7 +76,7 @@
                         <select name="usertype">
                             <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
                             <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>
-                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
                                 Corporate</option>
                             <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>

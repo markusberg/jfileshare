@@ -16,7 +16,7 @@
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <form action="<%= request.getContextPath() + request.getAttribute("urlPattern")%>" method="post">
             <p>Please enter the file password to access this file:
-                <input type="password" name="FilePassword" id="pw" />
+                <input type="password" class="textentry" name="FilePassword" id="pw" />
                 <input type="submit" name="sendpassword" value="Submit" />
             </p>
         </form>

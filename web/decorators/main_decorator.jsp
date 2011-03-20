@@ -14,7 +14,10 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=8" />
 
-        <title>SECTRA file distribution facility <decorator:title /></title>
+        <%
+                    Conf conf = (Conf) getServletContext().getAttribute("conf");
+        %>
+        <title><%=conf.getBrandingOrg() %> file distribution facility <decorator:title /></title>
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.4" type="text/css" />
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
@@ -28,7 +31,6 @@
         </script>
         <%
                     }
-                    Conf conf = (Conf) getServletContext().getAttribute("conf");
                     if (conf.getBrandingLogo() != null) {
         %>
         <style type="text/css">

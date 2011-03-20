@@ -28,7 +28,7 @@
                                     if (currentUser.isAdmin()) {
 
                         %>
-                        <input type="text" name="username" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedUsername"))%>" />
+                        <input type="text" class="textentry" name="username" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedUsername"))%>" />
                         <%
                                     } else {
                                         out.print(user.getUsername());
@@ -37,15 +37,17 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Email: </th><td><input type="text" name="email" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedEmail"))%>" /></td>
+                    <th>Email: </th>
+                    <td><input type="text" class="textentry" name="email" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedEmail"))%>" /></td>
                 </tr>
                 <tr>
                     <th>Password: </th>
-                    <td><input type="password" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>"/><span class="note">Note: leave blank in order to keep existing password unchanged</span></td>
+                    <td><input type="password" class="textentry" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>"/>
+                        <span class="note">Note: leave blank in order to keep existing password unchanged</span></td>
                 </tr>
                 <tr>
                     <th>Verify password: </th>
-                    <td><input type="password" name="password2" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword2"))%>"/></td>
+                    <td><input type="password" class="textentry" name="password2" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword2"))%>"/></td>
                 </tr>
 
                 <%
@@ -67,7 +69,7 @@
                     <td>
                         <div id="ExpirationBlock" style="display: <%= bExpiration ? "block" : "none"%>;">
                             Account will expire in
-                            <input style="width: 4em; text-align: right;" type="text" name="daysUntilExpiration" value="<%= daysUntilExpiration%>"> days
+                            <input type="text" class="intentry" name="daysUntilExpiration" value="<%= daysUntilExpiration%>"> days
                             <br />
                             <span class="note">Note: When the account expires, it will be deleted along with any and all uploaded files</span>
                         </div>
@@ -91,7 +93,7 @@
                         <select name="usertype">
                             <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
                             <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>
-                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
                                 internal</option>
                             <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>

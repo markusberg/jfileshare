@@ -18,21 +18,23 @@
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
 
         <p>Welcome to the 
-            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
             File Sharing facility. This web application
             is intended for registered users
             only. If you're a
-            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingCompany() %>
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
             corporate user, or if you already have an
             account you are welcome to login:</p>
 
         <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern") %>" method="post">
             <table>
                 <tr>
-                    <td>Username: </td><td><input type="text" class="textentry" name="login_username" id="username" /></td>
+                    <td>Username: </td>
+                    <td><input type="text" class="textentry" name="login_username" id="username" /></td>
                 </tr>
                 <tr>
-                    <td>Password: </td><td><input type="password" class="textentry" name="login_password" /></td>
+                    <td>Password: </td>
+                    <td><input type="password" class="textentry" name="login_password" /></td>
                 </tr>
                 <tr>
                     <td colspan=2>
