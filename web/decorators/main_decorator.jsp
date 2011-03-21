@@ -17,7 +17,7 @@
         <%
                     Conf conf = (Conf) getServletContext().getAttribute("conf");
         %>
-        <title><%=conf.getBrandingOrg() %> file distribution facility <decorator:title /></title>
+        <title><%=conf.getBrandingOrg()%> file distribution facility <decorator:title /></title>
         <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.4" type="text/css" />
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
@@ -105,12 +105,10 @@
                         if (user != null) {
             %>
             <div id="userinfo">
-                <form name="logout" action="<%= request.getContextPath()%>/logout" method="post">
-                    Currently logged in as <%=user.getUsername()%> ::
-                    <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Settings</a> ::
-                    <a href="#" onclick="document.logout.submit()">Log out</a>
-                </form>
-
+                <form id="logout" action="<%= request.getContextPath()%>/logout" method="post"></form>
+                Currently logged in as <%=user.getUsername()%> ::
+                <a href="<%=request.getContextPath()%>/user/edit/<%=user.getUid()%>">Settings</a> ::
+                <a href="#" onclick="document.getElementById('logout').submit()">Log out</a>
             </div>
 
             <%
@@ -136,7 +134,7 @@
             </div>
 
             <div id="footer">
-                jfileshare version 1.4 beta<br/>
+                <a href="<%= conf.getContextPath() %>/about">jfileshare</a> version 1.4 beta<br/>
             </div>
 
             <%
