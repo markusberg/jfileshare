@@ -29,15 +29,16 @@
         <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern") %>" method="post">
             <table>
                 <tr>
-                    <td>Username: </td>
+                    <th>Username: </th>
                     <td><input type="text" class="textentry" name="login_username" id="username" /></td>
                 </tr>
                 <tr>
-                    <td>Password: </td>
+                    <th>Password: </th>
                     <td><input type="password" class="textentry" name="login_password" /></td>
                 </tr>
                 <tr>
-                    <td colspan=2>
+                    <td>&nbsp;</td>
+                    <td>
                         <input type="hidden" name="action" value="login" />
                         <input type="submit" name="submit" value="Login" />
                     </td>

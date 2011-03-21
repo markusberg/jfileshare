@@ -7,6 +7,8 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <h1>About jfileshare</h1>
-        <p>Jfileshare allows simple and secure file transfers over the internet.</p>
+        <p>Jfileshare enables simple and secure file transfers over the internet.
+        There is built-in functionality for creating time-limited accounts for
+        external parties to transfer files to you as well.</p>
     </body>
 </html>
