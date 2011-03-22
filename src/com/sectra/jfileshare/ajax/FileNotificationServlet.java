@@ -5,6 +5,7 @@ import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.utils.Helpers;
+import gnu.mail.providers.smtp.SMTPTransport;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,11 +15,14 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.Address;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.event.TransportListener;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -129,12 +133,14 @@ public class FileNotificationServlet extends HttpServlet {
     private void sendEmailNotification(FileItem file,
             UserItem currentUser,
             InternetAddress emailRecipient)
-            throws MessagingException {
+            throws MessagingException, SendFailedException {
         Conf conf = (Conf) getServletContext().getAttribute("conf");
 
         Properties props = System.getProperties();
+        // props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.host", conf.getSmtpServer());
-        props.put("mail.smtp.port", conf.getSmtpServerPort());
+        props.put("mail.smtp.port", ((Integer) conf.getSmtpServerPort()).toString());
+        props.put("mail.smtp.reportsuccess", "true");
         Session session = Session.getInstance(props, null);
 
         MimeMessage msg = new MimeMessage(session);
@@ -183,7 +189,13 @@ public class FileNotificationServlet extends HttpServlet {
         // mp.addBodyPart(mbp3);
 
         msg.setContent(mp);
+        SMTPTransport transport = (SMTPTransport)session.getTransport("smtp");
+        transport.connect();
+        transport.sendMessage(msg, msg.getAllRecipients());
+        transport.close();
 
-        Transport.send(msg);
+        // Transport.send(msg);
+
+        logger.log(Level.INFO, "Sending email notification to {0}", emailRecipient.getAddress());
     }
 }

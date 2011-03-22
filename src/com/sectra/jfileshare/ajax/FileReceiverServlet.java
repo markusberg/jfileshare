@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.logging.Level;
 
 import java.util.logging.Logger;
@@ -125,6 +127,8 @@ public class FileReceiverServlet extends HttpServlet {
                 FileItemIterator it = upload.getItemIterator(req);
                 FileOutputStream filestream = null;
 
+                File tempFile = File.createTempFile(String.format("%05d-", currentUser.getUid()), null, new File(conf.getPathTemp()));
+                tempFile.deleteOnExit();
                 while (it.hasNext()) {
                     FileItemStream item = it.next();
                     String name = item.getFieldName();
@@ -148,7 +152,7 @@ public class FileReceiverServlet extends HttpServlet {
                         file.setOwnerUid(currentUser.getUid());
 
                         try {
-                            filestream = new FileOutputStream(conf.getPathTemp() + "/" + Integer.toString(currentUser.getUid()));
+                            filestream = new FileOutputStream(tempFile);
                             MessageDigest md = MessageDigest.getInstance("MD5");
                             outstream = new DigestOutputStream(filestream, md);
                             long filesize = IOUtils.copyLarge(instream, outstream);
@@ -185,16 +189,15 @@ public class FileReceiverServlet extends HttpServlet {
                 /* All done. Save the new file */
                 file.setDaysToKeep(conf.getDaysFileRetention());
 
-                if (!file.save(ds)) {
-                    req.setAttribute("msg", "Unable to contact the database");
-                    req.setAttribute("javascript", "parent.uploadComplete('critical');");
-                } else {
-                    File tempfile = new File(conf.getPathTemp(), Integer.toString(currentUser.getUid()));
-                    File finalfile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
-                    tempfile.renameTo(finalfile);
+                if (file.save(ds)) {
+                    File finalFile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
+                    tempFile.renameTo(finalFile);
                     logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});
                     req.setAttribute("msg", "File '" + file.getName() + "' uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
                     req.setAttribute("javascript", "parent.uploadComplete('info');");
+                } else {
+                    req.setAttribute("msg", "Unable to contact the database");
+                    req.setAttribute("javascript", "parent.uploadComplete('critical');");
                 }
             } catch (SizeLimitExceededException e) {
                 req.setAttribute("msg", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(conf.getFileSizeMax()));
