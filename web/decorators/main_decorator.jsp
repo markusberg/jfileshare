@@ -138,7 +138,7 @@
             </div>
 
             <%
-                        if (user != null) {
+                        if (user != null && conf.getDebug()) {
             %>
             <div id="dbgConsole">
                 <div style="font-weight: bold; margin-bottom: 1em;">Debug console</div>

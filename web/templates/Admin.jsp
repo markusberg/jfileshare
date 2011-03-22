@@ -114,6 +114,10 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Debug:</th>
+                    <td><input type="checkbox" name="debug" value="true" <%= request.getAttribute("validatedDebug") %>></td>
+                </tr>
+                <tr>
                     <th>Database version:</th>
                     <td><%= request.getAttribute("dbVersion")%></td>
                 </tr>

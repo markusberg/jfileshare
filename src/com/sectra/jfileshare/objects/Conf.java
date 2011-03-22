@@ -27,6 +27,7 @@ public class Conf {
     private int daysFileRetention;
     private int daysUserExpiration;
     private int dbVersion;
+    private boolean debug;
     private long fileSizeMax;
     private String pathStore;
     private String pathTemp;
@@ -47,6 +48,7 @@ public class Conf {
             setBrandingDomain(fetchValueFromDatabase(st, "brandingDomain"));
             setBrandingLogo(fetchValueFromDatabase(st, "brandingLogo"));
             setDbVersion(Integer.parseInt(fetchValueFromDatabase(st, "dbVersion")));
+            setDebug(Boolean.parseBoolean(fetchValueFromDatabase(st, "debug")));
             setDaysFileRetention(Integer.parseInt(fetchValueFromDatabase(st, "daysFileRetention")));
             setDaysUserExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysUserExpiration")));
             setFileSizeMax(Long.parseLong(fetchValueFromDatabase(st, "fileSizeMax")));
@@ -126,6 +128,14 @@ public class Conf {
         dbVersion = value;
     }
 
+    public boolean getDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean value) {
+        debug = value;
+    }
+
     public long getFileSizeMax() {
         return fileSizeMax;
     }
@@ -191,6 +201,7 @@ public class Conf {
             commitKeyValuePair(st, "brandingLogo", brandingLogo);
             commitKeyValuePair(st, "daysFileRetention", Integer.toString(daysFileRetention));
             commitKeyValuePair(st, "daysUserExpiration", Integer.toString(daysUserExpiration));
+            commitKeyValuePair(st, "debug", debug ? "true" : "false");
             commitKeyValuePair(st, "fileSizeMax", Long.toString(fileSizeMax));
             commitKeyValuePair(st, "pathStore", pathStore);
             commitKeyValuePair(st, "pathTemp", pathTemp);

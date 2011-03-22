@@ -130,6 +130,7 @@ public class StartupServlet extends HttpServlet {
             commitKeyValuePair(st, "brandingOrg", "Sectra");
             commitKeyValuePair(st, "brandingDomain", "sectra.se");
             commitKeyValuePair(st, "brandingLogo", "");
+            commitKeyValuePair(st, "debug", "false");
             commitKeyValuePair(st, "dbVersion", "2");
         } catch (SQLException e) {
             logger.severe(e.toString());

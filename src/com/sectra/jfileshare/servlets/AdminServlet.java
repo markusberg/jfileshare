@@ -73,6 +73,7 @@ public class AdminServlet extends HttpServlet {
             req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
 
             req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+            req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
             req.setAttribute("dbVersion", conf.getDbVersion());
 
             disp = app.getRequestDispatcher("/templates/Admin.jsp");
@@ -130,6 +131,10 @@ public class AdminServlet extends HttpServlet {
 
                 conf.setDaysUserExpiration(Integer.parseInt(req.getParameter("daysUserExpiration")));
                 req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+
+                conf.setDebug("true".equals(req.getParameter("debug")) ? true : false);
+                req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
+                
                 req.setAttribute("dbVersion", conf.getDbVersion());
 
                 if (conf.save(ds)) {
