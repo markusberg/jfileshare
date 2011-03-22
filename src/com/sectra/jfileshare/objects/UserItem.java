@@ -357,7 +357,7 @@ public class UserItem implements Serializable {
     }
 
     public Integer getDaysUntilExpiration() {
-        double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
+        long millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
         long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
         return (int) daysLeft;
     }

@@ -80,7 +80,7 @@
                 %>
                 <tr>
                     <th>Expiration:</th>
-                    <td>Account will expire in <%=daysUntilExpiration%> days</td>
+                    <td><%= bExpiration ? "Account will expire in " + daysUntilExpiration + " days" : "Account does not expire"%></td>
                 </tr>
                 <%
                             }
@@ -93,7 +93,7 @@
                         <select name="usertype">
                             <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
                             <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>
-                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
+                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
                                 internal</option>
                             <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
                         </select>
