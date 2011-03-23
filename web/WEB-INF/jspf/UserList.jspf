@@ -36,8 +36,8 @@
         <td class="number"><%= childuser.getSumChildren() == 0 ? "" : childuser.getSumChildren()%></td>
         <td class="number"><%= childuser.getSumFiles() == 0 ? "" : childuser.getSumFiles()%></td>
         <td class="number"><%= FileItem.humanReadable(childuser.getSumFileSize())%></td>
-        <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/stock_delete.png" alt="delete" width="15" height="15"/></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit this user" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/trashcan_empty.png" alt="delete" title="Delete this user" /></a></td>
     </tr>
 
     <%
