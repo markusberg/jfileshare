@@ -4,7 +4,6 @@
         <th>Size</th>
         <th>Exp.</th>
         <th>Downloads</th>
-        <th>Pw</th>
         <th>Notify a recipient</th>
     </tr>
     <%
@@ -13,21 +12,25 @@
                 for (FileItem file : files) {
     %>
     <tr class="<%=even ? "even" : "odd"%>">
-        <td><a href="<%= file.getURL(request.getContextPath())%>"><%=file.getName()%></a></td>
+        <td>
+            <a href="<%= file.getURL(request.getContextPath())%>"><%=file.getName()%></a>
+            <%= file.isEnabled() ? "" : "<img src=\"" + request.getContextPath() + "/images/stop.png\" alt=\"disabled\" title=\"This file is disabled for download\" />"%>
+            <%= file.getPwHash() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/lock.png\" alt=\"password\" title=\"This file is password protected\"/>"%>
+        </td>
         <td class="number"><%=FileItem.humanReadable(file.getSize())%></td>
 
         <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days"%></td>
         <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads()%></td>
-        <td><%= file.getPwHash() == null ? "no" : "yes"%></td>
+
         <td><form action="<%= request.getContextPath()%>/ajax/file/notification" method="post" onsubmit="fileNotify('<%= file.getFid()%>'); return false;">
                 <input type="text" class="textentry" name="emailRecipient" id="email_<%= file.getFid()%>"/>
                 <input type="submit" name="submit" value="Notify" /></form>
         </td>
-        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/stock_log.png" alt="delete" width="15" height="15" /></a></td>
-        <td><form action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post">
-                <input type="image" value="Delete file" src="<%= request.getContextPath()%>/images/stock_delete.png" style="width:15px; height:15px;"/>
-            </form>
+        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit this file" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/logviewer.png" alt="logviewer" title="View the download logs of this file" /></a></td>
+        <td>
+            <form id="delete-<%= file.getFid()%>" action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post"></form>
+            <a href="javascript:document.getElementById('delete-<%= file.getFid()%>').submit()"><img src="<%= request.getContextPath()%>/images/trashcan_empty.png" alt="delete" title="Delete file" /></a>
         </td>
     </tr>
 
