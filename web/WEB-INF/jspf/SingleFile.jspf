@@ -24,11 +24,17 @@
                 if (session.getAttribute("user") != null) {
                     UserItem user = (UserItem) session.getAttribute("user");
                     if (user.hasEditAccessTo(file)) {
+                        int daysFileExpiration = ((Conf) getServletContext().getAttribute("conf")).getDaysFileExpiration();
+                        if (daysFileExpiration != 0 || !file.isPermanent()) {
     %>
     <tr class="admin">
         <th>File expiration: </th>
         <td><%= file.isPermanent() ? "No" : file.getDaysUntilExpiration() + " days"%></td>
     </tr>
+    <%
+                            }
+    %>
+
     <tr class="admin">
         <th>Password protected: </th>
         <td><%= file.getPwHash() == null ? "No" : "Yes"%></td>
