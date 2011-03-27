@@ -79,7 +79,7 @@
             <tr>
                 <th>Username:</th>
                 <td><%= user.getUsername()%>
-                    ( <a href="<%= request.getContextPath()%>/user/edit/<%= user.getUid()%>"><img src="<%= request.getContextPath()%>/images/pencil.gif" alt="edit" /> Edit User</a> )
+                    ( <a href="<%= request.getContextPath()%>/user/edit/<%= user.getUid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit User" /> Edit User</a> )
                 </td>
             </tr>
             <tr>

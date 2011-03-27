@@ -2,7 +2,15 @@
     <tr>
         <th>Name</th>
         <th>Size</th>
+    <%
+                int daysFileExpiration = ((Conf) getServletContext().getAttribute("conf")).getDaysFileExpiration();
+                if (daysFileExpiration != 0) {
+    %>
         <th>Exp.</th>
+    <%
+                }
+    %>
+
         <th>Downloads</th>
         <th>Notify a recipient</th>
     </tr>
@@ -19,7 +27,13 @@
         </td>
         <td class="number"><%=FileItem.humanReadable(file.getSize())%></td>
 
+    <%
+                if (daysFileExpiration != 0) {
+    %>
         <td><%= file.isPermanent() ? "no" : file.getDaysUntilExpiration() + " days"%></td>
+    <%
+                }
+    %>
         <td><%= file.getDownloads() == null ? "unlimited" : file.getDownloads()%></td>
 
         <td><form action="<%= request.getContextPath()%>/ajax/file/notification" method="post" onsubmit="fileNotify('<%= file.getFid()%>'); return false;">
