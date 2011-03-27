@@ -62,7 +62,7 @@ public class AdminServlet extends HttpServlet {
 
             req.setAttribute("validatedPathStore", conf.getPathStore());
             req.setAttribute("validatedPathTemp", conf.getPathTemp());
-            req.setAttribute("validatedDaysFileRetention", conf.getDaysFileRetention());
+            req.setAttribute("validatedDaysFileExpiration", conf.getDaysFileExpiration());
 
             int[] fs = FileItem.getFileSize(conf.getFileSizeMax());
             req.setAttribute("validatedFileSizeMax", fs[1]);
@@ -73,6 +73,8 @@ public class AdminServlet extends HttpServlet {
             req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
 
             req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+            req.setAttribute("validatedDaysPasswordExpiration", conf.getDaysPasswordExpiration());
+
             req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
             req.setAttribute("dbVersion", conf.getDbVersion());
 
@@ -112,13 +114,28 @@ public class AdminServlet extends HttpServlet {
                 req.setAttribute("validatedPathStore", conf.getPathStore());
                 conf.setPathTemp(req.getParameter("pathTemp"));
                 req.setAttribute("validatedPathTemp", conf.getPathTemp());
-                conf.setDaysFileRetention(Integer.parseInt(req.getParameter("daysFileRetention")));
-                req.setAttribute("validatedDaysFileRetention", conf.getDaysFileRetention());
+
+                int validatedDaysFileExpiration;
+                try {
+                    validatedDaysFileExpiration = Integer.parseInt(req.getParameter("daysFileExpiration"));
+                } catch (NumberFormatException e) {
+                    validatedDaysFileExpiration = 0;
+                }
+                conf.setDaysFileExpiration(validatedDaysFileExpiration);
+                req.setAttribute("validatedDaysFileExpiration", validatedDaysFileExpiration);
 
                 conf.setSmtpServer(req.getParameter("smtpServer"));
                 req.setAttribute("validatedSmtpServer", conf.getSmtpServer());
-                conf.setSmtpServerPort(Integer.parseInt(req.getParameter("smtpServerPort")));
-                req.setAttribute("validatedSmtpServerPort", conf.getSmtpServerPort());
+
+                int validatedSmtpServerPort;
+                try {
+                    validatedSmtpServerPort = Integer.parseInt(req.getParameter("smtpServerPort"));
+                } catch (NumberFormatException e) {
+                    validatedSmtpServerPort = 25;
+                }
+                conf.setSmtpServerPort(validatedSmtpServerPort);
+                req.setAttribute("validatedSmtpServerPort", validatedSmtpServerPort);
+                
                 conf.setSmtpSender(req.getParameter("smtpSender"));
                 req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
 
@@ -129,12 +146,27 @@ public class AdminServlet extends HttpServlet {
                 req.setAttribute("validatedFileSizeMax", validatedFileSizeMax);
                 req.setAttribute("validatedFileSizeUnit", validatedFileSizeUnit);
 
-                conf.setDaysUserExpiration(Integer.parseInt(req.getParameter("daysUserExpiration")));
-                req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
+                int validatedDaysUserExpiration;
+                try {
+                    validatedDaysUserExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
+                } catch (NumberFormatException e) {
+                    validatedDaysUserExpiration = 60;
+                }
+                conf.setDaysUserExpiration(validatedDaysUserExpiration);
+                req.setAttribute("validatedDaysUserExpiration", validatedDaysUserExpiration);
+
+                int validatedDaysPasswordExpiration;
+                try {
+                    validatedDaysPasswordExpiration = Integer.parseInt(req.getParameter("daysPasswordExpiration"));
+                } catch (NumberFormatException e) {
+                    validatedDaysPasswordExpiration = 0;
+                }
+                conf.setDaysPasswordExpiration(validatedDaysPasswordExpiration);
+                req.setAttribute("validatedDaysPasswordExpiration", validatedDaysPasswordExpiration);
 
                 conf.setDebug("true".equals(req.getParameter("debug")) ? true : false);
                 req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
-                
+
                 req.setAttribute("dbVersion", conf.getDbVersion());
 
                 if (conf.save(ds)) {

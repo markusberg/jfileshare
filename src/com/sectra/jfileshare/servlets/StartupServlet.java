@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 public class StartupServlet extends HttpServlet {
 
+    private Conf conf;
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(StartupServlet.class.getName());
@@ -45,6 +46,7 @@ public class StartupServlet extends HttpServlet {
         TableInit();
         dbUpdate1();
         dbUpdate2();
+        dbUpdate3();
     }
 
     private void TableInit() {
@@ -63,6 +65,41 @@ public class StartupServlet extends HttpServlet {
                 } catch (SQLException e) {
                 }
             }
+        }
+    }
+
+    private void dbUpdate3() {
+        Connection dbConn = null;
+        try {
+            dbConn = datasource.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
+            st.execute();
+            ResultSet rs = st.getResultSet();
+            if (rs.first() && Integer.parseInt(rs.getString("Conf.value"))<3) {
+                logger.info("Need to update database to db level 3");
+                // Add column to hold the date of the last password change
+                alterDatabase(dbConn, "alter table UserItems ADD COLUMN datePasswordChange "
+                        + "timestamp NULL default NULL AFTER pwHash");
+                // Force users with crypt password to change
+                alterDatabase(dbConn, "update UserItems set datePasswordChange=dateCreation "
+                        + "where length(pwHash)<20");
+                alterDatabase(dbConn, "update UserItems set datePasswordChange=dateLastLogin "
+                        + "where length(pwHash)>20");
+                alterDatabase(dbConn, "insert into Conf values('daysPasswordExpiration', '180')");
+                alterDatabase(dbConn, "update Conf set `value`='3' where `key`='dbVersion'");
+            } else {
+                logger.info("Database is already at level 3 or higher");
+            }
+        } catch (SQLException ignored) {
+            logger.info(ignored.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+
         }
     }
 
@@ -119,7 +156,7 @@ public class StartupServlet extends HttpServlet {
             dbConn = datasource.getConnection();
             ServletContext app = getServletContext();
             st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
-            commitKeyValuePair(st, "daysFileRetention", app.getInitParameter("DAYS_FILE_RETENTION"));
+            commitKeyValuePair(st, "daysFileExpiration", app.getInitParameter("DAYS_FILE_RETENTION"));
             commitKeyValuePair(st, "daysUserExpiration", app.getInitParameter("DAYS_USER_EXPIRATION"));
             commitKeyValuePair(st, "fileSizeMax", app.getInitParameter("FILESIZE_MAX"));
             commitKeyValuePair(st, "pathStore", app.getInitParameter("PATH_STORE"));

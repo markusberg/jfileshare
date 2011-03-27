@@ -24,7 +24,8 @@ public class Conf {
     private String brandingDomain;
     private String brandingLogo;
     private String contextPath;
-    private int daysFileRetention;
+    private int daysFileExpiration;
+    private int daysPasswordExpiration;
     private int daysUserExpiration;
     private int dbVersion;
     private boolean debug;
@@ -49,7 +50,8 @@ public class Conf {
             setBrandingLogo(fetchValueFromDatabase(st, "brandingLogo"));
             setDbVersion(Integer.parseInt(fetchValueFromDatabase(st, "dbVersion")));
             setDebug(Boolean.parseBoolean(fetchValueFromDatabase(st, "debug")));
-            setDaysFileRetention(Integer.parseInt(fetchValueFromDatabase(st, "daysFileRetention")));
+            setDaysFileExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysFileExpiration")));
+            setDaysPasswordExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysPasswordExpiration")));
             setDaysUserExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysUserExpiration")));
             setFileSizeMax(Long.parseLong(fetchValueFromDatabase(st, "fileSizeMax")));
             setPathStore(fetchValueFromDatabase(st, "pathStore"));
@@ -81,113 +83,121 @@ public class Conf {
     }
 
     public String getBrandingOrg() {
-        return brandingOrg;
+        return this.brandingOrg;
     }
 
-    public void setBrandingOrg(String value) {
-        brandingOrg = value;
+    public void setBrandingOrg(String brandingOrg) {
+        this.brandingOrg = brandingOrg;
     }
 
     public String getBrandingDomain() {
-        return brandingDomain;
+        return this.brandingDomain;
     }
 
-    public void setBrandingDomain(String value) {
-        brandingDomain = value;
+    public void setBrandingDomain(String brandingDomain) {
+        this.brandingDomain = brandingDomain;
     }
 
     public String getBrandingLogo() {
-        return brandingLogo;
+        return this.brandingLogo;
     }
 
-    public void setBrandingLogo(String value) {
-        brandingLogo = (value != null && value.equals("")) ? null : value;
+    public void setBrandingLogo(String logo) {
+        this.brandingLogo = (logo != null && logo.equals("")) ? null : logo;
     }
 
-    public int getDaysFileRetention() {
-        return daysFileRetention;
+    public int getDaysFileExpiration() {
+        return daysFileExpiration;
     }
 
-    public void setDaysFileRetention(int value) {
-        daysFileRetention = value;
+    public void setDaysFileExpiration(int daysFileExpiration) {
+        this.daysFileExpiration = daysFileExpiration;
+    }
+
+    public int getDaysPasswordExpiration() {
+        return this.daysPasswordExpiration;
+    }
+
+    public void setDaysPasswordExpiration(int daysPasswordExpiration) {
+        this.daysPasswordExpiration = daysPasswordExpiration;
     }
 
     public int getDaysUserExpiration() {
-        return daysUserExpiration;
+        return this.daysUserExpiration;
     }
 
-    public void setDaysUserExpiration(int value) {
-        daysUserExpiration = value;
+    public void setDaysUserExpiration(int daysUserExpiration) {
+        this.daysUserExpiration = daysUserExpiration;
     }
 
     public int getDbVersion() {
-        return dbVersion;
+        return this.dbVersion;
     }
 
-    public void setDbVersion(int value) {
-        dbVersion = value;
+    public void setDbVersion(int dbVersion) {
+        this.dbVersion = dbVersion;
     }
 
     public boolean getDebug() {
-        return debug;
+        return this.debug;
     }
 
-    public void setDebug(boolean value) {
-        debug = value;
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public long getFileSizeMax() {
-        return fileSizeMax;
+        return this.fileSizeMax;
     }
 
-    public void setFileSizeMax(long value) {
-        fileSizeMax = value;
+    public void setFileSizeMax(long fileSizeMax) {
+        this.fileSizeMax = fileSizeMax;
     }
 
     public String getPathStore() {
-        return pathStore;
+        return this.pathStore;
     }
 
-    public void setPathStore(String value) {
-        pathStore = value;
+    public void setPathStore(String pathStore) {
+        this.pathStore = pathStore;
     }
 
     public String getPathTemp() {
-        return pathTemp;
+        return this.pathTemp;
     }
 
-    public void setPathTemp(String value) {
-        pathTemp = value;
+    public void setPathTemp(String pathTemp) {
+        this.pathTemp = pathTemp;
     }
 
     public InternetAddress getSmtpSender() {
-        return smtpSender;
+        return this.smtpSender;
     }
 
-    public void setSmtpSender(String value) {
+    public void setSmtpSender(String smtpSender) {
         try {
-            InternetAddress temp = new InternetAddress(value);
+            InternetAddress temp = new InternetAddress(smtpSender);
             temp.validate();
-            smtpSender = temp;
+            this.smtpSender = temp;
         } catch (AddressException e) {
             logger.info("Smtp sender address doesn't validate");
         }
     }
 
     public String getSmtpServer() {
-        return smtpServer;
+        return this.smtpServer;
     }
 
-    public void setSmtpServer(String value) {
-        smtpServer = value;
+    public void setSmtpServer(String smtpServer) {
+        this.smtpServer = smtpServer;
     }
 
     public int getSmtpServerPort() {
-        return smtpServerPort;
+        return this.smtpServerPort;
     }
 
-    public void setSmtpServerPort(int value) {
-        smtpServerPort = value;
+    public void setSmtpServerPort(int smtpServerPort) {
+        this.smtpServerPort = smtpServerPort;
     }
 
     public boolean save(DataSource ds) {
@@ -199,7 +209,8 @@ public class Conf {
             commitKeyValuePair(st, "brandingOrg", brandingOrg);
             commitKeyValuePair(st, "brandingDomain", brandingDomain);
             commitKeyValuePair(st, "brandingLogo", brandingLogo);
-            commitKeyValuePair(st, "daysFileRetention", Integer.toString(daysFileRetention));
+            commitKeyValuePair(st, "daysFileExpiration", Integer.toString(daysFileExpiration));
+            commitKeyValuePair(st, "daysPasswordExpiration", Integer.toString(daysPasswordExpiration));
             commitKeyValuePair(st, "daysUserExpiration", Integer.toString(daysUserExpiration));
             commitKeyValuePair(st, "debug", debug ? "true" : "false");
             commitKeyValuePair(st, "fileSizeMax", Long.toString(fileSizeMax));

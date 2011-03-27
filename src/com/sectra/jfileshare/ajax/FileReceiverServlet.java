@@ -187,8 +187,9 @@ public class FileReceiverServlet extends HttpServlet {
                     }
                 }
                 /* All done. Save the new file */
-                file.setDaysToKeep(conf.getDaysFileRetention());
-
+                if (conf.getDaysFileExpiration() != 0) {
+                    file.setDaysToKeep(conf.getDaysFileExpiration());
+                }
                 if (file.save(ds)) {
                     File finalFile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
                     tempFile.renameTo(finalFile);

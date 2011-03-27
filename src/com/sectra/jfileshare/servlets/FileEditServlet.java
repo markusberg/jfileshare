@@ -115,7 +115,7 @@ public class FileEditServlet extends HttpServlet {
                             && req.getParameter("bPermanent").equals("true")) {
                         file.setDateExpiration(null);
                     } else {
-                        file.setDaysToKeep(conf.getDaysFileRetention());
+                        file.setDaysToKeep(conf.getDaysFileExpiration());
                     }
 
                     Integer iDownloads = null;

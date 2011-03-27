@@ -30,10 +30,11 @@ public class UserItem implements Serializable {
     private String pwHash;
     private String email;
     private Integer uid;
-    private Integer usertype = TYPE_EXTERNAL;
+    private int usertype = TYPE_EXTERNAL;
     private Timestamp dateCreation;
     private Timestamp dateLastLogin;
     private Timestamp dateExpiration;
+    private Timestamp datePasswordChange;
     private Integer uidCreator;
     private long sumFileSize;
     private int sumFiles;
@@ -71,6 +72,7 @@ public class UserItem implements Serializable {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
                 setPwHash(rs.getString("UserItems.pwHash"));
+                setDatePasswordChange(rs.getTimestamp("UserItems.datePasswordChange"));
                 setEmail(rs.getString("UserItems.email"));
                 setUserType(rs.getInt("UserItems.usertype"));
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -110,6 +112,7 @@ public class UserItem implements Serializable {
                 setUid(rs.getInt("UserItems.uid"));
                 setUsername(rs.getString("UserItems.username"));
                 setPwHash(rs.getString("UserItems.pwHash"));
+                setDatePasswordChange(rs.getTimestamp("UserItems.datePasswordChange"));
                 setEmail(rs.getString("UserItems.email"));
                 setUserType(rs.getInt("UserItems.usertype"));
                 setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
@@ -134,7 +137,7 @@ public class UserItem implements Serializable {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -145,8 +148,25 @@ public class UserItem implements Serializable {
         this.pwHash = pwHash;
     }
 
+    /***
+     * Set the hashed password based on provided plaintext password
+     * 
+     * This method is only ever called when the password is set or changed
+     * therefore, datePasswordChange is also updated when this method is called
+     * 
+     * @param pwPlainText
+     */
     public void setPwPlainText(String pwPlainText) {
         this.pwHash = Sha512Crypt.Sha512_crypt(pwPlainText, null, 0);
+        this.setDatePasswordChange(new Timestamp(System.currentTimeMillis()));
+    }
+
+    public Timestamp getDatePasswordChange() {
+        return this.datePasswordChange;
+    }
+
+    public void setDatePasswordChange(Timestamp datePasswordChange) {
+        this.datePasswordChange = datePasswordChange;
     }
 
     public String getEmail() {
@@ -209,27 +229,27 @@ public class UserItem implements Serializable {
     }
 
     public Integer getUidCreator() {
-        return uidCreator;
+        return this.uidCreator;
     }
 
-    public void setUidCreator(Integer value) {
-        uidCreator = value;
+    public void setUidCreator(Integer uidCreator) {
+        this.uidCreator = uidCreator;
     }
 
     public long getSumFileSize() {
-        return sumFileSize;
+        return this.sumFileSize;
     }
 
     public int getSumFiles() {
-        return sumFiles;
+        return this.sumFiles;
     }
 
     public int getSumChildren() {
-        return sumChildren;
+        return this.sumChildren;
     }
 
-    public void setSumFileSize(long value) {
-        sumFileSize = value;
+    public void setSumFileSize(long sumFileSize) {
+        this.sumFileSize = sumFileSize;
     }
 
     public void setSumFiles(int sumFiles) {
@@ -260,7 +280,7 @@ public class UserItem implements Serializable {
             dbConn = ds.getConnection();
             PreparedStatement st;
             if (this.uid == null) {
-                st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
+                st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,now(),?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
                 st.setString(3, this.pwHash);
@@ -272,13 +292,14 @@ public class UserItem implements Serializable {
                     st.setInt(6, this.uidCreator);
                 }
             } else {
-                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,pwHash=?,email=?,dateExpiration=? where uid=?");
+                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,pwHash=?,datePasswordChange=?,email=?,dateExpiration=? where uid=?");
                 st.setInt(1, this.usertype);
                 st.setString(2, this.username);
                 st.setString(3, this.pwHash);
-                st.setString(4, this.email);
-                st.setTimestamp(5, this.dateExpiration);
-                st.setInt(6, this.uid);
+                st.setTimestamp(4, this.datePasswordChange);
+                st.setString(5, this.email);
+                st.setTimestamp(6, this.dateExpiration);
+                st.setInt(7, this.uid);
             }
 
             st.executeUpdate();
@@ -291,7 +312,7 @@ public class UserItem implements Serializable {
             st.close();
             return true;
         } catch (SQLException e) {
-            logger.severe("Unable to connect to database: " + e.toString());
+            logger.log(Level.SEVERE, "Unable to connect to database: {0}", e.toString());
             return false;
         } finally {
             if (dbConn != null) {
@@ -313,7 +334,7 @@ public class UserItem implements Serializable {
         ArrayList<FileItem> aFiles = this.getFiles(ds);
         if (aFiles.size() > 0) {
             // Delete all files belonging to this user
-            logger.info("Deleting " + aFiles.size() + " file(s) belonging to " + this.getUserInfo());
+            logger.log(Level.INFO, "Deleting {0} file(s) belonging to {1}", new Object[]{aFiles.size(), this.getUserInfo()});
             // Iterator<FileItem> it = aFiles.iterator();
             for (FileItem oFile : aFiles) {
                 // Delete the files on disk
@@ -322,7 +343,7 @@ public class UserItem implements Serializable {
                 fileondisk.delete();
             }
         } else {
-            logger.info("No files owned by user " + this.getUserInfo());
+            logger.log(Level.INFO, "No files owned by user {0}", this.getUserInfo());
         }
 
         try {
@@ -333,7 +354,7 @@ public class UserItem implements Serializable {
             st.executeUpdate();
             st.close();
 
-            logger.info("User " + this.getUserInfo() + " has now been deleted");
+            logger.log(Level.INFO, "User {0} has now been deleted", this.getUserInfo());
         } catch (SQLException e) {
             logger.warning(e.toString());
         } finally {
@@ -372,7 +393,7 @@ public class UserItem implements Serializable {
             ps.close();
             return true;
         } catch (SQLException e) {
-            logger.warning("Error saving last login: " + e.toString());
+            logger.log(Level.WARNING, "Error saving last login: {0}", e.toString());
             return false;
         } finally {
             if (dbConn != null) {
@@ -400,7 +421,7 @@ public class UserItem implements Serializable {
                 return true;
             }
         }
-        logger.info("Incorrect user password for user " + this.getUserInfo());
+        logger.log(Level.INFO, "Incorrect user password for user {0}", this.getUserInfo());
         return false;
     }
 
@@ -433,7 +454,7 @@ public class UserItem implements Serializable {
             }
             st.close();
         } catch (SQLException e) {
-            logger.severe("Exception: " + e.toString());
+            logger.log(Level.SEVERE, "Exception: {0}", e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -442,7 +463,7 @@ public class UserItem implements Serializable {
                 }
             }
         }
-        logger.info("Found " + aChildren.size() + " children to user " + this.getUserInfo());
+        logger.log(Level.INFO, "Found {0} children to user {1}", new Object[]{aChildren.size(), this.getUserInfo()});
         return aChildren;
     }
 
@@ -596,5 +617,11 @@ public class UserItem implements Serializable {
 
     public boolean isParentTo(UserItem user) {
         return (user.getUidCreator().equals(this.getUid()));
+    }
+
+    public boolean passwordIsOlderThan(int days) {
+        logger.log(Level.INFO, "last pw change: {0}", this.datePasswordChange);
+        logger.log(Level.INFO, "days: {0}", days);
+        return (this.datePasswordChange.getTime() + (days * 1000 * 60 * 60 * 24) < System.currentTimeMillis());
     }
 }

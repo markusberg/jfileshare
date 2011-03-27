@@ -7,7 +7,7 @@
 
         <script type="text/javascript">
             function setfocus() {
-                domUsername = document.getElementById("username");
+                domUsername = document.getElementById("focusme");
                 domUsername.focus();
             }
             window.onload=setfocus;
@@ -18,24 +18,25 @@
         <%@ include file="/WEB-INF/jspf/MessageBoxes.jspf" %>
 
         <p>Welcome to the 
-            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
             File Sharing facility. This web application
             is intended for registered users
             only. If you're a
-            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg() %>
+            <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
             corporate user, or if you already have an
             account you are welcome to login:</p>
 
-        <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern") %>" method="post">
+        <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern")%>" method="post">
             <table>
                 <tr>
                     <th>Username: </th>
-                    <td><input type="text" class="textentry" name="login_username" id="username" /></td>
+                    <td><input type="text" class="textentry" name="login_username" id="focusme" /></td>
                 </tr>
                 <tr>
                     <th>Password: </th>
                     <td><input type="password" class="textentry" name="login_password" /></td>
                 </tr>
+                <tr><td>&nbsp;</td></tr>
                 <tr>
                     <td>&nbsp;</td>
                     <td>

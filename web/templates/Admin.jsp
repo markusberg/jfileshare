@@ -66,15 +66,16 @@
                     <td><input type="text" class="textentry" name="pathTemp" value="<%= request.getAttribute("validatedPathTemp")%>" /></td>
                 </tr>
                 <tr>
-                    <th>File retention: </th>
-                    <td><input type="text" class="intentry" name="daysFileRetention" value="<%= request.getAttribute("validatedDaysFileRetention")%>" /> days</td>
+                    <th>Files expire after: </th>
+                    <td><input type="text" class="intentry" name="daysFileExpiration" value="<%= request.getAttribute("validatedDaysFileExpiration").equals(0) ? "" : request.getAttribute("validatedDaysFileExpiration")%>" /> days</td>
+                    <td><span class="note">Note: leave blank to disable file expiration</span></td>
                 </tr>
                 <tr>
                     <th>Maximum allowed file size: </th>
                     <td>
                         <input type="text" class="intentry" name="fileSizeMax" value="<%= request.getAttribute("validatedFileSizeMax")%>" />
                         <%
-                        Integer fileSizeUnit = (Integer) request.getAttribute("validatedFileSizeUnit");
+                                    Integer fileSizeUnit = (Integer) request.getAttribute("validatedFileSizeUnit");
                         %>
                         <select name="fileSizeUnit">
                             <option value="1" <%= fileSizeUnit == 1 ? "selected=\"selected\"" : ""%>>KiB</option>
@@ -96,7 +97,7 @@
                     <td><input type="text" class="textentry" name="smtpSender" value="<%= request.getAttribute("validatedSmtpSender")%>" /></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><h3>Other settings</h3></td>
+                    <td colspan="2"><h3>User settings</h3></td>
                 </tr>
                 <tr>
                     <th>Default user expiration: </th>
@@ -114,8 +115,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>User password expires after: </th>
+                    <td><input type="text" class="intentry" name="daysPasswordExpiration" value="<%= request.getAttribute("validatedDaysPasswordExpiration").equals(0) ? "" : request.getAttribute("validatedDaysPasswordExpiration")%>" /> days</td>
+                    <td><span class="note">Note: leave blank to disable password expiration</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><h3>Other</h3></td>
+                </tr>
+                <tr>
                     <th>Debug:</th>
-                    <td><input type="checkbox" name="debug" value="true" <%= request.getAttribute("validatedDebug") %>></td>
+                    <td><input type="checkbox" name="debug" value="true" <%= request.getAttribute("validatedDebug")%>></td>
                 </tr>
                 <tr>
                     <th>Database version:</th>

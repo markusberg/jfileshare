@@ -45,14 +45,27 @@
                         <input type="checkbox" name="bEnabled" value="true" <%= file.isEnabled() ? " checked" : ""%> />
                     </td>
                 </tr>
+                <%
+                                        int daysFileExpiration = ((Conf) getServletContext().getAttribute("conf")).getDaysFileExpiration();
+                                        if (daysFileExpiration != 0 || !file.isPermanent()) {
+                %>
                 <tr>
                     <th>Permanent: </th>
                     <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked" : ""%> />
+                        <%
+                                                                    if (daysFileExpiration != 0) {
+                        %>
                         <span class="note">Non-permanent files will be automatically removed after
-                            <%= ((Conf) getServletContext().getAttribute("conf")).getDaysFileRetention()%>
+                            <%= daysFileExpiration%>
                             days</span>
+                            <%
+                                                                        }
+                            %>
                     </td>
                 </tr>
+                <%
+                                        }
+                %>
                 <tr>
                     <th>Downloads allowed: </th>
                     <td><input type="text" class="intentry" name="iDownloads" value="<%= file.getDownloads() == null ? "" : file.getDownloads()%>" />

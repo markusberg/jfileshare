@@ -6,6 +6,7 @@ import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,22 +58,68 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpSession session = req.getSession();
-        // HttpServletResponse resp = (HttpServletResponse) response;
-        String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
 
         if (session.getAttribute("user") != null) {
             // we're already logged in
             chain.doFilter(request, response);
-        } else if (CheckUser(req, session)) {
-            // Sending a redirect instead of just forwarding to the correct page.
-            // This makes the backing back to this page not force a re-post of the login form
-            // resp.sendRedirect(urlPattern);
-            chain.doFilter(request, response);
         } else {
-            // User not logged in or login error.
-            // Save the url and divert to the login page.
-            req.setAttribute("urlPattern", urlPattern);
-            filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
+            String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
+
+            // We're in the middle of a forced password update
+            // validate provided passwords
+            if (session.getAttribute("tempuser") != null) {
+                UserItem tempuser = (UserItem) session.getAttribute("tempuser");
+
+                String requestedPassword1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+                String requestedPassword2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+
+                ArrayList<String> errors = tempuser.validatePassword(requestedPassword1, requestedPassword2);
+
+                if (errors.isEmpty()) {
+                    // Everything checks out. Save user. Move on.
+                    tempuser.save(ds);
+                    session.setAttribute("user", tempuser);
+                    session.removeAttribute("tempuser");
+                    tempuser.saveLastLogin(ds);
+                    chain.doFilter(request, response);
+                } else {
+                    String errormessage = "Password change failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                    for (String emsg : errors) {
+                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+                    }
+                    errormessage = errormessage.concat("</ul>\n");
+                    req.setAttribute("message_critical", errormessage);
+                    filterconfig.getServletContext().getRequestDispatcher("/templates/PasswordUpdate.jsp").forward(request, response);
+                }
+            } else {
+                // We're logging in
+                UserItem user = CheckUser(req, session);
+                if (user != null) {
+                    Conf conf = new Conf(ds);
+                    logger.log(Level.INFO, "Password expiration: {0}", conf.getDaysPasswordExpiration());
+                    logger.log(Level.INFO, "User pw change: {0}", user.getDatePasswordChange());
+                    if (conf.getDaysPasswordExpiration() != 0 && user.passwordIsOlderThan(conf.getDaysPasswordExpiration())) {
+                        // User is forced to update his password
+                        // Store the user object in a temporary variable in the session
+                        session.setAttribute("tempuser", user);
+                        req.setAttribute("message_warning", "Your password has expired. Please choose a new one.");
+                        req.setAttribute("urlPattern", urlPattern);
+                        filterconfig.getServletContext().getRequestDispatcher("/templates/PasswordUpdate.jsp").forward(request, response);
+                    } else {
+                        // FIXME: I'd like to do a redirect here instead of just forwarding to the correct page.
+                        // This makes the backing back to this page not force a re-post of the login form
+                        // resp.sendRedirect(urlPattern);
+                        user.saveLastLogin(ds);
+                        session.setAttribute("user", user);
+                        chain.doFilter(request, response);
+                    }
+                } else {
+                    // User not logged in or login error.
+                    // Save the url and divert to the login page.
+                    req.setAttribute("urlPattern", urlPattern);
+                    filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
+                }
+            }
         }
     }
 
@@ -82,7 +129,7 @@ public class LoginFilter implements Filter {
      * @param session
      * @return
      */
-    private boolean CheckUser(HttpServletRequest req, HttpSession session) {
+    private UserItem CheckUser(HttpServletRequest req, HttpSession session) {
         // Check if we are logging in right now
         if ("login".equals(req.getParameter("action"))) {
             String username = req.getParameter("login_username");
@@ -95,9 +142,7 @@ public class LoginFilter implements Filter {
                         throw new NoSuchUserException();
                     } else {
                         logger.log(Level.INFO, "User {0} is now logged in", user.getUserInfo());
-                        user.saveLastLogin(ds);
-                        session.setAttribute("user", user);
-                        return true;
+                        return user;
                     }
                 } catch (NoSuchUserException e) {
                     req.setAttribute("message_warning", "Non-existent user or incorrect password");
@@ -106,6 +151,6 @@ public class LoginFilter implements Filter {
                 }
             }
         }
-        return false;
+        return null;
     }
 }
