@@ -134,7 +134,7 @@
             </div>
 
             <div id="footer">
-                <a href="<%= conf.getContextPath() %>/about">jfileshare</a> version 1.4 beta<br/>
+                <a href="<%= conf.getContextPath() %>/about">jfileshare</a> version 1.4<br/>
             </div>
 
             <%
