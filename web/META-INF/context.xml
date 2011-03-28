@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context debug="5" path="/jfileshare" reloadable="true">
-  <Parameter name="PATH_TEMP" override="false" value="/files/temp"/>
-  <Parameter name="PATH_STORE" override="false" value="/files/store"/>
-  <Parameter name="FILESIZE_MAX" override="false" value="2147483648"/>
-  <Parameter name="DAYS_FILE_RETENTION" override="false" value="14"/>
-  <Parameter name="DAYS_USER_EXPIRATION" override="false" value="60"/>
-  <Parameter name="SMTP_SERVER" override="false" value="localhost"/>
-  <Parameter name="SMTP_SERVER_PORT" override="false" value="1099"/>
-  <Parameter name="SMTP_SENDER" override="false" value="noreply@sectra.se"/>
-  <Parameter name="URL_PREFIX" override="false" value=""/>
   <!-- maxActive: Maximum number of dB connections in pool. Make sure you  2147483648
          configure your mysqld max_connections large enough to handle
          all of your db connections. Set to -1 for no limit.
