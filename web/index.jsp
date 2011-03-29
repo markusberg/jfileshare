@@ -23,7 +23,7 @@
             is intended for registered users
             only. If you're a
             <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
-            corporate user, or if you already have an
+            internal user, or if you already have an
             account you are welcome to login:</p>
 
         <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern")%>" method="post">

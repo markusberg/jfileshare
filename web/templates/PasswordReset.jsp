@@ -49,7 +49,7 @@
             <p>Use this form if you've forgotten your password.
                 If you're a 
                 <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
-                corporate user, your username is the same as
+                internal user, your username is the same as
                 your regular login username.
                 Instructions will be sent to your email address.
             </p>
