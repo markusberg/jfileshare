@@ -63,7 +63,7 @@ public class UserViewServlet extends HttpServlet {
             UserItem user = new UserItem(ds, uid);
 
             if (!currentUser.hasEditAccessTo(user)) {
-                req.setAttribute("message_warning", "You are not authorized to view the details of this user.");
+                req.setAttribute("message_warning", "You are not authorized to view the details of that user");
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             } else {
                 if (!currentUser.getUid().equals(uid)) {

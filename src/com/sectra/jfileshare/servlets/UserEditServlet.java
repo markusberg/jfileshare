@@ -107,7 +107,7 @@ public class UserEditServlet extends HttpServlet {
                 UserItem user = new UserItem(ds, uid);
 
                 if (!currentUser.hasEditAccessTo(user)) {
-                    req.setAttribute("message_critical", "You do not have access to modify user " + user.getUserInfo());
+                    req.setAttribute("message_critical", "You do not have access to modify that user");
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
                     req.setAttribute("user", user);

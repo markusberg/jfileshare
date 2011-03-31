@@ -194,7 +194,7 @@ public class FileReceiverServlet extends HttpServlet {
                     File finalFile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
                     tempFile.renameTo(finalFile);
                     logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});
-                    req.setAttribute("msg", "File '" + file.getName() + "' uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
+                    req.setAttribute("msg", "File <strong>\"" + file.getName() + "\"</strong> uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
                     req.setAttribute("javascript", "parent.uploadComplete('info');");
                 } else {
                     req.setAttribute("msg", "Unable to contact the database");

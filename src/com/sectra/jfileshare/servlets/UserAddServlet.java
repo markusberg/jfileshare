@@ -170,7 +170,7 @@ public class UserAddServlet extends HttpServlet {
                     user.setUsername(username);
 
                     if (user.save(datasource)) {
-                        req.setAttribute("message", "User \"" + Helpers.htmlSafe(user.getUsername()) + "\" created");
+                        req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> created");
                         disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
 
                         // Set the default values for new users

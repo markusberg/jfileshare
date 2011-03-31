@@ -65,7 +65,7 @@ public class FileLogServlet extends HttpServlet {
                 ArrayList downloadLogs = file.getLogs(ds);
                 req.setAttribute("downloadLogs", downloadLogs);
                 if (downloadLogs.isEmpty()) {
-                    req.setAttribute("message", "This file (" + file.getName() + ") has never been downloaded");
+                    req.setAttribute("message", "The file <strong>\"" + file.getName() + "\"</strong> has never been downloaded");
                 }
                 req.setAttribute("tab", "File log");
                 disp = app.getRequestDispatcher("/templates/FileLog.jsp");

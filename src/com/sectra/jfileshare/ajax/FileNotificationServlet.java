@@ -81,7 +81,7 @@ public class FileNotificationServlet extends HttpServlet {
             // someone of it's existence
             InternetAddress emailValidated = new InternetAddress();
             if (!currentUser.hasEditAccessTo(file)) {
-                throw new Exception("You do not have admin access to that file.");
+                throw new Exception("You do not have admin access to that file");
             }
             // Email address sanity check
             emailValidated = new InternetAddress(emailRecipient);
@@ -90,11 +90,11 @@ public class FileNotificationServlet extends HttpServlet {
             // Everything checks out. Let's send the email notification
             sendEmailNotification(file, currentUser, emailValidated);
             buffy.append("\t<status>info</status>\n");
-            buffy.append("\t<msg>Email notification has been sent to ");
+            buffy.append("\t<msg>Email notification has been sent to &lt;strong&gt;");
             buffy.append(Helpers.htmlSafe(emailRecipient));
-            buffy.append(" regarding the file \"");
+            buffy.append("&lt;/strong&gt; regarding the file &lt;strong&gt;\"");
             buffy.append(file.getName());
-            buffy.append("\"</msg>\n");
+            buffy.append("\"&lt;/strong&gt;</msg>\n");
         } catch (NoSuchFileException e) {
             buffy.append("\t<status>warning</status>\n");
             buffy.append("\t<msg>".concat(e.getMessage()).concat("</msg>\n"));
@@ -162,7 +162,7 @@ public class FileNotificationServlet extends HttpServlet {
 
         MimeBodyPart mbp2 = new MimeBodyPart();
         mbp2.setContent("<h1>File available for download</h1>"
-                + "<p>" + currentUser.getUsername() + " has made the following \n"
+                + "<p><strong>" + currentUser.getUsername() + "</strong> has made the following \n"
                 + "file available for download:</p>\n"
                 + "<table>\n"
                 + "<tr><th style=\"text-align: right;\">Filename:</th><td>" + file.getName() + "</td></tr>\n"

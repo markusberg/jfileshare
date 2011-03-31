@@ -82,7 +82,7 @@ public class FileDeleteServlet extends HttpServlet {
                     req.setAttribute("user", user);
                     req.setAttribute("files", user.getFiles(ds));
                     req.setAttribute("users", user.getChildren(ds));
-                    req.setAttribute("message", "File <em>\"" + file.getName() + "\"</em> was successfully deleted");
+                    req.setAttribute("message", "File <strong>\"" + file.getName() + "\"</strong> was successfully deleted");
                     disp = app.getRequestDispatcher("/templates/UserView.jsp");
                 } else {
                     req.setAttribute("message_critical", "File delete failed");

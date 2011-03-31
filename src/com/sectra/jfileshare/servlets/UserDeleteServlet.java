@@ -91,16 +91,16 @@ public class UserDeleteServlet extends HttpServlet {
             RequestDispatcher disp;
 
             HttpSession session = req.getSession();
-            UserItem CurrentUser = (UserItem) session.getAttribute("user");
+            UserItem currentUser = (UserItem) session.getAttribute("user");
             Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
             try {
-                UserItem User = new UserItem(ds, iUid);
-                if (!CurrentUser.hasEditAccessTo(User)) {
-                    req.setAttribute("message_critical", "You do not have access to modify user " + User.getUserInfo());
+                UserItem user = new UserItem(ds, iUid);
+                if (!currentUser.hasEditAccessTo(user)) {
+                    req.setAttribute("message_critical", "You do not have access to modify that user");
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
-                    User.delete(ds, conf.getPathStore());
-                    req.setAttribute("message", "User " + User.getUserInfo() + " deleted");
+                    user.delete(ds, conf.getPathStore());
+                    req.setAttribute("message", "User <strong>\"" + user.getUsername() + "\"</strong> (" + user.getUid().toString() + ") deleted");
                     req.setAttribute("tab", "Delete user");
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");
                 }
