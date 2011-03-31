@@ -115,13 +115,18 @@ public class FileEditServlet extends HttpServlet {
                             && req.getParameter("bPermanent").equals("true")) {
                         file.setDateExpiration(null);
                     } else {
-                        file.setDaysToKeep(conf.getDaysFileExpiration());
+                        // only set this if file expiration is enabled
+                        if (conf.getDaysFileExpiration() != 0) {
+                            file.setDaysToKeep(conf.getDaysFileExpiration());
+                        }
                     }
 
                     Integer iDownloads = null;
                     if (req.getParameter("iDownloads") != null
                             && !req.getParameter("iDownloads").equals("")) {
-                        iDownloads = new Integer(req.getParameter("iDownloads"));
+                        try {
+                            iDownloads = new Integer(req.getParameter("iDownloads"));
+                        } catch (NumberFormatException ignore) {}
                     }
                     file.setDownloads(iDownloads);
 
