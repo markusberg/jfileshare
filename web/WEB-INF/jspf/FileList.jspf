@@ -23,7 +23,8 @@
             <a href="<%= file.getURL(request.getContextPath())%>"><%=file.getName()%></a>
             <%= file.isEnabled() ? "" : "<img src=\"" + request.getContextPath() + "/images/stop.png\" alt=\"disabled\" title=\"This file is disabled for download\" />"%>
             <%= file.getPwHash() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/lock.png\" alt=\"password\" title=\"This file is password protected\"/>"%>
-            <%= file.getDownloads() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/stock-download.png\" alt=\"download limit\" title=\"Download limit: "+file.getDownloads()+" more download(s) allowed\" />" %></td>
+            <%= file.getDownloads() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/stock-download.png\" alt=\"download limit\" title=\"Download limit: "+file.getDownloads()+" more download(s) allowed\" />" %>
+            <%= daysFileExpiration==0 && !file.isPermanent() ? "<img src=\"" + request.getContextPath() + "/images/icon-clock.png\" alt=\"file will expire\" title=\"This file will be deleted in " + file.getDaysUntilExpiration() + " day(s)\" />" : "" %>
         </td>
         <td class="number"><%=FileItem.humanReadable(file.getSize())%></td>
 
