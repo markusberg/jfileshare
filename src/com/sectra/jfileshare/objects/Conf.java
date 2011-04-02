@@ -103,7 +103,7 @@ public class Conf {
     }
 
     public void setBrandingLogo(String logo) {
-        this.brandingLogo = (logo != null && logo.equals("")) ? null : logo;
+        this.brandingLogo = (logo != null && logo.equals("")) ? "" : logo;
     }
 
     public int getDaysFileExpiration() {

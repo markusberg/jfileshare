@@ -14,6 +14,7 @@
         <%
                     UserItem currentUser = (UserItem) session.getAttribute("user");
                     UserItem user = (UserItem) request.getAttribute("user");
+                    Conf conf = (Conf) getServletContext().getAttribute("conf");
         %>
 
         <form action="<%= request.getContextPath()%>/user/edit/<%=user.getUid()%>" method="post">
@@ -28,7 +29,7 @@
                                     if (currentUser.isAdmin()) {
 
                         %>
-                        <input type="text" class="textentry" name="username" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedUsername"))%>" />
+                        <input type="text" class="textentry" name="username" value="<%= Helpers.htmlSafe(user.getUsername())%>" />
                         <%
                                     } else {
                                         out.print(user.getUsername());
@@ -38,24 +39,26 @@
                 </tr>
                 <tr>
                     <th>Email: </th>
-                    <td><input type="text" class="textentry" name="email" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedEmail"))%>" /></td>
+                    <td><input type="text" class="textentry" name="email" value="<%= Helpers.htmlSafe(user.getEmail())%>" /></td>
                 </tr>
                 <tr>
                     <th>Password: </th>
-                    <td><input type="password" class="textentry" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword1"))%>"/>
+                    <td><input type="password" class="textentry" name="password1" value="<%= Helpers.htmlSafe((String) request.getAttribute("password1"))%>"/>
                         <span class="note">Note: leave blank in order to keep existing password unchanged</span></td>
                 </tr>
                 <tr>
                     <th>Verify password: </th>
-                    <td><input type="password" class="textentry" name="password2" value="<%= Helpers.htmlSafe((String) request.getAttribute("validatedPassword2"))%>"/></td>
+                    <td><input type="password" class="textentry" name="password2" value="<%= Helpers.htmlSafe((String) request.getAttribute("password2"))%>"/></td>
                 </tr>
 
                 <%
-                            boolean bExpiration = (Boolean) request.getAttribute("validatedBExpiration");
-                            int daysUntilExpiration = (Integer) request.getAttribute("validatedDaysUntilExpiration");
+                            boolean bExpiration = user.getDateExpiration() != null;
+                            int daysUntilExpiration = bExpiration
+                                    ? user.getDaysUntilExpiration()
+                                    : conf.getDaysUserExpiration();
 
-                            // Only allow setting expiration on users that
-                            // you have edit access to
+                            // Disallow setting expiration on yourself
+                            // Unless you're an admin
                             if (currentUser.isAdmin() || currentUser.isParentTo(user)) {
                 %>
                 <tr>
@@ -85,17 +88,17 @@
                 <%
                             }
                             if (currentUser.isAdmin()) {
-                                Integer usertype = (Integer) request.getAttribute("validatedUsertype");
+                                int usertype = user.getUserType();
                 %>
                 <tr>
                     <th>User Type:</th>
                     <td>
                         <select name="usertype">
-                            <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype.equals(UserItem.TYPE_ADMIN) ? " selected=\"selected\"" : ""%>>Administrator</option>
-                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype.equals(UserItem.TYPE_INTERNAL) ? " selected=\"selected\"" : ""%>>
-                                <%= ((Conf) getServletContext().getAttribute("conf")).getBrandingOrg()%>
+                            <option value="<%=UserItem.TYPE_ADMIN%>"<%=usertype == UserItem.TYPE_ADMIN ? " selected=\"selected\"" : ""%>>Administrator</option>
+                            <option value="<%=UserItem.TYPE_INTERNAL%>"<%=usertype == UserItem.TYPE_INTERNAL ? " selected=\"selected\"" : ""%>>
+                                <%= Helpers.htmlSafe(conf.getBrandingOrg())%>
                                 internal</option>
-                            <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype.equals(UserItem.TYPE_EXTERNAL) ? " selected=\"selected\"" : ""%>>External</option>
+                            <option value="<%=UserItem.TYPE_EXTERNAL%>"<%=usertype == UserItem.TYPE_EXTERNAL ? " selected=\"selected\"" : ""%>>External</option>
                         </select>
                     </td>
                 </tr>

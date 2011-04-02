@@ -124,7 +124,7 @@ public class StartupServlet extends HttpServlet {
                 // create table for application configuration
                 alterDatabase(dbConn, "CREATE TABLE `Conf` ("
                         + "`key` varchar(64) NOT NULL, "
-                        + "`value` varchar(128) NULL DEFAULT NULL, "
+                        + "`value` varchar(128) NOT NULL, "
                         + "PRIMARY KEY (`key`)) "
                         + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
                 // populate the new table with init-values
@@ -183,7 +183,7 @@ public class StartupServlet extends HttpServlet {
 
     private void commitKeyValuePair(PreparedStatement st, String key, String value)
             throws SQLException {
-        st.setString(1, value);
+        st.setString(1, (value == null ? "" : value));
         st.setString(2, key);
         st.executeUpdate();
     }

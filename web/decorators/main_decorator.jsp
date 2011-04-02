@@ -31,7 +31,7 @@
         </script>
         <%
                     }
-                    if (conf.getBrandingLogo() != null) {
+                    if (!conf.getBrandingLogo().equals("")) {
         %>
         <style type="text/css">
             #container {

@@ -25,8 +25,8 @@ public class FileItem implements Serializable {
 
     private Integer fid;
     private String name;
-    private String type;
-    private Long size;
+    private String mimetype;
+    private long size;
     private String md5sum;
     private Integer downloads;
     private String pwHash;
@@ -109,11 +109,11 @@ public class FileItem implements Serializable {
     }
 
     public Integer getFid() {
-        return fid;
+        return this.fid;
     }
 
-    public void setFid(Integer value) {
-        fid = value;
+    public void setFid(Integer fid) {
+        this.fid = fid;
     }
 
     public String getName() {
@@ -130,88 +130,88 @@ public class FileItem implements Serializable {
     }
 
     public String getType() {
-        return type;
+        return this.mimetype;
     }
 
-    public void setType(String value) {
-        type = value;
+    public void setType(String mimetype) {
+        this.mimetype = mimetype;
     }
 
     public long getSize() {
-        return size;
+        return this.size;
     }
 
-    public void setSize(long value) {
-        size = value;
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public String getMd5sum() {
-        return md5sum;
+        return this.md5sum;
     }
 
-    public void setMd5sum(String value) {
-        md5sum = value;
+    public void setMd5sum(String md5sum) {
+        this.md5sum = md5sum;
     }
 
     public Integer getDownloads() {
-        return downloads;
+        return this.downloads;
     }
 
-    public void setDownloads(Integer value) {
-        downloads = value;
+    public void setDownloads(Integer downloads) {
+        this.downloads = downloads;
     }
 
     public String getPwHash() {
-        return pwHash;
+        return this.pwHash;
     }
 
-    public void setPwHash(String value) {
-        pwHash = value;
+    public void setPwHash(String pwHash) {
+        this.pwHash = pwHash;
     }
 
     public void setPwPlainText(String pwProvided) {
-        pwHash = Sha512Crypt.Sha512_crypt(pwProvided, null, 0);
+        this.pwHash = Sha512Crypt.Sha512_crypt(pwProvided, null, 0);
         // com.sectra.jfileshare.utils.Jcrypt.crypt(pwPlainText);
     }
 
     public Timestamp getDateCreation() {
-        return dateCreation;
+        return this.dateCreation;
     }
 
-    public void setDateCreation(Timestamp value) {
-        dateCreation = value;
+    public void setDateCreation(Timestamp dateCreation) {
+        this.dateCreation = dateCreation;
     }
 
     public Timestamp getDateExpiration() {
-        return dateExpiration;
+        return this.dateExpiration;
     }
 
-    public void setDateExpiration(Timestamp value) {
-        dateExpiration = value;
+    public void setDateExpiration(Timestamp dateExpiration) {
+        this.dateExpiration = dateExpiration;
     }
 
-    public void setOwnerUid(Integer value) {
-        ownerUid = value;
+    public void setOwnerUid(Integer ownerUid) {
+        this.ownerUid = ownerUid;
     }
 
     public Integer getOwnerUid() {
-        return ownerUid;
+        return this.ownerUid;
     }
 
-    public void setOwnerUsername(String value) {
-        ownerUsername = value;
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = ownerUsername;
     }
 
     public String getOwnerUsername() {
-        return ownerUsername;
+        return this.ownerUsername;
     }
 
-    public void setOwnerEmail(String value) {
-        ownerEmail = value;
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 
     public String getOwnerEmail() {
-        return ownerEmail;
+        return this.ownerEmail;
     }
 
     public String getURL(String urlPrefix) {
@@ -219,19 +219,19 @@ public class FileItem implements Serializable {
     }
 
     public boolean getAllowTinyUrl() {
-        return allowTinyUrl;
+        return this.allowTinyUrl;
     }
 
-    public void setAllowTinyUrl(boolean value) {
-        allowTinyUrl = value;
+    public void setAllowTinyUrl(boolean allowTinyUrl) {
+        this.allowTinyUrl = allowTinyUrl;
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return this.enabled;
     }
 
-    public void setEnabled(boolean value) {
-        enabled = value;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean save(DataSource ds) {
@@ -243,7 +243,7 @@ public class FileItem implements Serializable {
             if (this.fid == null) {
                 st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 st.setString(1, this.name);
-                st.setString(2, this.type);
+                st.setString(2, this.mimetype);
                 st.setDouble(3, this.size);
                 st.setString(4, this.md5sum);
                 if (this.downloads == null) {
@@ -418,8 +418,8 @@ public class FileItem implements Serializable {
         return result;
     }
 
-    public ArrayList<DownloadLog> getLogs(DataSource ds) {
-        ArrayList<DownloadLog> logs = new ArrayList<DownloadLog>();
+    public ArrayList<FileLog> getLogs(DataSource ds) {
+        ArrayList<FileLog> logs = new ArrayList<FileLog>();
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
@@ -427,7 +427,7 @@ public class FileItem implements Serializable {
             st.setInt(1, this.fid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                DownloadLog log = new DownloadLog(rs.getTimestamp(1), rs.getString(3));
+                FileLog log = new FileLog(rs.getTimestamp(1), rs.getString(3));
                 logs.add(log);
             }
         } catch (SQLException e) {
@@ -441,24 +441,5 @@ public class FileItem implements Serializable {
             }
         }
         return logs;
-    }
-
-    public class DownloadLog {
-
-        private String ipAddr;
-        private Date dateAccess;
-
-        public DownloadLog(Date dateAccess, String ipAddr) {
-            this.dateAccess = dateAccess;
-            this.ipAddr = ipAddr;
-        }
-
-        public String getIp() {
-            return this.ipAddr;
-        }
-
-        public Date getTime() {
-            return this.dateAccess;
-        }
     }
 }

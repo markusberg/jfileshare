@@ -1,7 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.Conf;
-import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
@@ -56,28 +55,7 @@ public class AdminServlet extends HttpServlet {
         Conf conf = (Conf) app.getAttribute("conf");
 
         if (User.isAdmin()) {
-            req.setAttribute("validatedBrandingOrg", conf.getBrandingOrg());
-            req.setAttribute("validatedBrandingDomain", conf.getBrandingDomain());
-            req.setAttribute("validatedBrandingLogo", conf.getBrandingLogo());
-
-            req.setAttribute("validatedPathStore", conf.getPathStore());
-            req.setAttribute("validatedPathTemp", conf.getPathTemp());
-            req.setAttribute("validatedDaysFileExpiration", conf.getDaysFileExpiration());
-
-            int[] fs = FileItem.getFileSize(conf.getFileSizeMax());
-            req.setAttribute("validatedFileSizeMax", fs[1]);
-            req.setAttribute("validatedFileSizeUnit", fs[0]);
-
-            req.setAttribute("validatedSmtpServer", conf.getSmtpServer());
-            req.setAttribute("validatedSmtpServerPort", conf.getSmtpServerPort());
-            req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
-
-            req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
-            req.setAttribute("validatedDaysPasswordExpiration", conf.getDaysPasswordExpiration());
-
-            req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
-            req.setAttribute("dbVersion", conf.getDbVersion());
-
+            req.setAttribute("conf", conf);
             disp = app.getRequestDispatcher("/templates/Admin.jsp");
         } else {
             req.setAttribute("message_critical", "Access Denied");
@@ -104,70 +82,50 @@ public class AdminServlet extends HttpServlet {
 
                 // FIXME: No sanity checking on the user input
                 conf.setBrandingOrg(req.getParameter("brandingOrg"));
-                req.setAttribute("validatedBrandingOrg", conf.getBrandingOrg());
                 conf.setBrandingDomain(req.getParameter("brandingDomain"));
-                req.setAttribute("validatedBrandingDomain", conf.getBrandingDomain());
                 conf.setBrandingLogo(req.getParameter("brandingLogo"));
-                req.setAttribute("validatedBrandingLogo", conf.getBrandingLogo());
-
                 conf.setPathStore(req.getParameter("pathStore"));
-                req.setAttribute("validatedPathStore", conf.getPathStore());
                 conf.setPathTemp(req.getParameter("pathTemp"));
-                req.setAttribute("validatedPathTemp", conf.getPathTemp());
 
-                int validatedDaysFileExpiration;
+                int daysFileExpiration;
                 try {
-                    validatedDaysFileExpiration = Integer.parseInt(req.getParameter("daysFileExpiration"));
+                    daysFileExpiration = Integer.parseInt(req.getParameter("daysFileExpiration"));
                 } catch (NumberFormatException e) {
-                    validatedDaysFileExpiration = 0;
+                    daysFileExpiration = 0;
                 }
-                conf.setDaysFileExpiration(validatedDaysFileExpiration);
-                req.setAttribute("validatedDaysFileExpiration", validatedDaysFileExpiration);
-
+                conf.setDaysFileExpiration(daysFileExpiration);
                 conf.setSmtpServer(req.getParameter("smtpServer"));
-                req.setAttribute("validatedSmtpServer", conf.getSmtpServer());
 
-                int validatedSmtpServerPort;
+                int smtpServerPort;
                 try {
-                    validatedSmtpServerPort = Integer.parseInt(req.getParameter("smtpServerPort"));
+                    smtpServerPort = Integer.parseInt(req.getParameter("smtpServerPort"));
                 } catch (NumberFormatException e) {
-                    validatedSmtpServerPort = 25;
+                    smtpServerPort = 25;
                 }
-                conf.setSmtpServerPort(validatedSmtpServerPort);
-                req.setAttribute("validatedSmtpServerPort", validatedSmtpServerPort);
-                
+                conf.setSmtpServerPort(smtpServerPort);
                 conf.setSmtpSender(req.getParameter("smtpSender"));
-                req.setAttribute("validatedSmtpSender", conf.getSmtpSender());
 
-                long validatedFileSizeMax = Long.parseLong(req.getParameter("fileSizeMax"));
-                int validatedFileSizeUnit = Integer.parseInt(req.getParameter("fileSizeUnit"));
+                int fileSizeMax = Integer.parseInt(req.getParameter("fileSizeMax"));
+                int fileSizeUnit = Integer.parseInt(req.getParameter("fileSizeUnit"));
 
-                conf.setFileSizeMax(validatedFileSizeMax * (long) Math.pow(1024, validatedFileSizeUnit));
-                req.setAttribute("validatedFileSizeMax", validatedFileSizeMax);
-                req.setAttribute("validatedFileSizeUnit", validatedFileSizeUnit);
+                conf.setFileSizeMax(fileSizeMax * (long) Math.pow(1024, fileSizeUnit));
 
-                int validatedDaysUserExpiration;
+                int daysUserExpiration;
                 try {
-                    validatedDaysUserExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
+                    daysUserExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
                 } catch (NumberFormatException e) {
-                    validatedDaysUserExpiration = 60;
+                    daysUserExpiration = 60;
                 }
-                conf.setDaysUserExpiration(validatedDaysUserExpiration);
-                req.setAttribute("validatedDaysUserExpiration", validatedDaysUserExpiration);
+                conf.setDaysUserExpiration(daysUserExpiration);
 
-                int validatedDaysPasswordExpiration;
+                int daysPasswordExpiration;
                 try {
-                    validatedDaysPasswordExpiration = Integer.parseInt(req.getParameter("daysPasswordExpiration"));
+                    daysPasswordExpiration = Integer.parseInt(req.getParameter("daysPasswordExpiration"));
                 } catch (NumberFormatException e) {
-                    validatedDaysPasswordExpiration = 0;
+                    daysPasswordExpiration = 0;
                 }
-                conf.setDaysPasswordExpiration(validatedDaysPasswordExpiration);
-                req.setAttribute("validatedDaysPasswordExpiration", validatedDaysPasswordExpiration);
-
+                conf.setDaysPasswordExpiration(daysPasswordExpiration);
                 conf.setDebug("true".equals(req.getParameter("debug")) ? true : false);
-                req.setAttribute("validatedDebug", conf.getDebug() ? "checked" : "");
-
-                req.setAttribute("dbVersion", conf.getDbVersion());
 
                 if (conf.save(ds)) {
                     req.setAttribute("message", "Changes saved");

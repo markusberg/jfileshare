@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.sectra.jfileshare.objects.FileItem"%>
+<%@page import="com.sectra.jfileshare.objects.FileLog"%>
 <%@page import="com.sectra.jfileshare.utils.Helpers"%>
 <%@page import="java.util.ArrayList"%>
 
@@ -16,7 +17,7 @@
         <%
                     if (request.getAttribute("file") != null) {
                         FileItem file = (FileItem) request.getAttribute("file");
-                        ArrayList<FileItem.DownloadLog> downloadLogs = (ArrayList<FileItem.DownloadLog>) request.getAttribute("downloadLogs");
+                        ArrayList<FileLog> downloadLogs = (ArrayList<FileLog>) request.getAttribute("downloadLogs");
                         if (!downloadLogs.isEmpty()) {
                             boolean even = false;
         %>
@@ -26,7 +27,7 @@
                 <th>Time</th><th>IP</th>
             </tr>
             <%
-                                        for (FileItem.DownloadLog log : downloadLogs) {
+                                        for (FileLog log : downloadLogs) {
             %>
             <tr class="<%= even ? "even" : "odd"%>">
                 <td><%=Helpers.formatDate(log.getTime())%></td>

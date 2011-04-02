@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserEditServlet extends HttpServlet {
+
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserEditServlet.class.getName());
@@ -68,15 +69,6 @@ public class UserEditServlet extends HttpServlet {
             } else {
                 req.setAttribute("user", user);
                 req.setAttribute("tab", "Edit user");
-
-                req.setAttribute("validatedUsername", user.getUsername());
-                req.setAttribute("validatedEmail", user.getEmail());
-                req.setAttribute("validatedPassword1", "");
-                req.setAttribute("validatedPassword2", "");
-                req.setAttribute("validatedBExpiration", user.getDateExpiration() == null ? false : true);
-                req.setAttribute("validatedDaysUntilExpiration", user.getDateExpiration() == null ? conf.getDaysUserExpiration() : user.getDaysUntilExpiration());
-                req.setAttribute("validatedUsertype", user.getUserType());
-
                 disp = app.getRequestDispatcher("/templates/UserEdit.jsp");
             }
         } catch (NoSuchUserException e) {
@@ -92,8 +84,7 @@ public class UserEditServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req.getParameter("action") != null
-                && req.getParameter("action").equals("login")) {
+        if ("login".equals(req.getParameter("action"))) {
             doGet(req, resp);
         } else {
             ServletContext app = getServletContext();
@@ -110,15 +101,11 @@ public class UserEditServlet extends HttpServlet {
                     req.setAttribute("message_critical", "You do not have access to modify that user");
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
-                    req.setAttribute("user", user);
-
-                    // validate user input
                     ArrayList<String> errors = new ArrayList<String>();
 
                     // only admin is allowed to edit usernames
-                    String requestedUsername = user.getUsername();
                     if (currentUser.isAdmin()) {
-                        requestedUsername = req.getParameter("username");
+                        String requestedUsername = req.getParameter("username");
                         if (!requestedUsername.equals(user.getUsername())) {
                             if (requestedUsername.length() < 2) {
                                 errors.add("The username is too short");
@@ -131,51 +118,48 @@ public class UserEditServlet extends HttpServlet {
                                 }
                             }
                         }
+                        user.setUsername(requestedUsername);
                     }
-                    req.setAttribute("validatedUsername", requestedUsername);
 
-                    // Validate email address
-                    String requestedEmail = (String) req.getParameter("email");
-                    errors.addAll(user.validateEmailAddress(requestedEmail));
-                    req.setAttribute("validatedEmail", requestedEmail);
+                    errors.addAll(user.validateEmailAddress(req.getParameter("email")));
 
                     // Validate passwords
-                    String requestedPassword1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
-                    String requestedPassword2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                    if (!requestedPassword1.equals("")) {
-                        errors.addAll(user.validatePassword(requestedPassword1, requestedPassword2));
+                    String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+                    String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+                    if (!password1.equals("")) {
+                        errors.addAll(user.validatePassword(password1, password2));
                     }
-                    req.setAttribute("validatedPassword1", requestedPassword1);
-                    req.setAttribute("validatedPassword2", requestedPassword2);
+                    req.setAttribute("password1", password1);
+                    req.setAttribute("password2", password2);
 
                     // Validate expiration
-                    Boolean requestedBExpiration = user.getDateExpiration() == null ? false : true;
-                    Integer requestedDaysUntilExpiration = conf.getDaysUserExpiration();
+                    // Disallow setting expiration on yourself
+                    // Unless you're admin
                     if (currentUser.isAdmin()
-                            || currentUser.isParentTo(user)) {
-                        if (req.getParameter("bExpiration") != null
-                                && req.getParameter("bExpiration").equals("true")) {
-                            requestedBExpiration = true;
+                            || !currentUser.getUid().equals(user.getUid())) {
+                        boolean expiration = "true".equals(req.getParameter("bExpiration"));
+                        int daysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
+                        if (daysUntilExpiration < 1) {
+                            daysUntilExpiration = conf.getDaysUserExpiration();
+                        } else if (daysUntilExpiration > 365) {
+                            daysUntilExpiration = 365;
+                        }
+                        if (expiration) {
+                            user.setDaysUntilExpiration(daysUntilExpiration);
                         } else {
-                            requestedBExpiration = false;
-                        }
-                        requestedDaysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
-                        if (requestedDaysUntilExpiration < 1) {
-                            requestedDaysUntilExpiration = conf.getDaysUserExpiration();
-                        } else if (requestedDaysUntilExpiration > 365) {
-                            requestedDaysUntilExpiration = 365;
+                            user.setDateExpiration(null);
                         }
                     }
-                    req.setAttribute("validatedBExpiration", requestedBExpiration);
-                    req.setAttribute("validatedDaysUntilExpiration", requestedDaysUntilExpiration);
 
-                    Integer requestedUsertype = user.getUserType();
+                    // Only allow admin to set usertype
                     if (currentUser.isAdmin()) {
-                        requestedUsertype = Integer.parseInt((String) req.getParameter("usertype"));
+                        int requestedUsertype = Integer.parseInt(req.getParameter("usertype"));
+                        user.setUserType(requestedUsertype);
                     }
-                    req.setAttribute("validatedUsertype", requestedUsertype);
 
-                    if (errors.size() > 0) {
+                    req.setAttribute("user", user);
+
+                    if (!errors.isEmpty()) {
                         String errormessage = "User edit failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
                         for (String emsg : errors) {
                             errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
@@ -183,20 +167,10 @@ public class UserEditServlet extends HttpServlet {
                         errormessage = errormessage.concat("</ul>\n");
                         req.setAttribute("message_critical", errormessage);
                     } else {
-                        // Set the parameters and save the user
-                        user.setUsername(requestedUsername);
-                        user.setEmail(requestedEmail);
-                        if (requestedBExpiration) {
-                            user.setDaysUntilExpiration(requestedDaysUntilExpiration);
-                        } else {
-                            user.setDateExpiration(null);
-                        }
-                        user.setUserType(requestedUsertype);
-
                         if (user.save(ds)) {
                             req.setAttribute("message", "Your changes have been saved");
-                            req.setAttribute("validatedPassword1", "");
-                            req.setAttribute("validatedPassword2", "");
+                            req.setAttribute("password1", "");
+                            req.setAttribute("password2", "");
                         } else {
                             req.setAttribute("message_critical", "Unable to save changes");
                         }

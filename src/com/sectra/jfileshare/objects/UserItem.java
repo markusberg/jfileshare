@@ -370,17 +370,20 @@ public class UserItem implements Serializable {
 
     /**
      * Number of days until the user is deleted
-     * @param iDays
+     * @param days
      */
-    public void setDaysUntilExpiration(int iDays) {
-        long millis = (long) iDays * 1000 * 60 * 60 * 24;
+    public void setDaysUntilExpiration(int days) {
+        long millis = (long) days * 1000 * 60 * 60 * 24;
         setDateExpiration(new Timestamp(System.currentTimeMillis() + millis));
     }
 
-    public Integer getDaysUntilExpiration() {
-        long millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
-        long daysLeft = Math.round(millisLeft / 1000 / 60 / 60 / 24);
-        return (int) daysLeft;
+    public int getDaysUntilExpiration() {
+        if (dateExpiration == null) {
+            return 0;
+        }
+        double millisLeft = dateExpiration.getTime() - System.currentTimeMillis();
+        double daysLeft = millisLeft / 1000 / 60 / 60 / 24;
+        return (int) Math.round(daysLeft);
     }
 
     public boolean saveLastLogin(DataSource ds) {
@@ -555,29 +558,13 @@ public class UserItem implements Serializable {
         try {
             InternetAddress etemp = new InternetAddress(emailAddress);
             etemp.validate();
-            this.setEmail(emailAddress);
         } catch (AddressException e) {
             errors.add("That does not look like a valid email address");
         }
+        this.setEmail(emailAddress);
         return errors;
     }
 
-    /**
-     * Validate that the provided username is available
-     * @param username
-     * @return ArrayList of errors encountered
-    public ArrayList<String> validateUserName(String username) {
-    ArrayList<String> errors = new ArrayList<String>();
-    if (username.equals("")) {
-    errors.add("Username is empty");
-    } else {
-    if (this.getUid() != null) {
-    errors.add("Username is already taken");
-    }
-    }
-    return errors;
-    }
-     */
     /**
      * Does the user enjoy edit rights to the specified file
      * @param file
@@ -620,8 +607,7 @@ public class UserItem implements Serializable {
     }
 
     public boolean passwordIsOlderThan(int days) {
-        logger.log(Level.INFO, "last pw change: {0}", this.datePasswordChange);
-        logger.log(Level.INFO, "days: {0}", days);
-        return (this.datePasswordChange.getTime() + (days * 1000 * 60 * 60 * 24) < System.currentTimeMillis());
+        long expiration = (long) days * 1000 * 60 * 60 * 24;
+        return (this.datePasswordChange.getTime() + expiration) < System.currentTimeMillis();
     }
 }
