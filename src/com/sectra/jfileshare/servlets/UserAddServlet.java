@@ -27,6 +27,7 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class UserAddServlet extends HttpServlet {
+
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(UserAddServlet.class.getName());
@@ -58,16 +59,11 @@ public class UserAddServlet extends HttpServlet {
             req.setAttribute("message_warning", "You do not have access to create users");
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
-            // Set the default values for new users
+            // Set the default values for a new user
             Conf conf = (Conf) getServletContext().getAttribute("conf");
-            req.setAttribute("validatedUsername", "");
-            req.setAttribute("validatedEmail", "");
-            req.setAttribute("validatedPassword1", "");
-            req.setAttribute("validatedPassword2", "");
-            req.setAttribute("validatedBExpiration", true);
-            req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
-            req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
-
+            UserItem user = new UserItem();
+            user.setDaysUntilExpiration(conf.getDaysUserExpiration());
+            req.setAttribute("user", user);
             disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
         }
         disp.forward(req, resp);
@@ -77,9 +73,7 @@ public class UserAddServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        if (req.getParameter("action") != null
-                && req.getParameter("action").equals("login")) {
-            // This post is the result of a login
+        if ("login".equals(req.getParameter("action"))) {
             doGet(req, resp);
         } else if (req.getParameter("action") != null
                 && req.getParameter("action").equals("adduser")) {
@@ -110,78 +104,58 @@ public class UserAddServlet extends HttpServlet {
                     }
                 }
                 user = new UserItem();
-                req.setAttribute("validatedUsername", username);
-
-                // Validate email address
+                user.setUsername(username);
                 errors.addAll(user.validateEmailAddress(req.getParameter("email")));
-                req.setAttribute("validatedEmail", req.getParameter("email"));
 
-                // Validate the amount of time account will be active
-                Integer daysUserExpiration = conf.getDaysUserExpiration();
-                if (req.getParameter("daysUserExpiration") != null) {
-                    Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
-                    if (UserItem.DAY_MAP.containsKey(requestedExpiration)) {
-                        daysUserExpiration = requestedExpiration;
+                // Validate the amount of time that the account will be active
+                if ("true".equals(req.getParameter("bExpiration"))) {
+                    Integer daysUserExpiration = conf.getDaysUserExpiration();
+                    if (req.getParameter("daysUserExpiration") != null) {
+                        Integer requestedExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
+                        if (UserItem.DAY_MAP.containsKey(requestedExpiration)) {
+                            daysUserExpiration = requestedExpiration;
+                        }
                     }
-                }
-                req.setAttribute("validatedDaysUserExpiration", daysUserExpiration);
-
-                // See if the expiration-box is checked
-                if (req.getParameter("bExpiration") != null
-                        && req.getParameter("bExpiration").equals("true")) {
-                    req.setAttribute("validatedBExpiration", true);
                     user.setDaysUntilExpiration(daysUserExpiration);
-                } else {
-                    req.setAttribute("validatedBExpiration", false);
                 }
 
                 // Validate passwords
                 String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
                 String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
                 errors.addAll(user.validatePassword(password1, password2));
-                req.setAttribute("validatedPassword1", password1);
-                req.setAttribute("validatedPassword2", password2);
+                req.setAttribute("password1", password1);
+                req.setAttribute("password2", password2);
 
                 // If currentUser is an admin, set the requested user type
-                int usertype = UserItem.TYPE_EXTERNAL;
                 if (currentUser.isAdmin()) {
-                    int reqUsertype = Integer.parseInt(req.getParameter("usertype"));
-                    if (reqUsertype == UserItem.TYPE_ADMIN
-                            || reqUsertype == UserItem.TYPE_EXTERNAL
-                            || reqUsertype == UserItem.TYPE_INTERNAL) {
+                    int usertype = Integer.parseInt(req.getParameter("usertype"));
+                    if (usertype == UserItem.TYPE_ADMIN
+                            || usertype == UserItem.TYPE_EXTERNAL
+                            || usertype == UserItem.TYPE_INTERNAL) {
                         user.setUserType(usertype);
-                        usertype = reqUsertype;
                     }
                 }
-                req.setAttribute("validatedUsertype", usertype);
 
-
-                if (errors.size() > 0) {
+                // Only attempt to save the user if there are no errors
+                if (!errors.isEmpty()) {
                     String errormessage = "User creation failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
                     for (String emsg : errors) {
                         errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
                     }
                     errormessage = errormessage.concat("</ul>\n");
                     req.setAttribute("message_critical", errormessage);
+                    req.setAttribute("user", user);
                     disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
                 } else {
-                    // Set the creator, username, and save the user
+                    // Set the creator and save the user
                     user.setUidCreator(currentUser.getUid());
-                    user.setUsername(username);
 
                     if (user.save(datasource)) {
                         req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> created");
+                        UserItem newUser = new UserItem();
+                        newUser.setDaysUntilExpiration(conf.getDaysUserExpiration());
+                        req.setAttribute("user", newUser);
                         disp = app.getRequestDispatcher("/templates/UserAdd.jsp");
-
-                        // Set the default values for new users
-                        req.setAttribute("validatedUsername", "");
-                        req.setAttribute("validatedEmail", "");
-                        req.setAttribute("validatedPassword1", "");
-                        req.setAttribute("validatedPassword2", "");
-                        req.setAttribute("validatedBExpiration", true);
-                        req.setAttribute("validatedDaysUserExpiration", conf.getDaysUserExpiration());
-                        req.setAttribute("validatedUsertype", UserItem.TYPE_EXTERNAL);
-
                     } else {
                         req.setAttribute("message_critical", "Unable to create user due to database error. Please try again, or contact the server administrator.");
                         disp = app.getRequestDispatcher("/templates/Error.jsp");

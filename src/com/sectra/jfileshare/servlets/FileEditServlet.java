@@ -84,8 +84,7 @@ public class FileEditServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req.getParameter("action") != null
-                && req.getParameter("action").equals("login")) {
+        if ("login".equals(req.getParameter("action"))) {
             // This POST is the result of a login
             doGet(req, resp);
         } else {
@@ -111,8 +110,7 @@ public class FileEditServlet extends HttpServlet {
                         file.setEnabled(false);
                     }
 
-                    if (req.getParameter("bPermanent") != null
-                            && req.getParameter("bPermanent").equals("true")) {
+                    if ("true".equals(req.getParameter("bPermanent"))) {
                         file.setDateExpiration(null);
                     } else {
                         // only set this if file expiration is enabled
@@ -122,8 +120,7 @@ public class FileEditServlet extends HttpServlet {
                     }
 
                     Integer iDownloads = null;
-                    if (req.getParameter("iDownloads") != null
-                            && !req.getParameter("iDownloads").equals("")) {
+                    if (!"".equals(req.getParameter("iDownloads"))) {
                         try {
                             iDownloads = new Integer(req.getParameter("iDownloads"));
                         } catch (NumberFormatException ignore) {}

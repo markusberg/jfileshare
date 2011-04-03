@@ -1,3 +1,4 @@
+<%@page import="com.sectra.jfileshare.utils.Helpers"%>
 <%@page import="com.sectra.jfileshare.objects.Conf"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.sectra.jfileshare.objects.FileItem"%>
@@ -29,11 +30,11 @@
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>
-                    <td><a href="<%= file.getURL(request.getContextPath())%>"><%= file.getName()%></a></td>
+                    <td><a href="<%= file.getURL(request.getContextPath())%>"><%= Helpers.htmlSafe(file.getName())%></a></td>
                 </tr>
                 <tr>
                     <th>Content-Type: </th>
-                    <td><%= file.getType()%></td>
+                    <td><%= Helpers.htmlSafe(file.getType())%></td>
                 </tr>
                 <tr>
                     <th>Md5sum: </th>
@@ -42,7 +43,7 @@
                 <tr>
                     <th>Enabled: </th>
                     <td>
-                        <input type="checkbox" name="bEnabled" value="true" <%= file.isEnabled() ? " checked" : ""%> />
+                        <input type="checkbox" name="bEnabled" value="true" <%= file.isEnabled() ? " checked=\"checked\"" : ""%> />
                     </td>
                 </tr>
                 <%
@@ -51,7 +52,7 @@
                 %>
                 <tr>
                     <th>Permanent: </th>
-                    <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked" : ""%> />
+                    <td><input type="checkbox" name="bPermanent" value="true" <%= file.isPermanent() ? " checked=\"checked\"" : ""%> />
                         <%
                                                                     if (daysFileExpiration != 0) {
                         %>
