@@ -79,7 +79,7 @@ public class FileAuthenticationFilter implements Filter {
                 chain.doFilter(request, response);
             } else if (!file.isEnabled()) {
                 logger.info("File found, but it's disabled");
-                request.setAttribute("message_critical", "The requested file has been disabled by it's owner");
+                request.setAttribute("message_critical", "The requested file has been disabled by its owner");
                 filterconfig.getServletContext().getRequestDispatcher("/templates/AccessDenied.jsp").forward(request, response);
             } else if (file.getDownloads() != null && file.getDownloads() == 0) {
                 logger.info("File found, but has reached max number of downloads");

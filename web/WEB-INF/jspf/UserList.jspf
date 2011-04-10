@@ -28,7 +28,16 @@
 
     %>
     <tr class="<%=even ? "even" : "odd"%>">
-        <td><a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>"><%= childuser.getUsername()%></a></td>
+        <td>
+            <a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>"><%= childuser.getUsername()%></a>
+    <%
+                    if (childuser.isAdmin()) {
+    %>
+            <img src="<%= request.getContextPath()%>/images/icon-security-keys.png" class="icon" alt="admin user" title="This user is an administrator" />
+    <%
+                    }
+    %>
+        </td>
         <td><%= childuser.getEmail()%></td>
         <td><%= com.sectra.jfileshare.utils.Helpers.formatDate(childuser.getDateCreation())%></td>
         <td><%= lastlogin%></td>
@@ -36,8 +45,8 @@
         <td class="number"><%= childuser.getSumChildren() == 0 ? "" : childuser.getSumChildren()%></td>
         <td class="number"><%= childuser.getSumFiles() == 0 ? "" : childuser.getSumFiles()%></td>
         <td class="number"><%= FileItem.humanReadable(childuser.getSumFileSize())%></td>
-        <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit this user" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/trashcan_empty.png" alt="delete" title="Delete this user" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/edit/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" class="icon" alt="edit" title="Edit this user" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/user/delete/<%= childuser.getUid()%>"><img src="<%= request.getContextPath()%>/images/trashcan_empty.png" class="icon" alt="delete" title="Delete this user" /></a></td>
     </tr>
 
     <%

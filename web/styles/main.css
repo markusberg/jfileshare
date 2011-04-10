@@ -93,6 +93,12 @@ table th {
     white-space: nowrap;
 }
 
+img.icon {
+    width: 16px;
+    height: 16px;
+    border: 0px;
+}
+
 /* styles for the tabbed menu interface */
 
 #Menu {

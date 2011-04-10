@@ -153,6 +153,10 @@ public class UserAddServlet extends HttpServlet {
                     if (user.save(datasource)) {
                         req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> created");
                         UserItem newUser = new UserItem();
+
+                        // Seed the UserAdd form with a blank default user
+                        req.setAttribute("password1", "");
+                        req.setAttribute("password2", "");
                         newUser.setDaysUntilExpiration(conf.getDaysUserExpiration());
                         req.setAttribute("user", newUser);
                         disp = app.getRequestDispatcher("/templates/UserAdd.jsp");

@@ -95,8 +95,6 @@ public class LoginFilter implements Filter {
                 UserItem user = CheckUser(req, session);
                 if (user != null) {
                     Conf conf = new Conf(ds);
-                    logger.log(Level.INFO, "Password expiration: {0}", conf.getDaysPasswordExpiration());
-                    logger.log(Level.INFO, "User pw change: {0}", user.getDatePasswordChange());
                     if (conf.getDaysPasswordExpiration() != 0 && user.passwordIsOlderThan(conf.getDaysPasswordExpiration())) {
                         // User is forced to update his password
                         // Store the user object in a temporary variable in the session

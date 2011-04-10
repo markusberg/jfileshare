@@ -21,10 +21,10 @@
     <tr class="<%=even ? "even" : "odd"%>">
         <td>
             <a href="<%= file.getURL(request.getContextPath())%>"><%=file.getName()%></a>
-            <%= file.isEnabled() ? "" : "<img src=\"" + request.getContextPath() + "/images/stop.png\" alt=\"disabled\" title=\"This file is disabled for download\" />"%>
-            <%= file.getPwHash() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/lock.png\" alt=\"password\" title=\"This file is password protected\"/>"%>
-            <%= file.getDownloads() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/stock-download.png\" alt=\"download limit\" title=\"Download limit: "+file.getDownloads()+" more download(s) allowed\" />" %>
-            <%= daysFileExpiration==0 && !file.isPermanent() ? "<img src=\"" + request.getContextPath() + "/images/icon-clock.png\" alt=\"file will expire\" title=\"This file will be deleted in " + file.getDaysUntilExpiration() + " day(s)\" />" : "" %>
+            <%= file.isEnabled() ? "" : "<img src=\"" + request.getContextPath() + "/images/stop.png\" class=\"icon\" alt=\"disabled\" title=\"This file is disabled for download\" />"%>
+            <%= file.getPwHash() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/lock.png\" class=\"icon\" alt=\"password\" title=\"This file is password protected\"/>"%>
+            <%= file.getDownloads() == null ? "" : "<img src=\"" + request.getContextPath() + "/images/stock-download.png\" class=\"icon\" alt=\"download limit\" title=\"Download limit: "+file.getDownloads()+" more download(s) allowed\" />" %>
+            <%= daysFileExpiration==0 && !file.isPermanent() ? "<img src=\"" + request.getContextPath() + "/images/icon-clock.png\" class=\"icon\" alt=\"file will expire\" title=\"This file will be deleted in " + file.getDaysUntilExpiration() + " day(s)\" />" : "" %>
         </td>
         <td class="number"><%=FileItem.humanReadable(file.getSize())%></td>
 
@@ -40,8 +40,8 @@
                 <input type="text" class="textentry" name="emailRecipient" id="email_<%= file.getFid()%>"/>
                 <input type="submit" name="submit" value="Notify" /></form>
         </td>
-        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit this file" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/logviewer.png" alt="logviewer" title="View the download logs of this file" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" class=\"icon\" alt="edit" title="Edit this file" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/logviewer.png" class=\"icon\" alt="logviewer" title="View the download logs of this file" /></a></td>
         <td>
             <form id="delete-<%= file.getFid()%>" action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post"></form>
             <a href="javascript:document.getElementById('delete-<%= file.getFid()%>').submit()"><img src="<%= request.getContextPath()%>/images/trashcan_empty.png" alt="delete" title="Delete file" /></a>
