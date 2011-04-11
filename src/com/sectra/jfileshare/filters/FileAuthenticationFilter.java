@@ -73,7 +73,7 @@ public class FileAuthenticationFilter implements Filter {
             }
 
             if (!file.getMd5sum().equals(md5sum)) {
-                throw new NoSuchFileException();
+                throw new NoSuchFileException("File not found. Incomplete link");
             } else if (currentUser != null && currentUser.hasEditAccessTo(file)) {
                 request.setAttribute("file", file);
                 chain.doFilter(request, response);
