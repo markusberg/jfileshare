@@ -610,4 +610,12 @@ public class UserItem implements Serializable {
         long expiration = (long) days * 1000 * 60 * 60 * 24;
         return (this.datePasswordChange.getTime() + expiration) < System.currentTimeMillis();
     }
+
+    /*
+     * Early versions of jfileshare used basic unix crypt when storing passwords
+     * this method is used to weed out those passwords.
+     */
+    public boolean passwordIsOnlyCrypt() {
+        return (this.pwHash.length() < 20);
+    }
 }

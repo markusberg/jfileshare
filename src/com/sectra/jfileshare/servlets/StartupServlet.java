@@ -87,7 +87,7 @@ public class StartupServlet extends HttpServlet {
                         + "where length(pwHash)>20");
                 alterDatabase(dbConn, "update UserItems set datePasswordChange=dateCreation "
                         + "where datePasswordChange is null");
-                alterDatabase(dbConn, "insert into Conf values('daysPasswordExpiration', '180')");
+                alterDatabase(dbConn, "insert into Conf values('daysPasswordExpiration', '0')");
                 alterDatabase(dbConn, "update Conf set `value`='3' where `key`='dbVersion'");
             } else {
                 logger.info("Database is already at level 3 or higher");
