@@ -93,7 +93,7 @@ public class FileNotificationServlet extends HttpServlet {
             buffy.append("\t<msg>Email notification has been sent to &lt;strong&gt;");
             buffy.append(Helpers.htmlSafe(emailRecipient));
             buffy.append("&lt;/strong&gt; regarding the file &lt;strong&gt;\"");
-            buffy.append(file.getName());
+            buffy.append(Helpers.htmlSafe(file.getName()));
             buffy.append("\"&lt;/strong&gt;</msg>\n");
         } catch (NoSuchFileException e) {
             buffy.append("\t<status>warning</status>\n");

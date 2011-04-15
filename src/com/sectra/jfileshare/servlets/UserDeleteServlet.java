@@ -3,6 +3,7 @@ package com.sectra.jfileshare.servlets;
 import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.NoSuchUserException;
+import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -100,7 +101,7 @@ public class UserDeleteServlet extends HttpServlet {
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
                     user.delete(ds, conf.getPathStore());
-                    req.setAttribute("message", "User <strong>\"" + user.getUsername() + "\"</strong> (" + user.getUid().toString() + ") deleted");
+                    req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> (" + user.getUid().toString() + ") deleted");
                     req.setAttribute("tab", "Delete user");
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");
                 }

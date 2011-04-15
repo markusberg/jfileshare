@@ -3,6 +3,7 @@ package com.sectra.jfileshare.ajax;
 import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.UserItem;
+import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.File;
 
@@ -120,6 +121,8 @@ public class FileReceiverServlet extends HttpServlet {
             session.setAttribute("uploadListener", listener);
             upload.setProgressListener(listener);
 
+            File tempFile = File.createTempFile(String.format("%05d-", currentUser.getUid()), null, new File(conf.getPathTemp()));
+            tempFile.deleteOnExit();
             try {
                 FileItem file = new FileItem();
 
@@ -127,8 +130,6 @@ public class FileReceiverServlet extends HttpServlet {
                 FileItemIterator it = upload.getItemIterator(req);
                 FileOutputStream filestream = null;
 
-                File tempFile = File.createTempFile(String.format("%05d-", currentUser.getUid()), null, new File(conf.getPathTemp()));
-                tempFile.deleteOnExit();
                 while (it.hasNext()) {
                     FileItemStream item = it.next();
                     String name = item.getFieldName();
@@ -194,19 +195,22 @@ public class FileReceiverServlet extends HttpServlet {
                     File finalFile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
                     tempFile.renameTo(finalFile);
                     logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});
-                    req.setAttribute("msg", "File <strong>\"" + file.getName() + "\"</strong> uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
+                    req.setAttribute("msg", "File <strong>\"" + Helpers.htmlSafe(file.getName()) + "\"</strong> uploaded successfully. <a href='" + req.getContextPath() + "/file/edit/" + file.getFid() + "'>Click here to edit file</a>");
                     req.setAttribute("javascript", "parent.uploadComplete('info');");
                 } else {
                     req.setAttribute("msg", "Unable to contact the database");
                     req.setAttribute("javascript", "parent.uploadComplete('critical');");
                 }
             } catch (SizeLimitExceededException e) {
+                tempFile.delete();
                 req.setAttribute("msg", "File is too large. The maximum size of file uploads is " + FileItem.humanReadable(conf.getFileSizeMax()));
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (FileUploadException e) {
+                tempFile.delete();
                 req.setAttribute("msg", "Unable to upload file");
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (Exception e) {
+                tempFile.delete();
                 req.setAttribute("msg", "Unable to upload file. ".concat(e.getMessage()));
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } finally {

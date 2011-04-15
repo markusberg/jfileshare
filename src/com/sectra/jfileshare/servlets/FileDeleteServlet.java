@@ -5,6 +5,7 @@ import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.NoSuchUserException;
+import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -82,7 +83,7 @@ public class FileDeleteServlet extends HttpServlet {
                     req.setAttribute("user", user);
                     req.setAttribute("files", user.getFiles(ds));
                     req.setAttribute("users", user.getChildren(ds));
-                    req.setAttribute("message", "File <strong>\"" + file.getName() + "\"</strong> was successfully deleted");
+                    req.setAttribute("message", "File <strong>\"" + Helpers.htmlSafe(file.getName()) + "\"</strong> was successfully deleted");
                     disp = app.getRequestDispatcher("/templates/UserView.jsp");
                 } else {
                     req.setAttribute("message_critical", "File delete failed");

@@ -3,6 +3,7 @@ package com.sectra.jfileshare.servlets;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
+import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -65,7 +66,7 @@ public class FileLogServlet extends HttpServlet {
                 ArrayList downloadLogs = file.getLogs(ds);
                 req.setAttribute("downloadLogs", downloadLogs);
                 if (downloadLogs.isEmpty()) {
-                    req.setAttribute("message", "The file <strong>\"" + file.getName() + "\"</strong> has never been downloaded");
+                    req.setAttribute("message", "The file <strong>\"" + Helpers.htmlSafe(file.getName()) + "\"</strong> has never been downloaded");
                 }
                 req.setAttribute("tab", "File log");
                 disp = app.getRequestDispatcher("/templates/FileLog.jsp");

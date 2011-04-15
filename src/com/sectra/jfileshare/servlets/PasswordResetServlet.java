@@ -156,7 +156,7 @@ public class PasswordResetServlet extends HttpServlet {
                     user.setUsername((String) UserInfo.get("username"));
                     user.setEmail((String) UserInfo.get("emailaddress"));
                     user.save(datasource);
-                    req.setAttribute("message", "Password for user <strong>" + (String) UserInfo.get("username") + "</strong> has been reset. You can now login with your newly selected password.");
+                    req.setAttribute("message", "Password for user <strong>" + Helpers.htmlSafe((String) UserInfo.get("username")) + "</strong> has been reset. You can now login with your newly selected password.");
                     this.DropRecoveryKey((String) UserInfo.get("key"));
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");
                 } else {
