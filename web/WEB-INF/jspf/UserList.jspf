@@ -1,3 +1,4 @@
+<%@page import="com.sectra.jfileshare.utils.Helpers"%>
 <table id="users">
     <tr>
         <th>username</th>
@@ -29,7 +30,7 @@
     %>
     <tr class="<%=even ? "even" : "odd"%>">
         <td>
-            <a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>"><%= childuser.getUsername()%></a>
+            <a href="<%= request.getContextPath()%>/user/view/<%= childuser.getUid()%>"><%= Helpers.htmlSafe(childuser.getUsername())%></a>
     <%
                     if (childuser.isAdmin()) {
     %>
@@ -39,7 +40,7 @@
     %>
         </td>
         <td><%= childuser.getEmail()%></td>
-        <td><%= com.sectra.jfileshare.utils.Helpers.formatDate(childuser.getDateCreation())%></td>
+        <td><%= Helpers.formatDate(childuser.getDateCreation())%></td>
         <td><%= lastlogin%></td>
         <td class="number"><%= childuser.getDateExpiration() == null ? "&nbsp;" : childuser.getDaysUntilExpiration() + " days"%></td>
         <td class="number"><%= childuser.getSumChildren() == 0 ? "" : childuser.getSumChildren()%></td>
