@@ -158,7 +158,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "Filename: " + file.getName() + "\n"
                 + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
                 + file.getURL(conf.getBaseUrl())
-                + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration().equals(1) ? " day)" : " days)")), "utf-8");
+                + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration()==1 ? " day)" : " days)")), "utf-8");
 
         MimeBodyPart mbp2 = new MimeBodyPart();
         mbp2.setContent("<h1>File available for download</h1>"
@@ -169,7 +169,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(file.getSize()) + "</td></tr>\n"
                 + "</table>\n"
                 + "<p><a href=\"" + file.getURL(conf.getBaseUrl()) + "\">" + file.getURL(conf.getBaseUrl()) + "</a>\n"
-                + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration().equals(1) ? " day)" : " days)"))
+                + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration()==1 ? " day)" : " days)"))
                 + "</p>\n", "text/html; charset=utf-8");
 
         /* Possibly attach image to make it look nicer
