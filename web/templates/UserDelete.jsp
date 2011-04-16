@@ -21,10 +21,10 @@
                     <th>Userid: </th><td><%=user.getUid()%></td>
                 </tr>
                 <tr>
-                    <th>Username: </th><td><%=user.getUsername()%></td>
+                    <th>Username: </th><td><%= Helpers.htmlSafe(user.getUsername()) %></td>
                 </tr>
                 <tr>
-                    <th>Email: </th><td><%=user.getEmail()%></td>
+                    <th>Email: </th><td><%= Helpers.htmlSafe(user.getEmail())%></td>
                 </tr>
                 <tr>
                     <th>User Level:</th>
