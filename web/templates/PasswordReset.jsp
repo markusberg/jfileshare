@@ -53,7 +53,7 @@
                 your regular login username.
                 Instructions will be sent to your email address.
             </p>
-            <p>Your username: <input type="text" class="textentry" name="username" id="FocusMe" />
+            <p><strong>Your username: </strong><input type="text" class="textentry" name="username" id="FocusMe" />
                 <input type="submit" value="Reset my password" />
                 <input type="hidden" name="action" value="PasswordResetRequest" />
             </p>
