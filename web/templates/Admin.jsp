@@ -69,7 +69,7 @@
                 <tr>
                     <th>Files expire after: </th>
                     <td><input type="text" class="intentry" name="daysFileExpiration" value="<%= conf.getDaysFileExpiration() == 0 ? "" : conf.getDaysFileExpiration()%>" /> days</td>
-                    <td><span class="note">leave blank to disable file expiration</span></td>
+                    <td><span class="note">Leave blank to disable file expiration</span></td>
                 </tr>
                 <tr>
                     <th>Maximum allowed file size: </th>
@@ -118,7 +118,7 @@
                 <tr>
                     <th>User password expires after: </th>
                     <td><input type="text" class="intentry" name="daysPasswordExpiration" value="<%= conf.getDaysPasswordExpiration() == 0 ? "" : conf.getDaysPasswordExpiration()%>" /> days</td>
-                    <td><span class="note">leave blank to disable password expiration</span></td>
+                    <td><span class="note">Leave blank to disable password expiration</span></td>
                 </tr>
                 <tr>
                     <td colspan="2"><h3>Other</h3></td>
