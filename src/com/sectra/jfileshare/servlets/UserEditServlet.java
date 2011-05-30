@@ -167,7 +167,7 @@ public class UserEditServlet extends HttpServlet {
                         errormessage = errormessage.concat("</ul>\n");
                         req.setAttribute("message_critical", errormessage);
                     } else {
-                        if (user.save(ds)) {
+                        if (user.update(ds, req.getRemoteAddr())) {
                             req.setAttribute("message", "Your changes have been saved");
                             req.setAttribute("password1", "");
                             req.setAttribute("password2", "");

@@ -191,7 +191,7 @@ public class FileReceiverServlet extends HttpServlet {
                 if (conf.getDaysFileExpiration() != 0) {
                     file.setDaysToKeep(conf.getDaysFileExpiration());
                 }
-                if (file.save(ds)) {
+                if (file.create(ds, req.getRemoteAddr())) {
                     File finalFile = new File(conf.getPathStore(), Integer.toString(file.getFid()));
                     tempFile.renameTo(finalFile);
                     logger.log(Level.INFO, "User {0} storing file \"{1}\" in the filestore", new Object[]{currentUser.getUid(), file.getName()});

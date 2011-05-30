@@ -69,8 +69,7 @@ public class FileDownloadServlet extends HttpServlet {
                 outstream.close();
             }
         }
-        String ipAddr = req.getRemoteAddr();
-        file.logDownload(ds, ipAddr);
+        file.logDownload(ds, req.getRemoteAddr());
     }
 
     @Override

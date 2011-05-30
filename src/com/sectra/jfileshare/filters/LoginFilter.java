@@ -76,10 +76,10 @@ public class LoginFilter implements Filter {
 
                 if (errors.isEmpty()) {
                     // Everything checks out. Save user. Move on.
-                    tempuser.save(ds);
+                    tempuser.update(ds, req.getRemoteAddr());
                     session.setAttribute("user", tempuser);
                     session.removeAttribute("tempuser");
-                    tempuser.saveLastLogin(ds);
+                    tempuser.saveLastLogin(ds, req.getRemoteAddr());
                     chain.doFilter(request, response);
                 } else {
                     String errormessage = "Password change failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
@@ -108,7 +108,8 @@ public class LoginFilter implements Filter {
                         // FIXME: I'd like to do a redirect here instead of just forwarding to the correct page.
                         // This makes the backing back to this page not force a re-post of the login form
                         // resp.sendRedirect(urlPattern);
-                        user.saveLastLogin(ds);
+
+                        user.saveLastLogin(ds, req.getRemoteAddr());
                         session.setAttribute("user", user);
                         chain.doFilter(request, response);
                     }

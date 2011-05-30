@@ -150,7 +150,7 @@ public class UserAddServlet extends HttpServlet {
                     // Set the creator and save the user
                     user.setUidCreator(currentUser.getUid());
 
-                    if (user.save(datasource)) {
+                    if (user.create(datasource, req.getRemoteAddr())) {
                         req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> created");
                         UserItem newUser = new UserItem();
 

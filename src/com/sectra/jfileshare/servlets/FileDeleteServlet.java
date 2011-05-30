@@ -67,7 +67,7 @@ public class FileDeleteServlet extends HttpServlet {
 
             if (currentUser.hasEditAccessTo(file)) {
                 Conf conf = (Conf) getServletContext().getAttribute("conf");
-                if (file.delete(ds, conf.getPathStore())) {
+                if (file.delete(ds, conf.getPathStore(), req.getRemoteAddr())) {
                     // FIXME: this is ugly. Should be ajax instead.
                     UserItem user = null;
                     if (currentUser.getUid().equals(file.getOwnerUid())) {

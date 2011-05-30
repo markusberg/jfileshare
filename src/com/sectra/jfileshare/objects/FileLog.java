@@ -3,16 +3,16 @@ package com.sectra.jfileshare.objects;
 import java.util.Date;
 
 public class FileLog {
-    private String ipAddr;
+    private String ipAddress;
     private Date dateAccess;
 
-    FileLog(Date dateAccess, String ipAddr) {
+    FileLog(Date dateAccess, String ipAddress) {
         this.dateAccess = dateAccess;
-        this.ipAddr = ipAddr;
+        this.ipAddress = ipAddress;
     }
 
     public String getIp() {
-        return this.ipAddr;
+        return this.ipAddress;
     }
 
     public Date getTime() {

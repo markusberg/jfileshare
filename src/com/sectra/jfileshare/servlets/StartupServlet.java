@@ -11,9 +11,6 @@ import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -47,6 +44,7 @@ public class StartupServlet extends HttpServlet {
         dbUpdate1();
         dbUpdate2();
         dbUpdate3();
+        dbUpdate4();
     }
 
     private void TableInit() {
@@ -68,6 +66,54 @@ public class StartupServlet extends HttpServlet {
         }
     }
 
+    private void dbUpdate4() {
+        Connection dbConn = null;
+        try {
+            dbConn = datasource.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
+            st.execute();
+            ResultSet rs = st.getResultSet();
+            if (rs.first() && Integer.parseInt(rs.getString("Conf.value")) < 4) {
+                logger.info("Need to update database to db level 4");
+                logger.info("Fixing the uid column of UserItems table");
+                alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN `uid` "
+                        + "`uid` int(10) NOT NULL AUTO_INCREMENT");
+
+                logger.info("Transforming DownloadLogs to more generic Logs table");
+                alterDatabase(dbConn, "alter table DownloadLogs DROP "
+                        + "FOREIGN KEY `DownloadLogs_ibfk_1`");
+                alterDatabase(dbConn, "alter table DownloadLogs DROP "
+                        + "KEY `fid`");
+                alterDatabase(dbConn, "alter table DownloadLogs RENAME TO Logs");
+                alterDatabase(dbConn, "alter table Logs CHANGE COLUMN `time` `date` "
+                        + "timestamp NOT NULL default CURRENT_TIMESTAMP");
+                alterDatabase(dbConn, "alter table Logs CHANGE COLUMN `remote_addr` "
+                        + "`ipAddress` varchar(39) NOT NULL DEFAULT '0.0.0.0' AFTER `date`");
+                alterDatabase(dbConn, "alter table Logs CHANGE COLUMN `fid` "
+                        + "`id` int(10) NOT NULL");
+                alterDatabase(dbConn, "alter table Logs ADD COLUMN "
+                        + "`action` varchar(32) NOT NULL");
+                alterDatabase(dbConn, "alter table Logs ADD COLUMN "
+                        + "`payload` varchar(256) NOT NULL");
+                alterDatabase(dbConn, "update Logs set `action`='download'");
+                alterDatabase(dbConn, "update Logs set Logs.payload=(select size from FileItems where fid=Logs.id) where `action`='download'");
+                alterDatabase(dbConn, "update Conf set `value`='4' where `key`='dbVersion'");
+            } else { 
+                logger.info("Database is already at level 4 or higher");
+            }
+        } catch (SQLException ignored) {
+            logger.info(ignored.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+
+        }
+    }
+
     private void dbUpdate3() {
         Connection dbConn = null;
         try {
@@ -75,7 +121,7 @@ public class StartupServlet extends HttpServlet {
             PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
             st.execute();
             ResultSet rs = st.getResultSet();
-            if (rs.first() && Integer.parseInt(rs.getString("Conf.value"))<3) {
+            if (rs.first() && Integer.parseInt(rs.getString("Conf.value")) < 3) {
                 logger.info("Need to update database to db level 3");
                 // Add column to hold the date of the last password change
                 alterDatabase(dbConn, "alter table UserItems ADD COLUMN datePasswordChange "

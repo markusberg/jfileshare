@@ -136,7 +136,7 @@ public class FileEditServlet extends HttpServlet {
                         file.setPwPlainText(req.getParameter("sPassword"));
                     }
 
-                    file.save(ds);
+                    file.update(ds, req.getRemoteAddr());
                     req.setAttribute("file", file);
                     disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
                 } else {

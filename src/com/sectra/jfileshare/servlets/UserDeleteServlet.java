@@ -100,7 +100,7 @@ public class UserDeleteServlet extends HttpServlet {
                     req.setAttribute("message_critical", "You do not have access to modify that user");
                     disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
                 } else {
-                    user.delete(ds, conf.getPathStore());
+                    user.delete(ds, conf.getPathStore(), req.getRemoteAddr());
                     req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> (" + user.getUid().toString() + ") deleted");
                     req.setAttribute("tab", "Delete user");
                     disp = app.getRequestDispatcher("/templates/Blank.jsp");

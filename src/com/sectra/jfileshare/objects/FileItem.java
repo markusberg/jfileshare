@@ -234,63 +234,95 @@ public class FileItem implements Serializable {
         this.enabled = enabled;
     }
 
-    public boolean save(DataSource ds) {
+    public boolean create(DataSource ds, String ipAddress) {
+        Connection dbConn = null;
+        PreparedStatement st = null;
+        try {
+            dbConn = ds.getConnection();
+            st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            st.setString(1, this.name);
+            st.setString(2, this.mimetype);
+            st.setDouble(3, this.size);
+            st.setString(4, this.md5sum);
+            if (this.downloads == null) {
+                st.setNull(5, java.sql.Types.INTEGER);
+            } else {
+                st.setInt(5, this.downloads);
+            }
+            if (this.pwHash == null) {
+                st.setNull(6, java.sql.Types.VARCHAR);
+            } else {
+                st.setString(6, this.pwHash);
+            }
+            if (this.dateExpiration == null) {
+                st.setNull(7, java.sql.Types.TIMESTAMP);
+            } else {
+                st.setTimestamp(7, this.dateExpiration);
+            }
+            st.setInt(8, this.ownerUid);
+            st.setBoolean(9, this.enabled);
+            st.setBoolean(10, this.allowTinyUrl);
+            st.executeUpdate();
+            ResultSet rs = st.getGeneratedKeys();
+            while (rs.next()) {
+                this.fid = rs.getInt(1);
+            }
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'upload',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.fid);
+            st.setString(3, Long.toString(this.size));
+            st.executeUpdate();
+
+            st.close();
+            return true;
+
+        } catch (SQLException e) {
+            logger.severe(e.toString());
+            return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    public boolean update(DataSource ds, String ipAddress) {
         Connection dbConn = null;
         PreparedStatement st = null;
         try {
             dbConn = ds.getConnection();
 
-            if (this.fid == null) {
-                st = dbConn.prepareStatement("insert into FileItems values(NULL,?,?,?,?,?,?,now(),?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-                st.setString(1, this.name);
-                st.setString(2, this.mimetype);
-                st.setDouble(3, this.size);
-                st.setString(4, this.md5sum);
-                if (this.downloads == null) {
-                    st.setNull(5, java.sql.Types.INTEGER);
-                } else {
-                    st.setInt(5, this.downloads);
-                }
-                if (this.pwHash == null) {
-                    st.setNull(6, java.sql.Types.VARCHAR);
-                } else {
-                    st.setString(6, this.pwHash);
-                }
-                if (this.dateExpiration == null) {
-                    st.setNull(7, java.sql.Types.TIMESTAMP);
-                } else {
-                    st.setTimestamp(7, this.dateExpiration);
-                }
-                st.setInt(8, this.ownerUid);
-                st.setBoolean(9, this.enabled);
-                st.setBoolean(10, this.allowTinyUrl);
-                st.executeUpdate();
-                ResultSet rs = st.getGeneratedKeys();
-                while (rs.next()) {
-                    this.fid = rs.getInt(1);
-                }
+            st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,pwHash=?,allowTinyUrl=? where fid=?");
+            if (this.downloads == null) {
+                st.setNull(1, java.sql.Types.INTEGER);
             } else {
-                st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,pwHash=?,allowTinyUrl=? where fid=?");
-                if (this.downloads == null) {
-                    st.setNull(1, java.sql.Types.INTEGER);
-                } else {
-                    st.setInt(1, this.downloads);
-                }
-                if (dateExpiration == null) {
-                    st.setNull(2, java.sql.Types.TIMESTAMP);
-                } else {
-                    st.setTimestamp(2, new Timestamp(this.dateExpiration.getTime()));
-                }
-                st.setBoolean(3, this.enabled);
-                if (this.pwHash == null) {
-                    st.setNull(4, java.sql.Types.VARCHAR);
-                } else {
-                    st.setString(4, this.pwHash);
-                }
-                st.setBoolean(5, this.allowTinyUrl);
-                st.setInt(6, this.fid);
-                st.executeUpdate();
+                st.setInt(1, this.downloads);
             }
+            if (dateExpiration == null) {
+                st.setNull(2, java.sql.Types.TIMESTAMP);
+            } else {
+                st.setTimestamp(2, new Timestamp(this.dateExpiration.getTime()));
+            }
+            st.setBoolean(3, this.enabled);
+            if (this.pwHash == null) {
+                st.setNull(4, java.sql.Types.VARCHAR);
+            } else {
+                st.setString(4, this.pwHash);
+            }
+            st.setBoolean(5, this.allowTinyUrl);
+            st.setInt(6, this.fid);
+            st.executeUpdate();
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'file edit',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.fid);
+            st.setString(3, this.name);
+            st.executeUpdate();
+
             st.close();
             return true;
 
@@ -313,7 +345,7 @@ public class FileItem implements Serializable {
      * @param pathFileStore
      * @return Were any errors encountered during the delete operation?
      */
-    public boolean delete(DataSource ds, String pathFileStore) {
+    public boolean delete(DataSource ds, String pathFileStore, String ipAddress) {
         File realfile = new File(pathFileStore + "/" + Integer.toString(this.fid));
         realfile.delete();
 
@@ -323,6 +355,13 @@ public class FileItem implements Serializable {
             PreparedStatement st = dbConn.prepareStatement("delete from FileItems where fid=?");
             st.setInt(1, this.fid);
             st.executeUpdate();
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'file delete',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.fid);
+            st.setString(3, this.name);
+            st.executeUpdate();
+
             st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
@@ -338,21 +377,22 @@ public class FileItem implements Serializable {
         return true;
     }
 
-    public void logDownload(DataSource ds, String ipAddr) {
+    public void logDownload(DataSource ds, String ipAddress) {
         logger.info("Logging download");
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st1 = dbConn.prepareStatement("UPDATE FileItems set downloads=downloads-1 where fid=? and downloads>0");
-            st1.setInt(1, this.fid);
-            st1.executeUpdate();
+            PreparedStatement st = dbConn.prepareStatement("UPDATE FileItems set downloads=downloads-1 where fid=? and downloads>0");
+            st.setInt(1, this.fid);
+            st.executeUpdate();
 
-            st1 = dbConn.prepareStatement("INSERT INTO DownloadLogs VALUES(now(),?,?)");
-            st1.setInt(1, this.fid);
-            st1.setString(2, ipAddr);
-            st1.executeUpdate();
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'download',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.fid);
+            st.setString(3, Long.toString(this.size));
+            st.executeUpdate();
 
-            st1.close();
+            st.close();
         } catch (SQLException e) {
             logger.severe(e.toString());
         } finally {
@@ -414,7 +454,7 @@ public class FileItem implements Serializable {
             unit++;
             size = size / 1024;
         }
-        int[] result = { unit, size.intValue() };
+        int[] result = {unit, size.intValue()};
         return result;
     }
 
@@ -423,11 +463,11 @@ public class FileItem implements Serializable {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("SELECT * FROM DownloadLogs WHERE fid=? order by time DESC");
+            PreparedStatement st = dbConn.prepareStatement("SELECT date, ipAddress FROM Logs WHERE `id`=? AND `action`='download' order by `date` DESC");
             st.setInt(1, this.fid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                FileLog log = new FileLog(rs.getTimestamp(1), rs.getString(3));
+                FileLog log = new FileLog(rs.getTimestamp(1), rs.getString(2));
                 logs.add(log);
             }
         } catch (SQLException e) {

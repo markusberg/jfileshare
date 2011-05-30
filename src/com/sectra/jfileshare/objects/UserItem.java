@@ -274,41 +274,73 @@ public class UserItem implements Serializable {
         return false;
     }
 
-    public boolean save(DataSource ds) {
+    public boolean create(DataSource ds, String ipAddress) {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
             PreparedStatement st;
-            if (this.uid == null) {
-                st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,now(),?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
-                st.setInt(1, this.usertype);
-                st.setString(2, this.username);
-                st.setString(3, this.pwHash);
-                st.setString(4, this.email);
-                st.setTimestamp(5, this.dateExpiration);
-                if (this.uidCreator == null) {
-                    st.setNull(6, java.sql.Types.NULL);
-                } else {
-                    st.setInt(6, this.uidCreator);
-                }
+
+            st = dbConn.prepareStatement("insert into UserItems values(NULL,?,?,?,now(),?,now(),NULL,?,?)", Statement.RETURN_GENERATED_KEYS);
+            st.setInt(1, this.usertype);
+            st.setString(2, this.username);
+            st.setString(3, this.pwHash);
+            st.setString(4, this.email);
+            st.setTimestamp(5, this.dateExpiration);
+            if (this.uidCreator == null) {
+                st.setNull(6, java.sql.Types.NULL);
             } else {
-                st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,pwHash=?,datePasswordChange=?,email=?,dateExpiration=? where uid=?");
-                st.setInt(1, this.usertype);
-                st.setString(2, this.username);
-                st.setString(3, this.pwHash);
-                st.setTimestamp(4, this.datePasswordChange);
-                st.setString(5, this.email);
-                st.setTimestamp(6, this.dateExpiration);
-                st.setInt(7, this.uid);
+                st.setInt(6, this.uidCreator);
             }
 
             st.executeUpdate();
-            if (this.uid == null) {
-                ResultSet rs = st.getGeneratedKeys();
-                while (rs.next()) {
-                    this.uid = rs.getInt(1);
+
+            ResultSet rs = st.getGeneratedKeys();
+            while (rs.next()) {
+                this.uid = rs.getInt(1);
+            }
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'create user',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.uid);
+            st.setString(3, this.username + " (" + this.uid.toString() + ")");
+            st.executeUpdate();
+            st.close();
+
+            return true;
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Unable to connect to database: {0}", e.toString());
+            return false;
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
                 }
             }
+        }
+    }
+
+    public boolean update(DataSource ds, String ipAddress) {
+        Connection dbConn = null;
+        try {
+            dbConn = ds.getConnection();
+            PreparedStatement st;
+            st = dbConn.prepareStatement("update UserItems set usertype=?,username=?,pwHash=?,datePasswordChange=?,email=?,dateExpiration=? where uid=?");
+            st.setInt(1, this.usertype);
+            st.setString(2, this.username);
+            st.setString(3, this.pwHash);
+            st.setTimestamp(4, this.datePasswordChange);
+            st.setString(5, this.email);
+            st.setTimestamp(6, this.dateExpiration);
+            st.setInt(7, this.uid);
+            st.executeUpdate();
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'user edit',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.uid);
+            st.setString(3, this.username);
+            st.executeUpdate();
+
             st.close();
             return true;
         } catch (SQLException e) {
@@ -329,18 +361,13 @@ public class UserItem implements Serializable {
      * @param ds DataSource to use
      * @param pathFileStore Physical on-disk path to the filestore
      */
-    public void delete(DataSource ds, String pathFileStore) {
+    public void delete(DataSource ds, String pathFileStore, String ipAddress) {
         Connection dbConn = null;
-        ArrayList<FileItem> aFiles = this.getFiles(ds);
-        if (aFiles.size() > 0) {
-            // Delete all files belonging to this user
-            logger.log(Level.INFO, "Deleting {0} file(s) belonging to {1}", new Object[]{aFiles.size(), this.getUserInfo()});
-            // Iterator<FileItem> it = aFiles.iterator();
-            for (FileItem oFile : aFiles) {
-                // Delete the files on disk
-                // CASCADE DELETE will take care of the database
-                File fileondisk = new File(pathFileStore + "/" + oFile.getFid());
-                fileondisk.delete();
+        ArrayList<FileItem> files = this.getFiles(ds);
+        if (!files.isEmpty()) {
+            logger.log(Level.INFO, "Deleting {0} file(s) belonging to {1}", new Object[]{files.size(), this.getUserInfo()});
+            for (FileItem file : files) {
+                file.delete(ds, pathFileStore, ipAddress);
             }
         } else {
             logger.log(Level.INFO, "No files owned by user {0}", this.getUserInfo());
@@ -352,6 +379,13 @@ public class UserItem implements Serializable {
             PreparedStatement st = dbConn.prepareStatement("delete from UserItems where uid=?");
             st.setInt(1, this.uid);
             st.executeUpdate();
+
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'user delete',?)");
+            st.setString(1, ipAddress);
+            st.setInt(2, this.uid);
+            st.setString(3, this.username);
+            st.executeUpdate();
+
             st.close();
 
             logger.log(Level.INFO, "User {0} has now been deleted", this.getUserInfo());
@@ -386,13 +420,20 @@ public class UserItem implements Serializable {
         return (int) Math.round(daysLeft);
     }
 
-    public boolean saveLastLogin(DataSource ds) {
+    public boolean saveLastLogin(DataSource ds, String ipAddress) {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
             PreparedStatement ps = dbConn.prepareStatement("UPDATE UserItems set dateLastLogin=now() where uid=?");
             ps.setInt(1, this.uid);
             ps.executeUpdate();
+
+            ps = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'login',?)");
+            ps.setString(1, ipAddress);
+            ps.setInt(2, this.uid);
+            ps.setString(3, this.username);
+            ps.executeUpdate();
+
             ps.close();
             return true;
         } catch (SQLException e) {
