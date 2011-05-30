@@ -76,11 +76,11 @@ public class VacuumCleaner extends HttpServlet {
 
         // Delete expired users
         ArrayList<UserItem> users = (ArrayList<UserItem>) getExpiredUsers(ds);
-        if (users.size() > 0) {
+        if (!users.isEmpty()) {
             logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", users.size());
         }
         for (UserItem user : users) {
-            user.delete(ds, getPathStore());
+            user.delete(ds, getPathStore(), "vacuum");
         }
 
         // Delete expired files
@@ -89,7 +89,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.log(Level.INFO, "Vacuuming {0} expired file(s) from the database", files.size());
         }
         for (FileItem file : files) {
-            file.delete(ds, getPathStore());
+            file.delete(ds, getPathStore(), "vacuum");
         }
 
         // Delete password requests older than 2 days
@@ -112,7 +112,7 @@ public class VacuumCleaner extends HttpServlet {
         String pathFileStore = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select value from Conf where `key`=\"pathFileStore\"");
+            PreparedStatement st = dbConn.prepareStatement("select value from Conf where `key`=\"pathStore\"");
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
                 pathFileStore = rs.getString("Conf.value");
