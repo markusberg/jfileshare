@@ -27,7 +27,7 @@
                 <%=request.getAttribute("uniqueLogins")%> different users</li>
             <li><%=request.getAttribute("uploads")%> files uploaded to the server
                 (<%=request.getAttribute("bytesUploads")%>)</li>
-            <li><%=request.getAttribute("downloads")%> files downloaded from the server
+            <li><%=request.getAttribute("downloads")%> downloads from the server
                 (<%=request.getAttribute("bytesDownloads")%>)</li>
         </ul>
         <%                        }
