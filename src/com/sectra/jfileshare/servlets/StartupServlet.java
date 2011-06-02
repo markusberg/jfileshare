@@ -97,6 +97,7 @@ public class StartupServlet extends HttpServlet {
                         + "`payload` varchar(256) NOT NULL");
                 alterDatabase(dbConn, "update Logs set `action`='download'");
                 alterDatabase(dbConn, "update Logs set Logs.payload=(select size from FileItems where fid=Logs.id) where `action`='download'");
+                alterDatabase(dbConn, "insert into Conf values('daysLogRetention', '7')");
                 alterDatabase(dbConn, "update Conf set `value`='4' where `key`='dbVersion'");
             } else { 
                 logger.info("Database is already at level 4 or higher");

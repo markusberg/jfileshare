@@ -1,5 +1,6 @@
 package com.sectra.jfileshare.servlets;
 
+import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import java.io.IOException;
 import java.sql.Connection;
@@ -50,27 +51,33 @@ public class AboutServlet extends HttpServlet {
         req.setAttribute("tab", "About");
         disp = app.getRequestDispatcher("/templates/About.jsp");
         HttpSession session = req.getSession();
+        Conf conf = (Conf) app.getAttribute("conf");
+
+        req.setAttribute("daysLogRetention", conf.getDaysLogRetention());
 
         if (session.getAttribute("user") != null) {
             Connection dbConn = null;
             PreparedStatement st = null;
             try {
                 dbConn = ds.getConnection();
-                st = dbConn.prepareStatement("select cast(count(1) as char) as logins, cast(count(distinct payload) as char) as uniqueLogins from Logs where action=\"login\" and date > (now() - INTERVAL 7 DAY)");
+                st = dbConn.prepareStatement("select cast(count(1) as char) as logins, cast(count(distinct payload) as char) as uniqueLogins from Logs where action=\"login\" and date > (now() - INTERVAL ? DAY)");
+                st.setInt(1, conf.getDaysLogRetention());
                 ResultSet rs = st.executeQuery();
                 if (rs.first()) {
                     req.setAttribute("logins", rs.getString("logins"));
                     req.setAttribute("uniqueLogins", rs.getString("uniqueLogins"));
                 }
 
-                st = dbConn.prepareStatement("select cast(count(1) as char) as downloads, sum(cast(payload as unsigned)) as bytesDownloads from Logs where action=\"download\" and date > (now() - INTERVAL 7 DAY)");
+                st = dbConn.prepareStatement("select cast(count(1) as char) as downloads, sum(cast(payload as unsigned)) as bytesDownloads from Logs where action=\"download\" and date > (now() - INTERVAL ? DAY)");
+                st.setInt(1, conf.getDaysLogRetention());
                 rs = st.executeQuery();
                 if (rs.first()) {
                     req.setAttribute("downloads", rs.getString("downloads"));
                     req.setAttribute("bytesDownloads", FileItem.humanReadable(rs.getLong("bytesDownloads")));
                 }
 
-                st = dbConn.prepareStatement("select cast(count(1) as char) as uploads, sum(cast(payload as unsigned)) as bytesUploads from Logs where action=\"upload\" and date > (now() - INTERVAL 7 DAY)");
+                st = dbConn.prepareStatement("select cast(count(1) as char) as uploads, sum(cast(payload as unsigned)) as bytesUploads from Logs where action=\"upload\" and date > (now() - INTERVAL ? DAY)");
+                st.setInt(1, conf.getDaysLogRetention());
                 rs = st.executeQuery();
                 if (rs.first()) {
                     req.setAttribute("uploads", rs.getString("uploads"));

@@ -73,6 +73,9 @@ public class VacuumCleaner extends HttpServlet {
     private void vacuum() {
         // logger.info("Running scheduled vacuum of database");
         Conf conf = (Conf) getServletContext().getAttribute("conf");
+        if (conf == null) {
+            conf = new Conf(ds);
+        }
 
         // Delete expired users
         ArrayList<UserItem> users = (ArrayList<UserItem>) getExpiredUsers(ds);
@@ -80,7 +83,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", users.size());
         }
         for (UserItem user : users) {
-            user.delete(ds, getPathStore(), "vacuum");
+            user.delete(ds, conf.getPathStore(), "vacuum");
         }
 
         // Delete expired files
@@ -89,7 +92,7 @@ public class VacuumCleaner extends HttpServlet {
             logger.log(Level.INFO, "Vacuuming {0} expired file(s) from the database", files.size());
         }
         for (FileItem file : files) {
-            file.delete(ds, getPathStore(), "vacuum");
+            file.delete(ds, conf.getPathStore(), "vacuum");
         }
 
         // Delete password requests older than 2 days
@@ -105,31 +108,24 @@ public class VacuumCleaner extends HttpServlet {
             dbConn.close();
         } catch (SQLException e) {
         }
-    }
 
-    private String getPathStore() {
-        Connection dbConn = null;
-        String pathFileStore = null;
+        // Clean out old log entries
+        // except file download logs where the files still exist on the server
         try {
-            dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select value from Conf where `key`=\"pathStore\"");
-            ResultSet rs = st.executeQuery();
-            if (rs.first()) {
-                pathFileStore = rs.getString("Conf.value");
+            Connection dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("DELETE FROM Logs where date < ( now() - INTERVAL ? DAY ) and (`action`!=? or id not in (select fid from FileItems))");
+            st.setInt(1, conf.getDaysLogRetention());
+            st.setString(2, "download");
+            int i = st.executeUpdate();
+
+            if (i > 0) {
+                logger.log(Level.INFO, "Vacuuming {0} log entries", Integer.toString(i));
             }
             st.close();
+            dbConn.close();
         } catch (SQLException e) {
-            logger.severe(e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException ignore) {
-                }
-            }
         }
-        return pathFileStore;
-    }
+}
 
     private ArrayList<UserItem> getExpiredUsers(DataSource ds) {
         ArrayList<UserItem> users = new ArrayList<UserItem>();

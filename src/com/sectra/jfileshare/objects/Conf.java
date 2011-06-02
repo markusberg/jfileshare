@@ -25,6 +25,7 @@ public class Conf {
     private String brandingLogo;
     private String contextPath;
     private int daysFileExpiration;
+    private int daysLogRetention;
     private int daysPasswordExpiration;
     private int daysUserExpiration;
     private int dbVersion;
@@ -51,6 +52,7 @@ public class Conf {
             setDbVersion(Integer.parseInt(fetchValueFromDatabase(st, "dbVersion")));
             setDebug(Boolean.parseBoolean(fetchValueFromDatabase(st, "debug")));
             setDaysFileExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysFileExpiration")));
+            setDaysLogRetention(Integer.parseInt(fetchValueFromDatabase(st, "daysLogRetention")));
             setDaysPasswordExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysPasswordExpiration")));
             setDaysUserExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysUserExpiration")));
             setFileSizeMax(Long.parseLong(fetchValueFromDatabase(st, "fileSizeMax")));
@@ -112,6 +114,14 @@ public class Conf {
 
     public void setDaysFileExpiration(int daysFileExpiration) {
         this.daysFileExpiration = daysFileExpiration;
+    }
+
+    public int getDaysLogRetention() {
+        return daysLogRetention;
+    }
+
+    public void setDaysLogRetention(int daysLogRetention) {
+        this.daysLogRetention = daysLogRetention;
     }
 
     public int getDaysPasswordExpiration() {
@@ -210,6 +220,7 @@ public class Conf {
             commitKeyValuePair(st, "brandingDomain", brandingDomain);
             commitKeyValuePair(st, "brandingLogo", brandingLogo);
             commitKeyValuePair(st, "daysFileExpiration", Integer.toString(daysFileExpiration));
+            commitKeyValuePair(st, "daysLogRetention", Integer.toString(daysLogRetention));
             commitKeyValuePair(st, "daysPasswordExpiration", Integer.toString(daysPasswordExpiration));
             commitKeyValuePair(st, "daysUserExpiration", Integer.toString(daysUserExpiration));
             commitKeyValuePair(st, "debug", debug ? "true" : "false");

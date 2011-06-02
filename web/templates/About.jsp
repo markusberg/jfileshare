@@ -21,7 +21,7 @@
                     if (session.getAttribute("user") != null) {
         %>
         <h1>Stats</h1>
-        <p>In the last seven days, there have been:</p>
+        <p>In the last <%=request.getAttribute("daysLogRetention")%> days, there have been:</p>
         <ul>
             <li><%=request.getAttribute("logins")%> logins by
                 <%=request.getAttribute("uniqueLogins")%> different users</li>
