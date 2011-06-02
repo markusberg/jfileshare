@@ -52,7 +52,7 @@ public class FileDownloadServlet extends HttpServlet {
 
         logger.info("Preparing to stream file");
         resp.setContentType(file.getType());
-        String disposition = req.getServletPath().equals("/file/get") ? "inline" : "attachment";
+        String disposition = req.getServletPath().equals("/file/get") && "image".equals(file.getType().substring(0,5)) ? "inline" : "attachment";
         resp.setHeader("Content-disposition", disposition+"; filename=\"" + file.getName() + "\"");
         resp.setHeader("Content-length", Long.toString(fileOnDisk.length()));
 
