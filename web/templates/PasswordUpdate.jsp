@@ -37,6 +37,7 @@
                 <tr>
                     <td></td>
                     <td>
+                        <input type="hidden" name="action" value="forcedPasswordUpdate" />
                         <input type="hidden" name="urlPattern" value="<%= request.getAttribute("urlPattern")%>" />
                         <input type="submit" name="update" value="Change password" />
                     </td>

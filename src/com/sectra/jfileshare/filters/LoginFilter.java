@@ -64,6 +64,14 @@ public class LoginFilter implements Filter {
         } else {
             String urlPattern = req.getServletPath() + (req.getPathInfo() == null ? "" : req.getPathInfo());
 
+            // This session was used for a forced password update, but that
+            // action was never completed. 
+            // Delete the tempuser object from the session:
+            if (!"forcedPasswordUpdate".equals(request.getParameter("action"))
+                    && session.getAttribute("tempuser") != null) {
+                session.removeAttribute("tempuser");
+            }
+
             // We're in the middle of a forced password update
             // validate provided passwords
             if (session.getAttribute("tempuser") != null) {
