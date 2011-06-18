@@ -20,10 +20,10 @@
                         LogoutTimer.forceLogout();
                     } else {
                         var msg = xml.getElementsByTagName("msg")[0].firstChild.data;
+                        var domStacktrace = xml.getElementsByTagName("stacktrace")[0].firstChild;
                         var stacktrace = '';
-                        var xmlStacktrace = xml.getElementsByTagName("stacktrace")[0];
-                        if (xmlStacktrace != undefined) {
-                            stacktrace = xmlStacktrace.firstChild.data;
+                        if ( domStacktrace != null) {
+                            stacktrace = domStacktrace.data;
                         }
                         generateMessageBox(status, msg, stacktrace);
                     }

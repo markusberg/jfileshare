@@ -1,5 +1,9 @@
 package com.sectra.jfileshare.ajax;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.fileupload.ProgressListener;
 
 /**
@@ -9,6 +13,7 @@ import org.apache.commons.fileupload.ProgressListener;
  *
  * @author markus
  */
+@XmlRootElement()
 public class FileUploadListener implements ProgressListener {
 
     private volatile long bytesRead = 0L,
@@ -27,10 +32,12 @@ public class FileUploadListener implements ProgressListener {
         item = anItem;
     }
 
+    @XmlElement()
     public long getBytesRead() {
         return bytesRead;
     }
 
+    @XmlElement()
     public long getContentLength() {
         return contentLength;
     }

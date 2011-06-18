@@ -15,14 +15,11 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.Address;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.event.TransportListener;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -42,11 +39,25 @@ import javax.servlet.ServletException;
 
 import javax.sql.DataSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class FileNotificationServlet extends HttpServlet {
+
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(FileNotificationServlet.class.getName());
-    
+
     @Override
     public void init(ServletConfig config)
             throws ServletException {
@@ -63,14 +74,14 @@ public class FileNotificationServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        resp.setContentType("text/xml; charset=UTF-8");
         PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession();
-        StringBuilder buffy = new StringBuilder();
-        resp.setContentType("text/xml;charset=UTF-8");
-        buffy.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        buffy.append("<response>\n");
-
         UserItem currentUser = (UserItem) session.getAttribute("user");
+
+        String status;
+        String message = "";
+        String stacktrace = "";
 
         try {
             int iFid = Integer.parseInt(req.getParameter("iFid"));
@@ -89,43 +100,67 @@ public class FileNotificationServlet extends HttpServlet {
 
             // Everything checks out. Let's send the email notification
             sendEmailNotification(file, currentUser, emailValidated);
-            buffy.append("\t<status>info</status>\n");
-            buffy.append("\t<msg>Email notification has been sent to &lt;strong&gt;");
-            buffy.append(Helpers.htmlSafe(emailRecipient));
-            buffy.append("&lt;/strong&gt; regarding the file &lt;strong&gt;\"");
-            buffy.append(Helpers.htmlSafe(file.getName()));
-            buffy.append("\"&lt;/strong&gt;</msg>\n");
+            status = "info";
+            message = "Email notification has been sent to <strong>"
+                    + emailRecipient + "</strong> regarding the file "
+                    + "<strong>\"" + file.getName() + "\"</strong>";
         } catch (NoSuchFileException e) {
-            buffy.append("\t<status>warning</status>\n");
-            buffy.append("\t<msg>".concat(e.getMessage()).concat("</msg>\n"));
+            status = "warning";
+            message = e.getMessage();
         } catch (SQLException e) {
-            buffy.append("\t<status>critical</status>\n");
-            buffy.append("\t<msg>".concat(e.getMessage()).concat("</msg>\n"));
+            status = "critical";
+            message = e.getMessage();
         } catch (AddressException e) {
-            buffy.append("\t<status>warning</status>\n");
-            buffy.append("\t<msg>Unable to send email. ".concat(e.getMessage()).concat("</msg>\n"));
+            status = "warning";
+            message = "Unable to send email. " + e.getMessage();
         } catch (MessagingException e) {
             logger.log(Level.WARNING, "Unable to send notification email: {0}", e.toString());
-            buffy.append("\t<status>critical</status>\n");
-            buffy.append("\t<msg>Failed to send email notification. ");
-            buffy.append("Reason unknown. Please try again later, or contact ");
-            buffy.append("the server administrator.</msg>\n");
-            buffy.append("\t<stacktrace>");
-            buffy.append(e.toString().concat("</stacktrace>\n"));
+            status = "critical";
+            message = "Failed to send email notification."
+                    + "Reason unknown. Please try again later, or contact "
+                    + "the server administrator.";
+            stacktrace = e.toString();
         } catch (NullPointerException ignore) {
             // This will happen if there's no currentUser object
             // We'll just send a sessionexpired-message to the UA to
             // trigger a logout.
-            buffy.append("\t<status>sessionexpired</status>\n");
+            status = "sessionexpired";
         } catch (Exception e) {
-            buffy.append("\t<status>warning</status>\n");
-            buffy.append("\t<msg>Unknown error</msg>\n");
-            buffy.append("\t<stacktrace>".concat(e.getMessage()).concat("</stacktrace>\n"));
+            status = "warning";
+            message = "Unknown error";
+            stacktrace = e.toString();
         }
 
-        buffy.append("</response>\n");
+        try {
+            // Create xml response document
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+            Element rootElement = (Element) doc.createElement("notificationResponse");
+            doc.appendChild(rootElement);
 
-        out.println(buffy.toString());
+            Element xmlStatus = doc.createElement("status");
+            xmlStatus.appendChild(doc.createTextNode(status));
+            rootElement.appendChild(xmlStatus);
+
+            Element xmlMessage = doc.createElement("msg");
+            xmlMessage.appendChild(doc.createTextNode(message));
+            rootElement.appendChild(xmlMessage);
+
+            Element xmlStacktrace = doc.createElement("stacktrace");
+            xmlStacktrace.appendChild(doc.createTextNode(stacktrace));
+            rootElement.appendChild(xmlStacktrace);
+
+            // stream xml content to client
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(out);
+            transformer.transform(source, result);
+        } catch (ParserConfigurationException pce) {
+        } catch (TransformerException tfe) {
+        }
+
         out.flush();
         out.close();
     }
@@ -158,7 +193,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "Filename: " + file.getName() + "\n"
                 + "Filesize: " + FileItem.humanReadable(file.getSize()) + "\n\n"
                 + file.getURL(conf.getBaseUrl())
-                + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration()==1 ? " day)" : " days)")), "utf-8");
+                + (file.getDateExpiration() == null ? "" : "\n(note: this link will expire in " + file.getDaysUntilExpiration() + (file.getDaysUntilExpiration() == 1 ? " day)" : " days)")), "utf-8");
 
         MimeBodyPart mbp2 = new MimeBodyPart();
         mbp2.setContent("<h1>File available for download</h1>"
@@ -169,7 +204,7 @@ public class FileNotificationServlet extends HttpServlet {
                 + "<tr><th style=\"text-align: right;\">Filesize:</th><td>" + FileItem.humanReadable(file.getSize()) + "</td></tr>\n"
                 + "</table>\n"
                 + "<p><a href=\"" + file.getURL(conf.getBaseUrl()) + "\">" + file.getURL(conf.getBaseUrl()) + "</a>\n"
-                + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + ( file.getDaysUntilExpiration()==1 ? " day)" : " days)"))
+                + (file.getDateExpiration() == null ? "" : "<br/>(note: this link will expire in " + file.getDaysUntilExpiration() + (file.getDaysUntilExpiration() == 1 ? " day)" : " days)"))
                 + "</p>\n", "text/html; charset=utf-8");
 
         /* Possibly attach image to make it look nicer
@@ -189,7 +224,7 @@ public class FileNotificationServlet extends HttpServlet {
         // mp.addBodyPart(mbp3);
 
         msg.setContent(mp);
-        SMTPTransport transport = (SMTPTransport)session.getTransport("smtp");
+        SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");
         transport.connect();
         transport.sendMessage(msg, msg.getAllRecipients());
         transport.close();

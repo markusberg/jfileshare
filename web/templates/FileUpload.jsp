@@ -27,11 +27,9 @@
                     if ( oAjax.status == 200 ) {
                         var xml = oAjax.responseXML;
                         var bytesRead = xml.getElementsByTagName("bytesRead")[0].firstChild.data;
-                        var bytesTotal = xml.getElementsByTagName("bytesTotal")[0].firstChild.data;
-                        updateProgress(bytesRead, bytesTotal);
+                        var contentLength = xml.getElementsByTagName("contentLength")[0].firstChild.data;
+                        updateProgress(bytesRead, contentLength);
                         oAjax = null;
-                    } else {
-                        alert( "Error: " + oAjax.statusText );
                     }
                 }
             }
@@ -59,15 +57,15 @@
                 return (iBytes/1024/1024).toFixed(2) + " MiB";
             }
 
-            function updateProgress(bytesRead, bytesTotal) {
+            function updateProgress(bytesRead, contentLength) {
                 var completion;
                 var statusText;
-                if (bytesTotal == 0) {
+                if (contentLength == 0) {
                     completion = 0;
                     statusText = "Not yet started";
                 } else {
-                    completion = bytesRead/bytesTotal;
-                    statusText = Math.floor(completion*100) + "% (" + humanReadable(bytesRead) + " / " + humanReadable(bytesTotal) + ")";
+                    completion = bytesRead/contentLength;
+                    statusText = Math.floor(completion*100) + "% (" + humanReadable(bytesRead) + " / " + humanReadable(contentLength) + ")";
                 }
 
                 var iWidth = domProgressBar.offsetWidth-2;

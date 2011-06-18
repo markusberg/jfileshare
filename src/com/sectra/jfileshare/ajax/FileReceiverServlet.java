@@ -35,6 +35,9 @@ import javax.servlet.ServletException;
 
 import javax.sql.DataSource;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -74,32 +77,21 @@ public class FileReceiverServlet extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter out = resp.getWriter();
         HttpSession session = req.getSession();
-        FileUploadListener listener = null;
-        StringBuilder buffy = new StringBuilder();
-        long bytesRead = 0L;
-        long contentLength = 0L;
-        // logger.info("Upload progress is running");
 
-        // Make sure the session has started
-        if (session != null) {
-            listener = (FileUploadListener) session.getAttribute("uploadListener");
-        }
         resp.setContentType("text/xml;charset=UTF-8");
-        buffy.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        buffy.append("<response>\n");
 
+        FileUploadListener listener = (FileUploadListener) session.getAttribute("uploadListener");
         if (listener == null) {
-            buffy.append("\t<bytesRead>0</bytesRead>\n");
-            buffy.append("\t<bytesTotal>0</bytesTotal>\n");
-        } else {
-            bytesRead = listener.getBytesRead();
-            contentLength = listener.getContentLength();
-            buffy.append("\t<bytesRead>").append(bytesRead).append("</bytesRead>\n");
-            buffy.append("\t<bytesTotal>").append(contentLength).append("</bytesTotal>\n");
+            listener = new FileUploadListener();
         }
-        buffy.append("</response>\n");
 
-        out.println(buffy.toString());
+        try {
+            JAXBContext context = JAXBContext.newInstance(FileUploadListener.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(listener, out);
+        } catch (Exception ignore) {
+        }
         out.flush();
         out.close();
     }
