@@ -86,8 +86,7 @@ public class PasswordResetServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Conf conf = (Conf) getServletContext().getAttribute("conf");
-        if (req.getParameter("action") != null
-                && req.getParameter("action").equals("PasswordResetRequest")) {
+        if ("PasswordResetRequest".equals(req.getParameter("action"))) {
             String username = req.getParameter("username");
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
@@ -127,8 +126,7 @@ public class PasswordResetServlet extends HttpServlet {
                 }
             }
             disp.forward(req, resp);
-        } else if (req.getParameter("action") != null
-                && req.getParameter("action").equals("PasswordReset")) {
+        } else if ("PasswordReset".equals(req.getParameter("action"))) {
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
             TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());

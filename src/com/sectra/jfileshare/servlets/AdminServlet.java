@@ -70,75 +70,75 @@ public class AdminServlet extends HttpServlet {
         if (req.getParameter("action") != null
                 && req.getParameter("action").equals("login")) {
             doGet(req, resp);
-        } else {
-            ServletContext app = getServletContext();
-            RequestDispatcher disp;
-            HttpSession session = req.getSession();
-            UserItem user = (UserItem) session.getAttribute("user");
-            Conf conf = (Conf) app.getAttribute("conf");
-
-            if (user.isAdmin()) {
-                disp = app.getRequestDispatcher("/templates/Admin.jsp");
-
-                // FIXME: No sanity checking on the user input
-                conf.setBrandingOrg(req.getParameter("brandingOrg"));
-                conf.setBrandingDomain(req.getParameter("brandingDomain"));
-                conf.setBrandingLogo(req.getParameter("brandingLogo"));
-                conf.setPathStore(req.getParameter("pathStore"));
-                conf.setPathTemp(req.getParameter("pathTemp"));
-
-                int daysFileExpiration;
-                try {
-                    daysFileExpiration = Integer.parseInt(req.getParameter("daysFileExpiration"));
-                } catch (NumberFormatException e) {
-                    daysFileExpiration = 0;
-                }
-                conf.setDaysFileExpiration(daysFileExpiration);
-                conf.setSmtpServer(req.getParameter("smtpServer"));
-
-                int smtpServerPort;
-                try {
-                    smtpServerPort = Integer.parseInt(req.getParameter("smtpServerPort"));
-                } catch (NumberFormatException e) {
-                    smtpServerPort = 25;
-                }
-                conf.setSmtpServerPort(smtpServerPort);
-                conf.setSmtpSender(req.getParameter("smtpSender"));
-
-                int fileSizeMax = Integer.parseInt(req.getParameter("fileSizeMax"));
-                int fileSizeUnit = Integer.parseInt(req.getParameter("fileSizeUnit"));
-
-                conf.setFileSizeMax(fileSizeMax * (long) Math.pow(1024, fileSizeUnit));
-
-                int daysUserExpiration;
-                try {
-                    daysUserExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
-                } catch (NumberFormatException e) {
-                    daysUserExpiration = 60;
-                }
-                conf.setDaysUserExpiration(daysUserExpiration);
-
-                int daysPasswordExpiration;
-                try {
-                    daysPasswordExpiration = Integer.parseInt(req.getParameter("daysPasswordExpiration"));
-                } catch (NumberFormatException e) {
-                    daysPasswordExpiration = 0;
-                }
-                conf.setDaysPasswordExpiration(daysPasswordExpiration);
-                conf.setDebug("true".equals(req.getParameter("debug")) ? true : false);
-
-                if (conf.save(ds)) {
-                    req.setAttribute("message", "Changes saved");
-                    app.setAttribute("conf", conf);
-                } else {
-                    req.setAttribute("message_warning", "Unable to save changes");
-                }
-
-            } else {
-                req.setAttribute("message_critical", "Access Denied");
-                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-            }
-            disp.forward(req, resp);
+            return;
         }
+        ServletContext app = getServletContext();
+        RequestDispatcher disp;
+        HttpSession session = req.getSession();
+        UserItem user = (UserItem) session.getAttribute("user");
+        Conf conf = (Conf) app.getAttribute("conf");
+
+        if (user.isAdmin()) {
+            disp = app.getRequestDispatcher("/templates/Admin.jsp");
+
+            // FIXME: No sanity checking on the user input
+            conf.setBrandingOrg(req.getParameter("brandingOrg"));
+            conf.setBrandingDomain(req.getParameter("brandingDomain"));
+            conf.setBrandingLogo(req.getParameter("brandingLogo"));
+            conf.setPathStore(req.getParameter("pathStore"));
+            conf.setPathTemp(req.getParameter("pathTemp"));
+
+            int daysFileExpiration;
+            try {
+                daysFileExpiration = Integer.parseInt(req.getParameter("daysFileExpiration"));
+            } catch (NumberFormatException e) {
+                daysFileExpiration = 0;
+            }
+            conf.setDaysFileExpiration(daysFileExpiration);
+            conf.setSmtpServer(req.getParameter("smtpServer"));
+
+            int smtpServerPort;
+            try {
+                smtpServerPort = Integer.parseInt(req.getParameter("smtpServerPort"));
+            } catch (NumberFormatException e) {
+                smtpServerPort = 25;
+            }
+            conf.setSmtpServerPort(smtpServerPort);
+            conf.setSmtpSender(req.getParameter("smtpSender"));
+
+            int fileSizeMax = Integer.parseInt(req.getParameter("fileSizeMax"));
+            int fileSizeUnit = Integer.parseInt(req.getParameter("fileSizeUnit"));
+
+            conf.setFileSizeMax(fileSizeMax * (long) Math.pow(1024, fileSizeUnit));
+
+            int daysUserExpiration;
+            try {
+                daysUserExpiration = Integer.parseInt(req.getParameter("daysUserExpiration"));
+            } catch (NumberFormatException e) {
+                daysUserExpiration = 60;
+            }
+            conf.setDaysUserExpiration(daysUserExpiration);
+
+            int daysPasswordExpiration;
+            try {
+                daysPasswordExpiration = Integer.parseInt(req.getParameter("daysPasswordExpiration"));
+            } catch (NumberFormatException e) {
+                daysPasswordExpiration = 0;
+            }
+            conf.setDaysPasswordExpiration(daysPasswordExpiration);
+            conf.setDebug("true".equals(req.getParameter("debug")) ? true : false);
+
+            if (conf.save(ds)) {
+                req.setAttribute("message", "Changes saved");
+                app.setAttribute("conf", conf);
+            } else {
+                req.setAttribute("message_warning", "Unable to save changes");
+            }
+
+        } else {
+            req.setAttribute("message_critical", "Access Denied");
+            disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+        }
+        disp.forward(req, resp);
     }
 }

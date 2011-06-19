@@ -91,6 +91,9 @@
                             user.isAdmin()));
                 }
 
+                if ("".equals(tabExplicit) && request.getServletPath().equals("/file/view")) {
+                    tabExplicit = "File";
+                }
                 tablist.add(new Tab(tabExplicit,
                         "Explicitly defined tab",
                         true,
@@ -134,7 +137,7 @@
             </div>
 
             <div id="footer">
-                <a href="<%= conf.getContextPath() %>/about">jfileshare</a> version 1.5<br/>
+                <a href="<%= conf.getContextPath()%>/about">jfileshare</a> version 1.5<br/>
             </div>
 
             <%
@@ -147,7 +150,7 @@
             <script type="text/javascript">
                 var domTimer = document.getElementById("dbgLogoutTimer");
                 function updateTimer() {
-                    domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000) + " seconds until logout";
+                domTimer.innerHTML = Math.round(LogoutTimer.getTimeUntilLogout()/1000) + " seconds until logout";
                 }
                 var tempTimer = setInterval("updateTimer()", 1000);
             </script>

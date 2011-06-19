@@ -87,69 +87,70 @@ public class FileEditServlet extends HttpServlet {
         if ("login".equals(req.getParameter("action"))) {
             // This POST is the result of a login
             doGet(req, resp);
-        } else {
-            ServletContext app = getServletContext();
-            RequestDispatcher disp;
-
-            int fid = Integer.parseInt(req.getPathInfo().substring(1));
-
-            try {
-                FileItem file = new FileItem(ds, fid);
-
-                HttpSession session = req.getSession();
-                UserItem user = (UserItem) session.getAttribute("user");
-                Conf conf = (Conf) getServletContext().getAttribute("conf");
-
-                if (user.hasEditAccessTo(file)) {
-                    req.setAttribute("tab", "Edit file");
-                    req.setAttribute("message", "Your changes to this file have been saved");
-                    if (req.getParameter("bEnabled") != null
-                            && req.getParameter("bEnabled").equals("true")) {
-                        file.setEnabled(true);
-                    } else {
-                        file.setEnabled(false);
-                    }
-
-                    if ("true".equals(req.getParameter("bPermanent"))) {
-                        file.setDateExpiration(null);
-                    } else {
-                        // only set this if file expiration is enabled
-                        if (conf.getDaysFileExpiration() != 0) {
-                            file.setDaysToKeep(conf.getDaysFileExpiration());
-                        }
-                    }
-
-                    Integer iDownloads = null;
-                    if (!"".equals(req.getParameter("iDownloads"))) {
-                        try {
-                            iDownloads = new Integer(req.getParameter("iDownloads"));
-                        } catch (NumberFormatException ignore) {}
-                    }
-                    file.setDownloads(iDownloads);
-
-                    if (req.getParameter("bUsePw") == null
-                            || req.getParameter("bUsePw").equals("")) {
-                        file.setPwHash(null);
-                    } else if (req.getParameter("bUsePw").equals("true")
-                            && req.getParameter("sPassword") != null
-                            && !req.getParameter("sPassword").equals("")) {
-                        file.setPwPlainText(req.getParameter("sPassword"));
-                    }
-
-                    file.update(ds, req.getRemoteAddr());
-                    req.setAttribute("file", file);
-                    disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
-                } else {
-                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-                }
-            } catch (NoSuchFileException e) {
-                req.setAttribute("message_warning", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/404.jsp");
-            } catch (SQLException e) {
-                req.setAttribute("message_critical", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/Error.jsp");
-            }
-            disp.forward(req, resp);
+            return;
         }
+        ServletContext app = getServletContext();
+        RequestDispatcher disp;
+
+        int fid = Integer.parseInt(req.getPathInfo().substring(1));
+
+        try {
+            FileItem file = new FileItem(ds, fid);
+
+            HttpSession session = req.getSession();
+            UserItem user = (UserItem) session.getAttribute("user");
+            Conf conf = (Conf) getServletContext().getAttribute("conf");
+
+            if (user.hasEditAccessTo(file)) {
+                req.setAttribute("tab", "Edit file");
+                req.setAttribute("message", "Your changes to this file have been saved");
+                if (req.getParameter("bEnabled") != null
+                        && req.getParameter("bEnabled").equals("true")) {
+                    file.setEnabled(true);
+                } else {
+                    file.setEnabled(false);
+                }
+
+                if ("true".equals(req.getParameter("bPermanent"))) {
+                    file.setDateExpiration(null);
+                } else {
+                    // only set this if file expiration is enabled
+                    if (conf.getDaysFileExpiration() != 0) {
+                        file.setDaysToKeep(conf.getDaysFileExpiration());
+                    }
+                }
+
+                Integer iDownloads = null;
+                if (!"".equals(req.getParameter("iDownloads"))) {
+                    try {
+                        iDownloads = new Integer(req.getParameter("iDownloads"));
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+                file.setDownloads(iDownloads);
+
+                if (req.getParameter("bUsePw") == null
+                        || req.getParameter("bUsePw").equals("")) {
+                    file.setPwHash(null);
+                } else if (req.getParameter("bUsePw").equals("true")
+                        && req.getParameter("sPassword") != null
+                        && !req.getParameter("sPassword").equals("")) {
+                    file.setPwPlainText(req.getParameter("sPassword"));
+                }
+
+                file.update(ds, req.getRemoteAddr());
+                req.setAttribute("file", file);
+                disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
+            } else {
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            }
+        } catch (NoSuchFileException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
+        }
+        disp.forward(req, resp);
     }
 }

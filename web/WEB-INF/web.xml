@@ -108,11 +108,13 @@
     </servlet>
     <servlet>
         <servlet-name>FileUpload</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileUploadServlet</servlet-class>
+        <!-- servlet-class>com.sectra.jfileshare.servlets.FileUploadServlet</servlet-class -->
+        <jsp-file>/templates/FileUpload.jsp</jsp-file>
     </servlet>
     <servlet>
         <servlet-name>FileView</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileViewServlet</servlet-class>
+        <!-- servlet-class>com.sectra.jfileshare.servlets.FileViewServlet</servlet-class -->
+        <jsp-file>/templates/FileView.jsp</jsp-file>
     </servlet>
     <servlet>
         <servlet-name>UserAdd</servlet-name>

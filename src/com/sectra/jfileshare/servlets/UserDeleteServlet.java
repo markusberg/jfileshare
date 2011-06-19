@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserDeleteServlet extends HttpServlet {
+
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(UserDeleteServlet.class.getName());
@@ -86,33 +87,33 @@ public class UserDeleteServlet extends HttpServlet {
         if (req.getParameter("action") != null
                 && req.getParameter("action").equals("login")) {
             doGet(req, resp);
-        } else {
-            ServletContext app = getServletContext();
-            Conf conf = (Conf) app.getAttribute("conf");
-            RequestDispatcher disp;
-
-            HttpSession session = req.getSession();
-            UserItem currentUser = (UserItem) session.getAttribute("user");
-            Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
-            try {
-                UserItem user = new UserItem(ds, iUid);
-                if (!currentUser.hasEditAccessTo(user)) {
-                    req.setAttribute("message_critical", "You do not have access to modify that user");
-                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-                } else {
-                    user.delete(ds, conf.getPathStore(), req.getRemoteAddr());
-                    req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> (" + user.getUid().toString() + ") deleted");
-                    req.setAttribute("tab", "Delete user");
-                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
-                }
-            } catch (NoSuchUserException e) {
-                req.setAttribute("message_warning", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/404.jsp");
-            } catch (SQLException e) {
-                req.setAttribute("message_critical", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/Error.jsp");
-            }
-            disp.forward(req, resp);
+            return;
         }
+        ServletContext app = getServletContext();
+        Conf conf = (Conf) app.getAttribute("conf");
+        RequestDispatcher disp;
+
+        HttpSession session = req.getSession();
+        UserItem currentUser = (UserItem) session.getAttribute("user");
+        Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
+        try {
+            UserItem user = new UserItem(ds, iUid);
+            if (!currentUser.hasEditAccessTo(user)) {
+                req.setAttribute("message_critical", "You do not have access to modify that user");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } else {
+                user.delete(ds, conf.getPathStore(), req.getRemoteAddr());
+                req.setAttribute("message", "User <strong>\"" + Helpers.htmlSafe(user.getUsername()) + "\"</strong> (" + user.getUid().toString() + ") deleted");
+                req.setAttribute("tab", "Delete user");
+                disp = app.getRequestDispatcher("/templates/Blank.jsp");
+            }
+        } catch (NoSuchUserException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
+        }
+        disp.forward(req, resp);
     }
 }

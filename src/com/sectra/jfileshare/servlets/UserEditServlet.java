@@ -86,107 +86,107 @@ public class UserEditServlet extends HttpServlet {
             throws ServletException, IOException {
         if ("login".equals(req.getParameter("action"))) {
             doGet(req, resp);
-        } else {
-            ServletContext app = getServletContext();
-            Conf conf = (Conf) app.getAttribute("conf");
-            RequestDispatcher disp;
+            return;
+        }
+        ServletContext app = getServletContext();
+        Conf conf = (Conf) app.getAttribute("conf");
+        RequestDispatcher disp;
 
-            HttpSession session = req.getSession();
-            UserItem currentUser = (UserItem) session.getAttribute("user");
-            Integer uid = Integer.parseInt(req.getPathInfo().substring(1));
-            try {
-                UserItem user = new UserItem(ds, uid);
+        HttpSession session = req.getSession();
+        UserItem currentUser = (UserItem) session.getAttribute("user");
+        Integer uid = Integer.parseInt(req.getPathInfo().substring(1));
+        try {
+            UserItem user = new UserItem(ds, uid);
 
-                if (!currentUser.hasEditAccessTo(user)) {
-                    req.setAttribute("message_critical", "You do not have access to modify that user");
-                    disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
-                } else {
-                    ArrayList<String> errors = new ArrayList<String>();
+            if (!currentUser.hasEditAccessTo(user)) {
+                req.setAttribute("message_critical", "You do not have access to modify that user");
+                disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
+            } else {
+                ArrayList<String> errors = new ArrayList<String>();
 
-                    // only admin is allowed to edit usernames
-                    if (currentUser.isAdmin()) {
-                        String requestedUsername = req.getParameter("username");
-                        if (!requestedUsername.equals(user.getUsername())) {
-                            if (requestedUsername.length() < 2) {
-                                errors.add("The username is too short");
-                            } else {
-                                try {
-                                    UserItem tempuser = new UserItem(ds, requestedUsername);
-                                    errors.add("The requested username already exists");
-                                } catch (NoSuchUserException ignored) {
-                                } catch (SQLException ignored) {
-                                }
+                // only admin is allowed to edit usernames
+                if (currentUser.isAdmin()) {
+                    String requestedUsername = req.getParameter("username");
+                    if (!requestedUsername.equals(user.getUsername())) {
+                        if (requestedUsername.length() < 2) {
+                            errors.add("The username is too short");
+                        } else {
+                            try {
+                                UserItem tempuser = new UserItem(ds, requestedUsername);
+                                errors.add("The requested username already exists");
+                            } catch (NoSuchUserException ignored) {
+                            } catch (SQLException ignored) {
                             }
                         }
-                        user.setUsername(requestedUsername);
                     }
-
-                    errors.addAll(user.validateEmailAddress(req.getParameter("email")));
-
-                    // Validate passwords
-                    String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
-                    String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                    if (!password1.equals("")) {
-                        errors.addAll(user.validatePassword(password1, password2));
-                    }
-                    req.setAttribute("password1", password1);
-                    req.setAttribute("password2", password2);
-
-                    // Validate expiration
-                    // Disallow setting expiration on yourself
-                    // Unless you're admin
-                    if (currentUser.isAdmin()
-                            || !currentUser.getUid().equals(user.getUid())) {
-                        boolean expiration = "true".equals(req.getParameter("bExpiration"));
-                        int daysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
-                        if (daysUntilExpiration < 1) {
-                            daysUntilExpiration = conf.getDaysUserExpiration();
-                        } else if (daysUntilExpiration > 365) {
-                            daysUntilExpiration = 365;
-                        }
-                        if (expiration) {
-                            user.setDaysUntilExpiration(daysUntilExpiration);
-                        } else {
-                            user.setDateExpiration(null);
-                        }
-                    }
-
-                    // Only allow admin to set usertype
-                    if (currentUser.isAdmin()) {
-                        int requestedUsertype = Integer.parseInt(req.getParameter("usertype"));
-                        user.setUserType(requestedUsertype);
-                    }
-
-                    req.setAttribute("user", user);
-
-                    if (!errors.isEmpty()) {
-                        String errormessage = "User edit failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                        for (String emsg : errors) {
-                            errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
-                        }
-                        errormessage = errormessage.concat("</ul>\n");
-                        req.setAttribute("message_critical", errormessage);
-                    } else {
-                        if (user.update(ds, req.getRemoteAddr())) {
-                            req.setAttribute("message", "Your changes have been saved");
-                            req.setAttribute("password1", "");
-                            req.setAttribute("password2", "");
-                        } else {
-                            req.setAttribute("message_critical", "Unable to save changes");
-                        }
-                    }
-                    req.setAttribute("tab", "Edit user");
-                    disp = app.getRequestDispatcher("/templates/UserEdit.jsp");
+                    user.setUsername(requestedUsername);
                 }
-            } catch (NoSuchUserException e) {
-                req.setAttribute("message_warning", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/404.jsp");
 
-            } catch (SQLException e) {
-                req.setAttribute("message_critical", e.getMessage());
-                disp = app.getRequestDispatcher("/templates/Error.jsp");
+                errors.addAll(user.validateEmailAddress(req.getParameter("email")));
+
+                // Validate passwords
+                String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+                String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+                if (!password1.equals("")) {
+                    errors.addAll(user.validatePassword(password1, password2));
+                }
+                req.setAttribute("password1", password1);
+                req.setAttribute("password2", password2);
+
+                // Validate expiration
+                // Disallow setting expiration on yourself
+                // Unless you're admin
+                if (currentUser.isAdmin()
+                        || !currentUser.getUid().equals(user.getUid())) {
+                    boolean expiration = "true".equals(req.getParameter("bExpiration"));
+                    int daysUntilExpiration = Integer.parseInt(req.getParameter("daysUntilExpiration"));
+                    if (daysUntilExpiration < 1) {
+                        daysUntilExpiration = conf.getDaysUserExpiration();
+                    } else if (daysUntilExpiration > 365) {
+                        daysUntilExpiration = 365;
+                    }
+                    if (expiration) {
+                        user.setDaysUntilExpiration(daysUntilExpiration);
+                    } else {
+                        user.setDateExpiration(null);
+                    }
+                }
+
+                // Only allow admin to set usertype
+                if (currentUser.isAdmin()) {
+                    int requestedUsertype = Integer.parseInt(req.getParameter("usertype"));
+                    user.setUserType(requestedUsertype);
+                }
+
+                req.setAttribute("user", user);
+
+                if (!errors.isEmpty()) {
+                    String errormessage = "User edit failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                    for (String emsg : errors) {
+                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+                    }
+                    errormessage = errormessage.concat("</ul>\n");
+                    req.setAttribute("message_critical", errormessage);
+                } else {
+                    if (user.update(ds, req.getRemoteAddr())) {
+                        req.setAttribute("message", "Your changes have been saved");
+                        req.setAttribute("password1", "");
+                        req.setAttribute("password2", "");
+                    } else {
+                        req.setAttribute("message_critical", "Unable to save changes");
+                    }
+                }
+                req.setAttribute("tab", "Edit user");
+                disp = app.getRequestDispatcher("/templates/UserEdit.jsp");
             }
-            disp.forward(req, resp);
+        } catch (NoSuchUserException e) {
+            req.setAttribute("message_warning", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/404.jsp");
+
+        } catch (SQLException e) {
+            req.setAttribute("message_critical", e.getMessage());
+            disp = app.getRequestDispatcher("/templates/Error.jsp");
         }
+        disp.forward(req, resp);
     }
 }
