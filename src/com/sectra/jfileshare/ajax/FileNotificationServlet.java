@@ -179,9 +179,9 @@ public class FileNotificationServlet extends HttpServlet {
         Session session = Session.getInstance(props, null);
 
         MimeMessage msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(currentUser.getEmail()));
+        msg.setSender(new InternetAddress(currentUser.getEmail()));
         msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-        msg.setSender(conf.getSmtpSender());
+        msg.setFrom(conf.getSmtpSender());
         msg.setSubject("File " + file.getName() + " available for download");
 
         MimeMultipart mp = new MimeMultipart();
