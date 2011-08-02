@@ -203,7 +203,7 @@ public class FileReceiverServlet extends HttpServlet {
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } catch (Exception e) {
                 tempFile.delete();
-                req.setAttribute("msg", "Unable to upload file. ".concat(e.getMessage()));
+                req.setAttribute("msg", "Unable to upload file. ".concat( e.getMessage() == null ? "" : e.getMessage()));
                 req.setAttribute("javascript", "parent.uploadComplete('warning');");
             } finally {
                 session.setAttribute("uploadListener", null);
