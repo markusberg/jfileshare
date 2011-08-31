@@ -279,6 +279,10 @@ public class Conf {
         return urlPrefix;
     }
 
+    public String getVersion() {
+        return "1.6";
+    }
+
     public void setContextPath(String value) {
         contextPath = value;
     }

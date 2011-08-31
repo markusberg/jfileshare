@@ -18,13 +18,13 @@
                     Conf conf = (Conf) getServletContext().getAttribute("conf");
         %>
         <title><%=conf.getBrandingOrg()%> file distribution facility <decorator:title /></title>
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=1.5" type="text/css" />
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/styles/main.css?v=<%= conf.getVersion()%>" type="text/css" />
         <%
                     UserItem user = (UserItem) session.getAttribute("user");
                     // Add javascript for session timeout
                     if (user != null) {
         %>
-        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=1.5"></script>
+        <script type="text/javascript" xml:space="preserve" src="<%= request.getContextPath()%>/scripts/main.js?v=<%= conf.getVersion()%>"></script>
         <script type="text/javascript">
             var contextPath = "<%=request.getContextPath()%>";
             LogoutTimer.start();
@@ -137,7 +137,7 @@
             </div>
 
             <div id="footer">
-                <a href="<%= conf.getContextPath()%>/about">jfileshare</a> version 1.5<br/>
+                <a href="<%= conf.getContextPath()%>/about">jfileshare</a> version <%= conf.getVersion()%><br/>
             </div>
 
             <%
