@@ -103,9 +103,8 @@ public class LoginFilter implements Filter {
                 UserItem user = CheckUser(req, session);
                 if (user != null) {
                     Conf conf = new Conf(ds);
-                    if (user.passwordIsOnlyCrypt()
-                            || (conf.getDaysPasswordExpiration() != 0
-                            && user.passwordIsOlderThan(conf.getDaysPasswordExpiration()))) {
+                    if (conf.getDaysPasswordExpiration() != 0
+                            && user.passwordIsOlderThan(conf.getDaysPasswordExpiration())) {
                         // User is forced to update his password
                         // Store the user object in a temporary variable in the session
                         session.setAttribute("tempuser", user);

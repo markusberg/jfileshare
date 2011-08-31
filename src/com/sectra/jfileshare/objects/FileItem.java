@@ -1,6 +1,5 @@
 package com.sectra.jfileshare.objects;
 
-import com.sectra.jfileshare.utils.Jcrypt;
 import com.sectra.jfileshare.utils.Sha512Crypt;
 
 import java.io.File;
@@ -411,11 +410,6 @@ public class FileItem implements Serializable {
      * @return Does the provided password check out?
      */
     public boolean authenticated(String pwProvided) {
-        if (this.pwHash.length() < 20) {
-            String pwCrypt = Jcrypt.crypt(this.pwHash, pwProvided);
-            return pwCrypt.equals(this.pwHash);
-        }
-
         return Sha512Crypt.verifyPassword(pwProvided, this.pwHash);
     }
 

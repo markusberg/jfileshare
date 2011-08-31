@@ -1,6 +1,5 @@
 package com.sectra.jfileshare.objects;
 
-import com.sectra.jfileshare.utils.Jcrypt;
 import com.sectra.jfileshare.utils.Sha512Crypt;
 
 import java.io.File;
@@ -455,15 +454,8 @@ public class UserItem implements Serializable {
      * @return Does the provided password check out?
      */
     public boolean authenticated(String pwProvided) {
-        if (this.pwHash.length() < 20) {
-            String pwCrypt = Jcrypt.crypt(this.pwHash, pwProvided);
-            if (pwCrypt.equals(this.pwHash)) {
-                return true;
-            }
-        } else {
-            if (Sha512Crypt.verifyPassword(pwProvided, this.pwHash)) {
-                return true;
-            }
+        if (Sha512Crypt.verifyPassword(pwProvided, this.pwHash)) {
+            return true;
         }
         logger.log(Level.INFO, "Incorrect user password for user {0}", this.getUserInfo());
         return false;
@@ -650,13 +642,5 @@ public class UserItem implements Serializable {
     public boolean passwordIsOlderThan(int days) {
         long expiration = (long) days * 1000 * 60 * 60 * 24;
         return (this.datePasswordChange.getTime() + expiration) < System.currentTimeMillis();
-    }
-
-    /*
-     * Early versions of jfileshare used basic unix crypt when storing passwords
-     * this method is used to weed out those passwords.
-     */
-    public boolean passwordIsOnlyCrypt() {
-        return (this.pwHash.length() < 20);
     }
 }
