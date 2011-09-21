@@ -1,3 +1,22 @@
+/**
+ *  Copyright 2011 SECTRA Imtec AB
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ * @author      Markus Berg <markus.berg @ sectra.se>
+ * @version     1.6
+ * @since       2011-09-21
+ */
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.Conf;
@@ -91,88 +110,88 @@ public class PasswordResetServlet extends HttpServlet {
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
 
-            UserItem user = null;
+            UserItem user = new UserItem();
             try {
-                user = new UserItem(datasource, username);
+                user.fetch(datasource, username);
             } catch (NoSuchUserException e) {
                 // Doesn't exist in database.
                 // Assume that this is a Corporate-internal user
-                user = new UserItem();
                 user.setEmail(username.concat("@").concat(conf.getBrandingDomain()));
             } catch (SQLException e) {
                 req.setAttribute("message_critical", e.toString());
                 disp = app.getRequestDispatcher("/templates/Error.jsp");
+                disp.forward(req, resp);
+                return;
             }
 
-            if (user != null) {
-                try {
-                    InternetAddress emailRecipient = new InternetAddress(user.getEmail());
-                    emailRecipient.validate();
-                    String key = Sha512Crypt.Sha512_crypt(user.getEmail(), null, 0);
-                    key = key.substring(key.length() - 50, key.length());
-                    if (SendResetInstructions(emailRecipient, key, conf)
-                            && StoreRecoveryKey(username, user.getEmail(), key)) {
-                        if (user.getUid() == null) {
-                            req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
-                        } else {
-                            req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + user.getUsername() + "\".");
-                        }
-                        disp = app.getRequestDispatcher("/templates/Blank.jsp");
+            try {
+                InternetAddress emailRecipient = new InternetAddress(user.getEmail());
+                emailRecipient.validate();
+                String key = Sha512Crypt.Sha512_crypt(user.getEmail(), null, 0);
+                key = key.substring(key.length() - 50, key.length());
+                if (SendResetInstructions(emailRecipient, key, conf)
+                        && StoreRecoveryKey(username, user.getEmail(), key)) {
+                    if (user.getUid() == null) {
+                        req.setAttribute("message", "Account by that name was not found in the database. Instructions on how to reset your password have been sent to: " + emailRecipient.getAddress());
                     } else {
-                        req.setAttribute("message_critical", "Unable to send email. This is likely a server error. Please try again later, or contact the server administrator");
+                        req.setAttribute("message", "Instructions on how to reset your password have been sent to the email address that is registered to the user \"" + user.getUsername() + "\".");
                     }
-                } catch (AddressException e) {
-                    req.setAttribute("message_critical", "Unable to send email. \"" + Helpers.htmlSafe(user.getEmail()) + "\" doesn't validate as a real email address");
+                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
+                } else {
+                    req.setAttribute("message_critical", "Unable to send email. This is likely a server error. Please try again later, or contact the server administrator");
                 }
+            } catch (AddressException e) {
+                req.setAttribute("message_critical", "Unable to send email. \"" + Helpers.htmlSafe(user.getEmail()) + "\" doesn't validate as a real email address");
             }
+
             disp.forward(req, resp);
         } else if ("PasswordReset".equals(req.getParameter("action"))) {
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
             TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());
 
-            UserItem user = null;
+            UserItem user = new UserItem();
             ArrayList<String> errors = new ArrayList<String>();
             try {
-                user = new UserItem(datasource, (String) UserInfo.get("username"));
+                user.fetch(datasource, (String) UserInfo.get("username"));
             } catch (NoSuchUserException e) {
                 // Account didn't exist prior to pwreset attempt.
                 // Thus, this is an internal user
-                user = new UserItem();
                 user.setUserType(UserItem.TYPE_INTERNAL);
             } catch (SQLException e) {
                 req.setAttribute("message_critical", e.toString());
                 disp = app.getRequestDispatcher("/templates/Error.jsp");
+                disp.forward(req, resp);
+                return;
             }
 
-            if (user != null) {
-                String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
-                String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
-                errors.addAll(user.validatePassword(password1, password2));
+            String password1 = req.getParameter("password1") == null ? "" : req.getParameter("password1");
+            String password2 = req.getParameter("password2") == null ? "" : req.getParameter("password2");
+            errors.addAll(user.validatePassword(password1, password2));
 
-                if (errors.isEmpty()) {
-                    user.setUsername((String) UserInfo.get("username"));
-                    user.setEmail((String) UserInfo.get("emailaddress"));
-                    if (user.getUid() == null) {
-                        user.create(datasource, req.getRemoteAddr());
-                    } else {
-                        user.update(datasource, req.getRemoteAddr());
-                    }
-
-                    req.setAttribute("message", "Password for user <strong>" + Helpers.htmlSafe((String) UserInfo.get("username")) + "</strong> has been reset. You can now login with your newly selected password.");
-                    this.DropRecoveryKey((String) UserInfo.get("key"));
-                    disp = app.getRequestDispatcher("/templates/Blank.jsp");
+            if (errors.isEmpty()) {
+                user.setUsername((String) UserInfo.get("username"));
+                user.setEmail((String) UserInfo.get("emailaddress"));
+                if (user.getUid() == null) {
+                    user.create(datasource, req.getRemoteAddr());
                 } else {
-                    String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
-                    for (String emsg : errors) {
-                        errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
-                    }
-                    errormessage = errormessage.concat("</ul>\n");
-                    req.setAttribute("message_critical", errormessage);
-                    req.setAttribute("username", UserInfo.get("username"));
-                    req.setAttribute("key", UserInfo.get("key"));
+                    user.update(datasource, req.getRemoteAddr());
                 }
+
+                req.setAttribute("message", "Password for user <strong>" + Helpers.htmlSafe((String) UserInfo.get("username")) + "</strong> has been reset. You can now login with your newly selected password.");
+                this.DropRecoveryKey((String) UserInfo.get("key"));
+                disp = app.getRequestDispatcher("/templates/Blank.jsp");
+            } else {
+                String errormessage = "Password reset failed due to the following " + (errors.size() == 1 ? "reason" : "reasons") + ":<ul>";
+                for (String emsg : errors) {
+                    errormessage = errormessage.concat("<li>" + emsg + "</li>\n");
+                }
+                errormessage = errormessage.concat("</ul>\n");
+                req.setAttribute("message_critical", errormessage);
+                req.setAttribute("username", UserInfo.get("username"));
+                req.setAttribute("key", UserInfo.get("key"));
             }
+
             disp.forward(req, resp);
         } else {
             // Fallback to default page if required fields are missing

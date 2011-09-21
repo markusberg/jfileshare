@@ -1,10 +1,28 @@
+/**
+ *  Copyright 2011 SECTRA Imtec AB
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ * @author      Markus Berg <markus.berg @ sectra.se>
+ * @version     1.6
+ * @since       2011-09-21
+ */
 package com.sectra.jfileshare.ajax;
 
 import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
-import com.sectra.jfileshare.utils.Helpers;
 import gnu.mail.providers.smtp.SMTPTransport;
 
 import java.io.IOException;
@@ -86,7 +104,8 @@ public class FileNotificationServlet extends HttpServlet {
         try {
             int iFid = Integer.parseInt(req.getParameter("iFid"));
             String emailRecipient = req.getParameter("emailRecipient");
-            FileItem file = new FileItem(ds, iFid);
+            FileItem file = new FileItem();
+            file.fetch(ds, iFid);
 
             // You must have edit access to the file in order to notify
             // someone of it's existence
