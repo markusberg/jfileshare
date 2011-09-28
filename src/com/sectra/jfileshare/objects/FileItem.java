@@ -463,7 +463,7 @@ public class FileItem implements Serializable {
 
     public static int[] getFileSize(Long size) {
         int unit = 0;
-        while (!(size < 1024)) {
+        while (size > 8192) {
             unit++;
             size = size / 1024;
         }
