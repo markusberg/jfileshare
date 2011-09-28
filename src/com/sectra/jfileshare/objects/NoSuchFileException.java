@@ -24,7 +24,7 @@ package com.sectra.jfileshare.objects;
  * @author markus
  */
 public class NoSuchFileException extends Exception {
-
+    static final long serialVersionUID = 1;
     /**
      * Creates a new instance of <code>NoSuchFileException</code> without detail message.
      */

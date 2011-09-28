@@ -23,7 +23,7 @@ import com.sectra.jfileshare.utils.Sha512Crypt;
 
 import java.io.File;
 import java.io.Serializable;
-import java.text.DecimalFormat;
+// import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import java.sql.Connection;
@@ -32,13 +32,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.logging.Level;
+// import java.util.logging.Level;
 
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 public class FileItem implements Serializable {
+    static final long serialVersionUID = 1;
 
     private Integer fid;
     private String name;
@@ -444,7 +445,7 @@ public class FileItem implements Serializable {
      * @return Human readable file size, e.g. "4.02 MiB"
      */
     public static String humanReadable(long filesize) {
-        DecimalFormat df = new DecimalFormat("0.#");
+        // DecimalFormat df = new DecimalFormat("0.#");
         int[] fs = getFileSize(filesize);
         return fs[1] + " " + unitsFileSize[fs[0]];
     }

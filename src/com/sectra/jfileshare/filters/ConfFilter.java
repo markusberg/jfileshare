@@ -23,7 +23,7 @@ import com.sectra.jfileshare.objects.Conf;
 
 import java.io.IOException;
 
-import java.util.logging.Level;
+// import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -46,7 +46,6 @@ public class ConfFilter implements Filter {
     private static final Logger logger =
             Logger.getLogger(LoginFilter.class.getName());
 
-    @Override
     public void init(FilterConfig config)
             throws ServletException {
         try {
@@ -59,11 +58,9 @@ public class ConfFilter implements Filter {
         }
     }
 
-    @Override
     public void destroy() {
     }
 
-    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         Conf conf = (Conf) filterconfig.getServletContext().getAttribute("conf");

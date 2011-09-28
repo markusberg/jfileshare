@@ -49,6 +49,7 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserAdminServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
     private static final Logger logger =
@@ -91,7 +92,7 @@ public class UserAdminServlet extends HttpServlet {
         doGet(req, resp);
     }
 
-    private ArrayList getAllUsers() {
+    private ArrayList<UserItem> getAllUsers() {
         ArrayList<UserItem> allUsers = new ArrayList<UserItem>();
         Connection dbConn = null;
 

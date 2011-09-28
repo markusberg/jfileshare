@@ -41,13 +41,11 @@ public class LogoutFilter implements Filter {
     private static final Logger logger =
             Logger.getLogger(LogoutFilter.class.getName());
 
-    @Override
     public void init(FilterConfig filterConfig)
             throws ServletException {
         this.filterconfig = filterConfig;
     }
 
-    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -73,7 +71,6 @@ public class LogoutFilter implements Filter {
         filterconfig.getServletContext().getRequestDispatcher("/index.jsp").forward(servletRequest, servletResponse);
     }
 
-    @Override
     public void destroy() {
     }
 }

@@ -25,7 +25,7 @@ import com.sectra.jfileshare.objects.NoSuchUserException;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 import java.util.ArrayList;
 
 import javax.naming.Context;
@@ -46,10 +46,11 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserEditServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(UserEditServlet.class.getName());
+    // private static final Logger logger =
+    //         Logger.getLogger(UserEditServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)
@@ -68,7 +69,7 @@ public class UserEditServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         ServletContext app = getServletContext();
-        Conf conf = (Conf) app.getAttribute("conf");
+        // Conf conf = (Conf) app.getAttribute("conf");
         RequestDispatcher disp;
 
         try {

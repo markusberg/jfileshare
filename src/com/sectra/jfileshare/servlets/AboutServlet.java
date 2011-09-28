@@ -44,6 +44,7 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 
 public class AboutServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private static final Logger logger =
             Logger.getLogger(AboutServlet.class.getName());

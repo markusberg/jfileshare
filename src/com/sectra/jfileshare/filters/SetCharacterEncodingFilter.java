@@ -30,16 +30,13 @@ import javax.servlet.http.HttpServletResponse;
 
 public class SetCharacterEncodingFilter implements Filter {
 
-    @Override
     public void init(FilterConfig config)
             throws ServletException {
     }
 
-    @Override
     public void destroy() {
     }
 
-    @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {

@@ -26,7 +26,7 @@ import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -49,10 +49,11 @@ import javax.sql.DataSource;
  * @since   1.5
  */
 public class FileEditServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(FileEditServlet.class.getName());
+    // private static final Logger logger =
+    //        Logger.getLogger(FileEditServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)

@@ -66,11 +66,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Attr;
+// import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class FileNotificationServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
     private static final Logger logger =

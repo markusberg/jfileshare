@@ -19,7 +19,7 @@
  */
 package com.sectra.jfileshare.servlets;
 
-import com.sectra.jfileshare.objects.Conf;
+// import com.sectra.jfileshare.objects.Conf;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -42,8 +42,9 @@ import javax.servlet.ServletException;
 import javax.sql.DataSource;
 
 public class StartupServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
-    private Conf conf;
+    // private Conf conf;
     private DataSource datasource;
     private static final Logger logger =
             Logger.getLogger(StartupServlet.class.getName());

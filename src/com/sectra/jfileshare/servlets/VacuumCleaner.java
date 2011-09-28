@@ -46,6 +46,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 public class VacuumCleaner extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
     private static final Logger logger =

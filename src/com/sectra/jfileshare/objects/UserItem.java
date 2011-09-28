@@ -42,6 +42,7 @@ import javax.mail.internet.AddressException;
 import javax.sql.DataSource;
 
 public class UserItem implements Serializable {
+    static final long serialVersionUID = 1L;
 
     private String username;
     private String pwHash;

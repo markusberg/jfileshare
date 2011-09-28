@@ -63,6 +63,7 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class PasswordResetServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource datasource = null;
     private static final Logger logger =
@@ -87,7 +88,7 @@ public class PasswordResetServlet extends HttpServlet {
             throws ServletException, IOException {
         ServletContext app = getServletContext();
 
-        TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());
+        TreeMap<String, String> UserInfo = this.retrieveUserInfo(req.getPathInfo());
         if (UserInfo.get("key") != null) {
             if (UserInfo.get("username") != null) {
                 req.setAttribute("username", (String) UserInfo.get("username"));
@@ -148,7 +149,7 @@ public class PasswordResetServlet extends HttpServlet {
         } else if ("PasswordReset".equals(req.getParameter("action"))) {
             ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
-            TreeMap UserInfo = this.retrieveUserInfo(req.getPathInfo());
+            TreeMap<String,String> UserInfo = this.retrieveUserInfo(req.getPathInfo());
 
             UserItem user = new UserItem();
             ArrayList<String> errors = new ArrayList<String>();

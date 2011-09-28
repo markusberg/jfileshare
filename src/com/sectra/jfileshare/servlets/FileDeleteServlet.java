@@ -27,8 +27,8 @@ import com.sectra.jfileshare.objects.NoSuchUserException;
 import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+// import java.util.logging.Level;
+// import java.util.logging.Logger;
 import java.sql.SQLException;
 
 import javax.naming.Context;
@@ -54,9 +54,11 @@ import javax.sql.DataSource;
  * @since   1.5
  */
 public class FileDeleteServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
+
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(FileDeleteServlet.class.getName());
+    // private static final Logger logger =
+    //         Logger.getLogger(FileDeleteServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)

@@ -33,8 +33,8 @@ import java.io.PrintWriter;
 
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+// import java.text.DecimalFormat;
+// import java.text.NumberFormat;
 import java.util.logging.Level;
 
 import java.util.logging.Logger;
@@ -73,6 +73,7 @@ import org.apache.commons.io.IOUtils;
  * @author markus
  */
 public class FileReceiverServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
     private static final Logger logger =

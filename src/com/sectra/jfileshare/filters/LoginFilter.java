@@ -53,7 +53,6 @@ public class LoginFilter implements Filter {
     private static final Logger logger =
             Logger.getLogger(LoginFilter.class.getName());
 
-    @Override
     public void init(FilterConfig config)
             throws ServletException {
         try {
@@ -66,12 +65,10 @@ public class LoginFilter implements Filter {
         }
     }
 
-    @Override
     public void destroy() {
         ds = null;
     }
 
-    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;

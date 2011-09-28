@@ -26,7 +26,7 @@ import com.sectra.jfileshare.utils.Helpers;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -46,10 +46,11 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 public class UserDeleteServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(UserDeleteServlet.class.getName());
+    // private static final Logger logger =
+    //         Logger.getLogger(UserDeleteServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)

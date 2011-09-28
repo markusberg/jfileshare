@@ -53,7 +53,6 @@ public class FileAuthenticationFilter implements Filter {
     private static final Logger logger =
             Logger.getLogger(FileAuthenticationFilter.class.getName());
 
-    @Override
     public void init(FilterConfig filterConfig)
             throws ServletException {
         this.filterconfig = filterConfig;
@@ -66,12 +65,10 @@ public class FileAuthenticationFilter implements Filter {
         }
     }
 
-    @Override
     public void destroy() {
         ds = null;
     }
 
-    @Override
     public void doFilter(ServletRequest request,
             ServletResponse response,
             FilterChain chain)
@@ -132,7 +129,7 @@ public class FileAuthenticationFilter implements Filter {
     private boolean authenticated(FileItem file, HttpSession session, HttpServletRequest req) {
         //First, are we authenticated for this file
         if (session.getAttribute("authfiles") != null) {
-            ArrayList authfiles = (ArrayList) session.getAttribute("authfiles");
+            ArrayList<Integer> authfiles = (ArrayList<Integer>) session.getAttribute("authfiles");
 
             if (authfiles.contains(file.getFid())) {
                 logger.info("User already authenticated for file");

@@ -19,7 +19,7 @@
  */
 package com.sectra.jfileshare.ajax;
 
-import javax.xml.bind.annotation.XmlAttribute;
+// import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -43,7 +43,6 @@ public class FileUploadListener implements ProgressListener {
         super();
     }
 
-    @Override
     public void update(long aBytesRead, long aContentLength,
             int anItem) {
         bytesRead = aBytesRead;

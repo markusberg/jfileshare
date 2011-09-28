@@ -24,7 +24,7 @@ import com.sectra.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -42,10 +42,11 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class UserViewServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(UserViewServlet.class.getName());
+    // private static final Logger logger =
+    //         Logger.getLogger(UserViewServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)

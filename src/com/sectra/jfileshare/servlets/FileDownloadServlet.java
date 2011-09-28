@@ -42,6 +42,7 @@ import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
 
 public class FileDownloadServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
     private static final Logger logger =

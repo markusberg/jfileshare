@@ -20,6 +20,7 @@
 package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.FileItem;
+import com.sectra.jfileshare.objects.FileLog;
 import com.sectra.jfileshare.objects.NoSuchFileException;
 import com.sectra.jfileshare.objects.UserItem;
 import com.sectra.jfileshare.utils.Helpers;
@@ -27,7 +28,7 @@ import com.sectra.jfileshare.utils.Helpers;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -45,10 +46,11 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class FileLogServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource ds;
-    private static final Logger logger =
-            Logger.getLogger(FileLogServlet.class.getName());
+    // private static final Logger logger =
+    //         Logger.getLogger(FileLogServlet.class.getName());
 
     @Override
     public void init(ServletConfig config)
@@ -83,7 +85,7 @@ public class FileLogServlet extends HttpServlet {
                 disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
             } else {
                 req.setAttribute("file", file);
-                ArrayList downloadLogs = file.getLogs(ds);
+                ArrayList<FileLog> downloadLogs = file.getLogs(ds);
                 req.setAttribute("downloadLogs", downloadLogs);
                 if (downloadLogs.isEmpty()) {
                     req.setAttribute("message", "The file <strong>\"" + Helpers.htmlSafe(file.getName()) + "\"</strong> has never been downloaded");

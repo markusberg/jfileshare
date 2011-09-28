@@ -46,6 +46,7 @@ import javax.servlet.RequestDispatcher;
 import javax.sql.DataSource;
 
 public class UserAddServlet extends HttpServlet {
+    static final long serialVersionUID = 1L;
 
     private DataSource datasource;
     private static final Logger logger =
