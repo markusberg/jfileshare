@@ -50,6 +50,9 @@
                 String tabExplicit;
 
                 tabExplicit = request.getAttribute("tab") == null ? "" : request.getAttribute("tab").toString();
+                if ("".equals(tabExplicit) && request.getServletPath().equals("/file/view")) {
+                    tabExplicit = "File";
+                }
 
                 if (user == null) {
                     /**
@@ -91,9 +94,6 @@
                             user.isAdmin()));
                 }
 
-                if ("".equals(tabExplicit) && request.getServletPath().equals("/file/view")) {
-                    tabExplicit = "File";
-                }
                 tablist.add(new Tab(tabExplicit,
                         "Explicitly defined tab",
                         true,
