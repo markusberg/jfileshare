@@ -21,10 +21,13 @@ package com.sectra.jfileshare.servlets;
 
 import com.sectra.jfileshare.objects.Conf;
 import com.sectra.jfileshare.objects.FileItem;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
+
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -41,7 +44,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.RequestDispatcher;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
+
+import org.apache.commons.io.FileSystemUtils;
 
 public class AboutServlet extends HttpServlet {
     static final long serialVersionUID = 1L;
@@ -79,6 +83,9 @@ public class AboutServlet extends HttpServlet {
             Connection dbConn = null;
             PreparedStatement st = null;
             try {
+				long bytesStoreAvailable = FileSystemUtils.freeSpaceKb(conf.getPathStore()) * 1024;
+                req.setAttribute("bytesStoreAvailable", FileItem.humanReadable(bytesStoreAvailable));
+
                 dbConn = ds.getConnection();
                 st = dbConn.prepareStatement("select cast(count(1) as char) as logins, cast(count(distinct payload) as char) as uniqueLogins from Logs where action=\"login\" and date > (now() - INTERVAL ? DAY)");
                 st.setInt(1, conf.getDaysLogRetention());

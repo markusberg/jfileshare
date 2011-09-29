@@ -30,6 +30,7 @@
                     if (session.getAttribute("user") != null) {
         %>
         <h1>Stats</h1>
+		<p>Free disk space: <%=request.getAttribute("bytesStoreAvailable")%></p>
         <p>In the last <%=request.getAttribute("daysLogRetention")%> days, there have been:</p>
         <ul>
             <li><%=request.getAttribute("logins")%> logins by
