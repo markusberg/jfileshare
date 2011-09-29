@@ -31,8 +31,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.logging.Level;
 
+import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
 import java.util.ArrayList;
@@ -211,6 +212,7 @@ public class PasswordResetServlet extends HttpServlet {
             msg.setFrom(emailRecipient);
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
             msg.setSender(conf.getSmtpSender());
+			msg.setSentDate(new Date());
 
             msg.setSubject("Reset Password Instructions");
 

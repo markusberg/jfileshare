@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 
 import java.sql.SQLException;
 
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -202,6 +203,7 @@ public class FileNotificationServlet extends HttpServlet {
         msg.setSender(new InternetAddress(currentUser.getEmail()));
         msg.setRecipient(Message.RecipientType.TO, emailRecipient);
         msg.setFrom(conf.getSmtpSender());
+		msg.setSentDate(new Date());
         msg.setSubject("File " + file.getName() + " available for download");
 
         MimeMultipart mp = new MimeMultipart();
