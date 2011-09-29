@@ -209,9 +209,9 @@ public class PasswordResetServlet extends HttpServlet {
 
         try {
             MimeMessage msg = new MimeMessage(session);
-            msg.setFrom(emailRecipient);
+            msg.setSender(emailRecipient);
             msg.setRecipient(Message.RecipientType.TO, emailRecipient);
-            msg.setSender(conf.getSmtpSender());
+            msg.setFrom(conf.getSmtpSender());
 			msg.setSentDate(new Date());
 
             msg.setSubject("Reset Password Instructions");
