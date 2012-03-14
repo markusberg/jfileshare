@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 --%>
-<%@page import="com.sectra.jfileshare.objects.Conf"%>
+<%@page import="nu.kelvin.jfileshare.objects.Conf"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <html>
 

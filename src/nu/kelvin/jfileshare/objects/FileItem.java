@@ -32,15 +32,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-// import java.util.logging.Level;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 public class FileItem implements Serializable {
-    static final long serialVersionUID = 1;
 
+    static final long serialVersionUID = 1;
     private Integer fid;
     private String name;
     private String mimetype;
@@ -71,28 +71,7 @@ public class FileItem implements Serializable {
             st.setInt(1, fid);
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
-                setFid(rs.getInt("FileItems.fid"));
-                setName(rs.getString("FileItems.name"));
-                setType(rs.getString("FileItems.type"));
-                setSize(rs.getLong("FileItems.size"));
-                setMd5sum(rs.getString("FileItems.md5sum"));
-                setEnabled(rs.getBoolean("FileItems.enabled"));
-                setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
-                setDownloads(rs.getInt("FileItems.downloads"));
-                if (rs.wasNull()) {
-                    setDownloads(null);
-                }
-
-                setPwHash(rs.getString("FileItems.pwHash"));
-                setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
-                setDateExpiration(rs.getTimestamp("dateExpiration"));
-                if (rs.wasNull()) {
-                    setDateExpiration(null);
-                }
-
-                setOwnerUid(rs.getInt("UserItems.uid"));
-                setOwnerUsername(rs.getString("UserItems.username"));
-                setOwnerEmail(rs.getString("UserItems.email"));
+                this.populate(rs);
             } else {
                 logger.info("File not found in database");
                 throw new NoSuchFileException("File not found");
@@ -111,6 +90,81 @@ public class FileItem implements Serializable {
                 }
             }
         }
+    }
+
+    private void populate(ResultSet rs)
+            throws SQLException {
+        setFid(rs.getInt("FileItems.fid"));
+        setName(rs.getString("FileItems.name"));
+        setType(rs.getString("FileItems.type"));
+        setSize(rs.getLong("FileItems.size"));
+        setMd5sum(rs.getString("FileItems.md5sum"));
+        setEnabled(rs.getBoolean("FileItems.enabled"));
+        setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
+        setDownloads(rs.getInt("FileItems.downloads"));
+        if (rs.wasNull()) {
+            setDownloads(null);
+        }
+
+        setPwHash(rs.getString("FileItems.pwHash"));
+        setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
+        setDateExpiration(rs.getTimestamp("dateExpiration"));
+        if (rs.wasNull()) {
+            setDateExpiration(null);
+        }
+
+        setOwnerUid(rs.getInt("UserItems.uid"));
+        setOwnerUsername(rs.getString("UserItems.username"));
+        setOwnerEmail(rs.getString("UserItems.email"));
+    }
+
+    public static ArrayList<FileItem> fetchExpired(DataSource ds) {
+        ArrayList<FileItem> files = new ArrayList<FileItem>();
+        try {
+            Connection dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select * from FileItems where dateExpiration<now() order by fid");
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                FileItem file = new FileItem();
+                file.populate(rs);
+                files.add(file);
+            }
+            st.close();
+            dbConn.close();
+        } catch (SQLException e) {
+            logger.warning(e.toString());
+        }
+        return files;
+    }
+
+    public static ArrayList<FileItem> fetchOwnedBy(DataSource ds, int uidOwner) {
+        ArrayList<FileItem> files = new ArrayList<FileItem>();
+        Connection dbConn = null;
+        try {
+            dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.uid=? order by FileItems.name ASC;");
+            st.setInt(1, uidOwner);
+            st.execute();
+            ResultSet rs = st.getResultSet();
+
+            while (rs.next()) {
+                FileItem file = new FileItem();
+                file.populate(rs);
+                files.add(file);
+            }
+            st.close();
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Exception: {0}", e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+
+        return files;
     }
 
     /**

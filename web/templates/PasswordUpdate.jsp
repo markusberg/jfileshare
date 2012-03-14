@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 --%>
-<%@page import="com.sectra.jfileshare.utils.Helpers"%>
+<%@page import="nu.kelvin.jfileshare.utils.Helpers"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <html>

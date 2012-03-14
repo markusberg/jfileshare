@@ -42,8 +42,8 @@ import javax.mail.internet.AddressException;
 import javax.sql.DataSource;
 
 public class UserItem implements Serializable {
-    static final long serialVersionUID = 1L;
 
+    static final long serialVersionUID = 1L;
     private String username;
     private String pwHash;
     private String email;
@@ -87,16 +87,7 @@ public class UserItem implements Serializable {
             st.setInt(1, uid);
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
-                setUid(rs.getInt("UserItems.uid"));
-                setUsername(rs.getString("UserItems.username"));
-                setPwHash(rs.getString("UserItems.pwHash"));
-                setDatePasswordChange(rs.getTimestamp("UserItems.datePasswordChange"));
-                setEmail(rs.getString("UserItems.email"));
-                setUserType(rs.getInt("UserItems.usertype"));
-                setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
-                setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
-                setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                setUidCreator(rs.getInt("UserItems.uidCreator"));
+                this.populate(rs);
                 setSumFiles(rs.getInt("sumFiles"));
                 setSumFileSize(rs.getLong("sumFileSize"));
                 setSumChildren(rs.getInt("sumChildren"));
@@ -118,6 +109,20 @@ public class UserItem implements Serializable {
         }
     }
 
+    private void populate(ResultSet rs)
+            throws SQLException {
+        setUid(rs.getInt("UserItems.uid"));
+        setUsername(rs.getString("UserItems.username"));
+        setPwHash(rs.getString("UserItems.pwHash"));
+        setDatePasswordChange(rs.getTimestamp("UserItems.datePasswordChange"));
+        setEmail(rs.getString("UserItems.email"));
+        setUserType(rs.getInt("UserItems.usertype"));
+        setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
+        setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
+        setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
+        setUidCreator(rs.getInt("UserItems.uidCreator"));
+    }
+
     public void fetch(DataSource ds, String username)
             throws NoSuchUserException, SQLException {
         Connection dbConn = null;
@@ -127,16 +132,7 @@ public class UserItem implements Serializable {
             st.setString(1, username);
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
-                setUid(rs.getInt("UserItems.uid"));
-                setUsername(rs.getString("UserItems.username"));
-                setPwHash(rs.getString("UserItems.pwHash"));
-                setDatePasswordChange(rs.getTimestamp("UserItems.datePasswordChange"));
-                setEmail(rs.getString("UserItems.email"));
-                setUserType(rs.getInt("UserItems.usertype"));
-                setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
-                setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
-                setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                setUidCreator(rs.getInt("UserItems.uidCreator"));
+                populate(rs);
             } else {
                 throw new NoSuchUserException("User not found");
             }
@@ -152,6 +148,27 @@ public class UserItem implements Serializable {
                 }
             }
         }
+    }
+
+    public static ArrayList<UserItem> fetchExpired(DataSource ds) {
+        ArrayList<UserItem> users = new ArrayList<UserItem>();
+        try {
+            Connection dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select * from UserItems where dateExpiration<now() order by uid");
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                UserItem user = new UserItem();
+                user.populate(rs);
+                users.add(user);
+            }
+
+            st.close();
+            dbConn.close();
+        } catch (SQLException e) {
+            logger.warning(e.toString());
+        }
+        return users;
     }
 
     public String getUsername() {
@@ -378,6 +395,7 @@ public class UserItem implements Serializable {
      * Delete the user and all files belonging to user
      * @param ds DataSource to use
      * @param pathFileStore Physical on-disk path to the filestore
+     * @param ipAddress The ip address performing the deletion
      */
     public void delete(DataSource ds, String pathFileStore, String ipAddress) {
         Connection dbConn = null;
@@ -492,16 +510,7 @@ public class UserItem implements Serializable {
 
             while (rs.next()) {
                 UserItem user = new UserItem();
-
-                user.setUid(rs.getInt("UserItems.uid"));
-
-                user.setUsername(rs.getString("UserItems.username"));
-                user.setPwHash(rs.getString("UserItems.pwHash"));
-                user.setEmail(rs.getString("UserItems.email"));
-                user.setUserType(rs.getInt("UserItems.usertype"));
-                user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
-                user.setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
-                user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
+                user.populate(rs);
                 user.setSumFileSize(rs.getLong("sumFilesize"));
                 user.setSumFiles(rs.getInt("sumFiles"));
                 user.setSumChildren(rs.getInt("sumChildren"));
@@ -523,54 +532,10 @@ public class UserItem implements Serializable {
     }
 
     public ArrayList<FileItem> getFiles(DataSource ds) {
-        ArrayList<FileItem> aFiles = new ArrayList<FileItem>();
-        Connection dbConn = null;
-        try {
-            dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.uid=? order by FileItems.name ASC;");
-            st.setInt(1, this.getUid());
-            st.execute();
-            ResultSet rs = st.getResultSet();
+        ArrayList<FileItem> files = FileItem.fetchOwnedBy(ds, this.uid);
 
-            while (rs.next()) {
-                FileItem file = new FileItem();
-
-                file.setFid(rs.getInt("FileItems.fid"));
-                file.setName(rs.getString("FileItems.name"));
-                file.setType(rs.getString("FileItems.type"));
-                file.setSize(rs.getLong("FileItems.size"));
-                file.setMd5sum(rs.getString("FileItems.md5sum"));
-                file.setEnabled(rs.getBoolean("FileItems.enabled"));
-                file.setDownloads(rs.getInt("FileItems.downloads"));
-                if (rs.wasNull()) {
-                    file.setDownloads(null);
-                }
-                file.setPwHash(rs.getString("FileItems.pwHash"));
-                if (rs.wasNull()) {
-                    file.setPwHash(null);
-                }
-                file.setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
-                file.setDateExpiration(rs.getTimestamp("FileItems.dateExpiration"));
-                if (rs.wasNull()) {
-                    file.setDateExpiration(null);
-                }
-                file.setOwnerUid(rs.getInt("FileItems.uid"));
-                aFiles.add(file);
-            }
-            st.close();
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "Exception: {0}", e.toString());
-        } finally {
-            if (dbConn != null) {
-                try {
-                    dbConn.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
-
-        logger.log(Level.INFO, "Found {0} files owned by user {1}", new Object[]{aFiles.size(), this.getUserInfo()});
-        return aFiles;
+        logger.log(Level.INFO, "Found {0} files owned by user {1}", new Object[]{files.size(), this.getUserInfo()});
+        return files;
     }
 
     /**

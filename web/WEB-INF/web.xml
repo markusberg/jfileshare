@@ -14,23 +14,23 @@
     </filter>
     <filter>
         <filter-name>setcharacterencoding</filter-name>
-        <filter-class>com.sectra.jfileshare.filters.SetCharacterEncodingFilter</filter-class>
+        <filter-class>nu.kelvin.jfileshare.filters.SetCharacterEncodingFilter</filter-class>
     </filter>
     <filter>
         <filter-name>conf</filter-name>
-        <filter-class>com.sectra.jfileshare.filters.ConfFilter</filter-class>
+        <filter-class>nu.kelvin.jfileshare.filters.ConfFilter</filter-class>
     </filter>
     <filter>
         <filter-name>login</filter-name>
-        <filter-class>com.sectra.jfileshare.filters.LoginFilter</filter-class>
+        <filter-class>nu.kelvin.jfileshare.filters.LoginFilter</filter-class>
     </filter>
     <filter>
         <filter-name>logout</filter-name>
-        <filter-class>com.sectra.jfileshare.filters.LogoutFilter</filter-class>
+        <filter-class>nu.kelvin.jfileshare.filters.LogoutFilter</filter-class>
     </filter>
     <filter>
         <filter-name>fileAuthentication</filter-name>
-        <filter-class>com.sectra.jfileshare.filters.FileAuthenticationFilter</filter-class>
+        <filter-class>nu.kelvin.jfileshare.filters.FileAuthenticationFilter</filter-class>
     </filter>
     <!-- Sitemesh filter -->
     <filter-mapping>
@@ -83,28 +83,27 @@
     <servlet>
         <description>About this web application</description>
         <servlet-name>About</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.AboutServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.AboutServlet</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Admin</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.AdminServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.AdminServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FileDelete</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileDeleteServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.FileDeleteServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FileDownload</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileDownloadServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.FileDownloadServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FileEdit</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileEditServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.FileEditServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FileLog</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.FileLogServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.FileLogServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FileUpload</servlet-name>
@@ -118,49 +117,49 @@
     </servlet>
     <servlet>
         <servlet-name>UserAdd</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.UserAddServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.UserAddServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserAdmin</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.UserAdminServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.UserAdminServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserDelete</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.UserDeleteServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.UserDeleteServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserEdit</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.UserEditServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.UserEditServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserView</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.UserViewServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.UserViewServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>AjaxFileNotification</servlet-name>
-        <servlet-class>com.sectra.jfileshare.ajax.FileNotificationServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.ajax.FileNotificationServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>AjaxFileReceiver</servlet-name>
-        <servlet-class>com.sectra.jfileshare.ajax.FileReceiverServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.ajax.FileReceiverServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>PasswordReset</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.PasswordResetServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.PasswordResetServlet</servlet-class>
     </servlet>
     <!-- "Special" servlets -->
     <servlet>
         <servlet-name>LinkCompatibility</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.LinkCompatibilityServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.LinkCompatibilityServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Startup</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.StartupServlet</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.StartupServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
         <servlet-name>VacuumCleaner</servlet-name>
-        <servlet-class>com.sectra.jfileshare.servlets.VacuumCleaner</servlet-class>
+        <servlet-class>nu.kelvin.jfileshare.servlets.VacuumCleaner</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
     <!-- Servlet mappings -->
@@ -168,7 +167,6 @@
         <servlet-name>About</servlet-name>
         <url-pattern>/about</url-pattern>
     </servlet-mapping>
-
     <servlet-mapping>
         <servlet-name>Admin</servlet-name>
         <url-pattern>/admin</url-pattern>

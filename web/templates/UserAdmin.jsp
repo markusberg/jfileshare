@@ -14,8 +14,8 @@
    limitations under the License.
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="com.sectra.jfileshare.objects.UserItem"%>
-<%@page import="com.sectra.jfileshare.objects.FileItem"%>
+<%@page import="nu.kelvin.jfileshare.objects.UserItem"%>
+<%@page import="nu.kelvin.jfileshare.objects.FileItem"%>
 <%@page import="java.util.ArrayList"%>
 <html>
     <head>

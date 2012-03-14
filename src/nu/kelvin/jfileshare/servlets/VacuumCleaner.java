@@ -14,8 +14,8 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
- * @since       2011-09-21
+ * @version     1.7
+ * @since       2012-03-14
  */
 package nu.kelvin.jfileshare.servlets;
 
@@ -46,8 +46,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 public class VacuumCleaner extends HttpServlet {
-    static final long serialVersionUID = 1L;
 
+    static final long serialVersionUID = 1L;
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
@@ -98,21 +98,21 @@ public class VacuumCleaner extends HttpServlet {
         }
 
         // Delete expired users
-        ArrayList<UserItem> users = (ArrayList<UserItem>) getExpiredUsers(ds);
+        ArrayList<UserItem> users = UserItem.fetchExpired(ds);
         if (!users.isEmpty()) {
             logger.log(Level.INFO, "Vacuuming {0} expired user(s) from the database", users.size());
-        }
-        for (UserItem user : users) {
-            user.delete(ds, conf.getPathStore(), "vacuum");
+            for (UserItem user : users) {
+                user.delete(ds, conf.getPathStore(), "vacuum");
+            }
         }
 
         // Delete expired files
-        ArrayList<FileItem> files = (ArrayList<FileItem>) getExpiredFiles(ds);
+        ArrayList<FileItem> files = FileItem.fetchExpired(ds);
         if (!files.isEmpty()) {
             logger.log(Level.INFO, "Vacuuming {0} expired file(s) from the database", files.size());
-        }
-        for (FileItem file : files) {
-            file.delete(ds, conf.getPathStore(), "vacuum");
+            for (FileItem file : files) {
+                file.delete(ds, conf.getPathStore(), "vacuum");
+            }
         }
 
         // Delete password requests older than 2 days
@@ -145,61 +145,5 @@ public class VacuumCleaner extends HttpServlet {
             dbConn.close();
         } catch (SQLException e) {
         }
-}
-
-    private ArrayList<UserItem> getExpiredUsers(DataSource ds) {
-        ArrayList<UserItem> users = new ArrayList<UserItem>();
-        try {
-            Connection dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select * from UserItems where dateExpiration<now() order by uid");
-            ResultSet rs = st.executeQuery();
-
-            while (rs.next()) {
-                UserItem user = new UserItem();
-                user.setUid(rs.getInt("UserItems.uid"));
-                user.setUsername(rs.getString("UserItems.username"));
-                user.setPwHash(rs.getString("UserItems.pwHash"));
-                user.setEmail(rs.getString("UserItems.email"));
-                user.setUserType(rs.getInt("UserItems.usertype"));
-                user.setDateCreation(rs.getTimestamp("UserItems.dateCreation"));
-                user.setDateLastLogin(rs.getTimestamp("UserItems.dateLastLogin"));
-                user.setDateExpiration(rs.getTimestamp("UserItems.dateExpiration"));
-                users.add(user);
-            }
-
-            st.close();
-            dbConn.close();
-        } catch (SQLException e) {
-            logger.warning(e.toString());
-        }
-        return users;
-    }
-
-    private ArrayList<FileItem> getExpiredFiles(DataSource ds) {
-        ArrayList<FileItem> files = new ArrayList<FileItem>();
-        try {
-            Connection dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select * from FileItems where dateExpiration<now() order by fid");
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                FileItem file = new FileItem();
-                file.setFid(rs.getInt("fid"));
-                file.setName(rs.getString("name"));
-                file.setType(rs.getString("type"));
-                file.setSize(rs.getLong("size"));
-                file.setMd5sum(rs.getString("md5sum"));
-                file.setDownloads(rs.getInt("downloads"));
-                file.setPwHash(rs.getString("pwHash"));
-                file.setDateCreation(rs.getTimestamp("dateCreation"));
-                file.setDateExpiration(rs.getTimestamp("dateExpiration"));
-                file.setEnabled(rs.getBoolean("enabled"));
-                files.add(file);
-            }
-            st.close();
-            dbConn.close();
-        } catch (SQLException e) {
-            logger.warning(e.toString());
-        }
-        return files;
     }
 }
