@@ -1,6 +1,6 @@
-<%@page import="com.sectra.jfileshare.objects.Conf"%>
-<%@ page import="com.sectra.jfileshare.objects.UserItem" %>
-<%@ page import="com.sectra.jfileshare.utils.Tab" %>
+<%@ page import="nu.kelvin.jfileshare.objects.Conf"%>
+<%@ page import="nu.kelvin.jfileshare.objects.UserItem" %>
+<%@ page import="nu.kelvin.jfileshare.utils.Tab" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="/WEB-INF/sitemesh-page.tld" prefix="page"%>

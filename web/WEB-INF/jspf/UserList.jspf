@@ -1,4 +1,4 @@
-<%@page import="com.sectra.jfileshare.utils.Helpers"%>
+<%@page import="nu.kelvin.jfileshare.utils.Helpers"%>
 <table id="users">
     <tr>
         <th>username</th>
@@ -20,11 +20,11 @@
                         lastlogin = "never";
                     } else if (childuser.getDateLastLogin().before(childuser.getDateCreation())
                             || childuser.getDateLastLogin().equals(childuser.getDateCreation())) {
-                        // the first version of jfileshare didn't properly store lastlogin
-                        // so this is a workaround:
+                        /* the first version of jfileshare didn't properly store lastlogin */
+                        /* so this is a workaround: */
                         lastlogin = "unknown";
                     } else {
-                        lastlogin = com.sectra.jfileshare.utils.Helpers.formatDate(childuser.getDateLastLogin());
+                        lastlogin = nu.kelvin.jfileshare.utils.Helpers.formatDate(childuser.getDateLastLogin());
                     }
 
     %>
