@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.7
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -299,7 +299,7 @@ public class Conf {
     }
 
     public String getVersion() {
-        return "1.6";
+        return "1.7";
     }
 
     public void setContextPath(String value) {
