@@ -72,6 +72,9 @@ public class FileItem implements Serializable {
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
                 this.populate(rs);
+                setOwnerUid(rs.getInt("UserItems.uid"));
+                setOwnerUsername(rs.getString("UserItems.username"));
+                setOwnerEmail(rs.getString("UserItems.email"));
             } else {
                 logger.info("File not found in database");
                 throw new NoSuchFileException("File not found");
@@ -108,21 +111,18 @@ public class FileItem implements Serializable {
 
         setPwHash(rs.getString("FileItems.pwHash"));
         setDateCreation(rs.getTimestamp("FileItems.dateCreation"));
-        setDateExpiration(rs.getTimestamp("dateExpiration"));
+        setDateExpiration(rs.getTimestamp("FileItems.dateExpiration"));
         if (rs.wasNull()) {
             setDateExpiration(null);
         }
 
-        setOwnerUid(rs.getInt("UserItems.uid"));
-        setOwnerUsername(rs.getString("UserItems.username"));
-        setOwnerEmail(rs.getString("UserItems.email"));
     }
 
     public static ArrayList<FileItem> fetchExpired(DataSource ds) {
         ArrayList<FileItem> files = new ArrayList<FileItem>();
         try {
             Connection dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select * from FileItems where dateExpiration<now() order by fid");
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where dateExpiration<now() order by FileItems.fid");
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 FileItem file = new FileItem();
@@ -150,6 +150,7 @@ public class FileItem implements Serializable {
             while (rs.next()) {
                 FileItem file = new FileItem();
                 file.populate(rs);
+                file.setOwnerUid(uidOwner);
                 files.add(file);
             }
             st.close();
