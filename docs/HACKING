@@ -4,15 +4,24 @@ Setting up your development environment:
 * install openjdk, ant, mysql
 * download tomcat6 and unzip in your homedir
 * install the mysql connector in the ${TOMCAT_HOME}/lib directory
+* Download the following packages:
+  + jakarta-commons-io
+  + classpathx-mail
+  + commons-fileupload
+  + sitemesh
+
+  and copy their respective jar-files to your tomcat lib-folder
+
 * Create a build.properties file in your homedir or your buildroot. It should
 look something like this:
-catalina.home=${user.home}/apache-tomcat-6.0.29
+catalina.home=${user.home}/apache-tomcat-7.0.30
 
 manager.username=myusername
 manager.password=mypassword
 
 manager.url=http://localhost:8080/manager
 EOF
+
 
 Netbeans environment:
 If you want to use the Netbeans IDE, you should follow these simple steps
