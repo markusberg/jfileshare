@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.8
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -76,12 +76,116 @@ public class StartupServlet extends HttpServlet {
             logger.info("Tables exist");
         } catch (SQLException e) {
             logger.info("Database tables not found");
+            createTables(dbConn);
         } finally {
             if (dbConn != null) {
                 try {
                     dbConn.close();
                 } catch (SQLException e) {
                 }
+            }
+        }
+    }
+
+    private void createTables(Connection dbConn) {
+        try {
+            dbConn.setAutoCommit(false);
+            // Create table for application configuration
+            logger.info("Creating Conf table");
+            alterDatabase(dbConn, "CREATE TABLE `Conf` ("
+                    + "`key` varchar(64) NOT NULL, "
+                    + "`value` varchar(128) NOT NULL, "
+                    + "PRIMARY KEY (`key`)) "
+                    + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
+            alterDatabase(dbConn, "insert into Conf values('daysLogRetention', '7')");
+            alterDatabase(dbConn, "update Conf set `value`='4' where `key`='dbVersion'");
+            PreparedStatement st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
+            commitKeyValuePair(st, "daysFileExpiration", "14");
+            commitKeyValuePair(st, "daysUserExpiration", "60");
+            commitKeyValuePair(st, "fileSizeMax", "10485760");
+            commitKeyValuePair(st, "pathStore", "/jfileshare/store");
+            commitKeyValuePair(st, "pathTemp", "/jfileshare/temp");
+            commitKeyValuePair(st, "smtpServer", "localhost");
+            commitKeyValuePair(st, "smtpServerPort", "25");
+            commitKeyValuePair(st, "smtpSender", "noreply@example.com");
+            commitKeyValuePair(st, "brandingOrg", "jfileshare");
+            commitKeyValuePair(st, "brandingDomain", "example.com");
+            commitKeyValuePair(st, "brandingLogo", "");
+            commitKeyValuePair(st, "debug", "false");
+
+            // Create UserItems table
+            logger.info("Creating UserItems table");
+            alterDatabase(dbConn, "CREATE TABLE `UserItems` ( "
+                    + "`uid` int(10) NOT NULL auto_increment, "
+                    + "`usertype` int(2) NOT NULL default '1', "
+                    + "`username` varchar(255) NOT NULL, "
+                    + "`pwHash` varchar(255) default NULL, "
+                    + "`datePasswordChange` timestamp NULL default NULL, "
+                    + "`email` varchar(255) default NULL, "
+                    + "`dateCreation` timestamp NOT NULL default CURRENT_TIMESTAMP, "
+                    + "`dateLastLogin` timestamp NULL default NULL, "
+                    + "`dateExpiration` timestamp NULL default NULL, "
+                    + "`uidCreator` int(5) default NULL, "
+                    + "PRIMARY KEY  (`uid`), "
+                    + "UNIQUE KEY `username` (`username`), "
+                    + "KEY `uidCreator` (`uidCreator`), "
+                    + "CONSTRAINT `UserItems_ibfk_1` FOREIGN KEY (`uidCreator`) REFERENCES `UserItems` (`uid`) ON DELETE SET NULL "
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+            // Create FileItems table
+            logger.info("Creating FileItems table");
+            alterDatabase(dbConn, "CREATE TABLE `FileItems` ("
+                    + "`fid` int(10) NOT NULL auto_increment, "
+                    + "`name` varchar(255) NOT NULL, "
+                    + "`type` varchar(100) NOT NULL, "
+                    + "`size` bigint(20) unsigned NOT NULL default '0', "
+                    + "`md5sum` varchar(255) NOT NULL, "
+                    + "`downloads` int(5) default NULL, "
+                    + "`pwHash` varchar(255) default NULL, "
+                    + "`dateCreation` timestamp NOT NULL default CURRENT_TIMESTAMP, "
+                    + "`dateExpiration` timestamp NULL default NULL, "
+                    + "`uid` int(5) NOT NULL, "
+                    + "`enabled` tinyint(1) NOT NULL default '1', "
+                    + "`allowTinyUrl` tinyint(1) NOT NULL default '0', "
+                    + "PRIMARY KEY  (`fid`), "
+                    + "KEY `uid` (`uid`), "
+                    + "CONSTRAINT `FileItems_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `UserItems` (`uid`) ON DELETE CASCADE "
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+            // Create Logs table
+            logger.info("Creating Logs table");
+            alterDatabase(dbConn, "CREATE TABLE `Logs` ( "
+                    + "`date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
+                    + "`ipAddress` varchar(39) NOT NULL default '0.0.0.0', "
+                    + "`id` int(10) NOT NULL, "
+                    + "`action` varchar(32) NOT NULL, "
+                    + "`payload` varchar(256) NOT NULL "
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+            // Create views
+            logger.info("Creating views");
+            alterDatabase(dbConn, "create VIEW viewUserFiles as select uid, count(fid) as sumFiles, sum(size) as sumFilesize from FileItems group by uid");
+            alterDatabase(dbConn, "create VIEW viewUserChildren as select uidCreator as uid, count(uid) as sumChildren from UserItems where uidCreator is not null group by uidCreator");
+
+            // Create table for password reset/recovery
+            logger.info("Creating PasswordReset table");
+            alterDatabase(dbConn, "CREATE TABLE `PasswordReset` ("
+                    + "`dateRequest` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+                    + "`username` varchar(255) NOT NULL, "
+                    + "`emailaddress` varchar(255) NOT NULL, "
+                    + "`key` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+            // Commit transaction
+            logger.info("Committing transaction");
+            dbConn.commit();
+        } catch (SQLException e) {
+            try {
+                dbConn.rollback();
+                logger.warning("Unable to create tables. Rolling back.");
+                logger.warning(e.toString());
+            } catch (SQLException eRollback) {
+                logger.warning("Unable to roll back.");
+                logger.warning(eRollback.toString());
             }
         }
     }
@@ -233,8 +337,8 @@ public class StartupServlet extends HttpServlet {
             commitKeyValuePair(st, "smtpServer", app.getInitParameter("SMTP_SERVER"));
             commitKeyValuePair(st, "smtpServerPort", app.getInitParameter("SMTP_SERVER_PORT"));
             commitKeyValuePair(st, "smtpSender", app.getInitParameter("SMTP_SENDER"));
-            commitKeyValuePair(st, "brandingOrg", "Sectra");
-            commitKeyValuePair(st, "brandingDomain", "sectra.se");
+            commitKeyValuePair(st, "brandingOrg", "jfileshare");
+            commitKeyValuePair(st, "brandingDomain", "example.com");
             commitKeyValuePair(st, "brandingLogo", "");
             commitKeyValuePair(st, "debug", "false");
             commitKeyValuePair(st, "dbVersion", "2");
