@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.8
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.filters;
@@ -129,6 +129,7 @@ public class FileAuthenticationFilter implements Filter {
     private boolean authenticated(FileItem file, HttpSession session, HttpServletRequest req) {
         //First, are we authenticated for this file
         if (session.getAttribute("authfiles") != null) {
+            @SuppressWarnings("unchecked")
             ArrayList<Integer> authfiles = (ArrayList<Integer>) session.getAttribute("authfiles");
 
             if (authfiles.contains(file.getFid())) {
