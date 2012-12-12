@@ -308,6 +308,7 @@ public class PasswordResetServlet extends HttpServlet {
      * @return
      */
     private TreeMap<String, String> retrieveUserInfo(String key) {
+        // FIXME: if the key contains double-slashes, the lookup fails
         Connection dbConn = null;
         TreeMap<String, String> UserInfo = new TreeMap<String, String>();
         try {
