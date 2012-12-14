@@ -2,15 +2,13 @@ JFileShare developer's documentation
 
 Setting up your development environment:
 * install openjdk, ant, mysql
-* download tomcat6 and unzip in your homedir
+* download tomcat7 and unzip in your homedir
 * install the mysql connector in the ${TOMCAT_HOME}/lib directory
-* Download the following packages:
+* The following packages are included in the source distribution:
   + jakarta-commons-io
   + classpathx-mail
   + commons-fileupload
   + sitemesh
-
-  and copy their respective jar-files to your tomcat lib-folder
 
 * Create a build.properties file in your homedir or your buildroot. It should
 look something like this:
@@ -30,5 +28,7 @@ If you want to use the Netbeans IDE, you should follow these simple steps
 * Import the existing sources (including the build.xml ant-file) into a new netbeans project
 * Netbeans is a nice IDE to work with
 
+xxxxxxxxxxxxxxxxxxxxxxxx
 
+FIXME: When using a /file/download link and the file is password protected, non-7bit-ascii characters are not handled correctly. Fix this by adjusting the characterencoding and fileauthentication filters
 
