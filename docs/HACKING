@@ -28,7 +28,3 @@ If you want to use the Netbeans IDE, you should follow these simple steps
 * Import the existing sources (including the build.xml ant-file) into a new netbeans project
 * Netbeans is a nice IDE to work with
 
-xxxxxxxxxxxxxxxxxxxxxxxx
-
-FIXME: When using a /file/download link and the file is password protected, non-7bit-ascii characters are not handled correctly. Fix this by adjusting the characterencoding and fileauthentication filters
-

@@ -127,7 +127,7 @@ public class FileAuthenticationFilter implements Filter {
     }
 
     private boolean authenticated(FileItem file, HttpSession session, HttpServletRequest req) {
-        //First, are we authenticated for this file
+        // First: are we already authenticated for this file
         if (session.getAttribute("authfiles") != null) {
             @SuppressWarnings("unchecked")
             ArrayList<Integer> authfiles = (ArrayList<Integer>) session.getAttribute("authfiles");
@@ -139,9 +139,10 @@ public class FileAuthenticationFilter implements Filter {
         }
 
         // We need to authenticate; do we have a password to authenticate?
-        if (req.getParameter("FilePassword") != null) {
+        String pw = req.getParameter("FilePassword");
+        if (pw != null && !"".equals(pw)) {
             // We are logging in.. verify the password.
-            if (file.authenticated(req.getParameter("FilePassword"))) {
+            if (file.authenticated(pw)) {
                 logger.log(Level.INFO, "Saving {0} to authfiles in session ", file.getFid());
                 if (session.getAttribute("authfiles") != null) {
                     @SuppressWarnings("unchecked")
