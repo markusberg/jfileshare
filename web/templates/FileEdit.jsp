@@ -45,7 +45,7 @@
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>
-                    <td><a href="<%= file.getURL(request.getContextPath())%>"><%= Helpers.htmlSafe(file.getName())%></a></td>
+                    <td><input type="text" name="fileName" class="fileNameEntry" value="<%= Helpers.htmlSafe(file.getName())%>" /></td>
                 </tr>
                 <tr>
                     <th>Content-Type: </th>

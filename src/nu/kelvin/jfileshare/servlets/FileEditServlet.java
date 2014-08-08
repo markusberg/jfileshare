@@ -142,6 +142,11 @@ public class FileEditServlet extends HttpServlet {
                     }
                 }
 
+                if (req.getParameter("fileName") != null
+                        && !req.getParameter("fileName").equals("")) {
+                    file.setName(req.getParameter("fileName"));
+                }
+
                 Integer iDownloads = null;
                 if (!"".equals(req.getParameter("iDownloads"))) {
                     try {

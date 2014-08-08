@@ -369,25 +369,26 @@ public class FileItem implements Serializable {
         try {
             dbConn = ds.getConnection();
 
-            st = dbConn.prepareStatement("update FileItems set downloads=?,dateExpiration=?,enabled=?,pwHash=?,allowTinyUrl=? where fid=?");
+            st = dbConn.prepareStatement("update FileItems set name=?,downloads=?,dateExpiration=?,enabled=?,pwHash=?,allowTinyUrl=? where fid=?");
+            st.setString(1,this.name);
             if (this.downloads == null) {
-                st.setNull(1, java.sql.Types.INTEGER);
+                st.setNull(2, java.sql.Types.INTEGER);
             } else {
-                st.setInt(1, this.downloads);
+                st.setInt(2, this.downloads);
             }
             if (dateExpiration == null) {
-                st.setNull(2, java.sql.Types.TIMESTAMP);
+                st.setNull(3, java.sql.Types.TIMESTAMP);
             } else {
-                st.setTimestamp(2, new Timestamp(this.dateExpiration.getTime()));
+                st.setTimestamp(3, new Timestamp(this.dateExpiration.getTime()));
             }
-            st.setBoolean(3, this.enabled);
+            st.setBoolean(4, this.enabled);
             if (this.pwHash == null) {
-                st.setNull(4, java.sql.Types.VARCHAR);
+                st.setNull(5, java.sql.Types.VARCHAR);
             } else {
-                st.setString(4, this.pwHash);
+                st.setString(5, this.pwHash);
             }
-            st.setBoolean(5, this.allowTinyUrl);
-            st.setInt(6, this.fid);
+            st.setBoolean(6, this.allowTinyUrl);
+            st.setInt(7, this.fid);
             st.executeUpdate();
 
             st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'file edit',?)");

@@ -31,6 +31,9 @@ body {
     font-size: 0.8em;
 }
 
+input.fileNameEntry {
+    width: 20em;
+}
 input.textentry {
     width: 12em;
 }
