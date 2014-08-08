@@ -20,6 +20,7 @@
 package nu.kelvin.jfileshare.objects;
 
 import nu.kelvin.jfileshare.utils.Sha512Crypt;
+import nu.kelvin.jfileshare.utils.Helpers;
 
 import java.io.Serializable;
 
@@ -60,6 +61,7 @@ public class UserItem implements Serializable {
     public static final int TYPE_ADMIN = 1;
     public static final int TYPE_INTERNAL = 2;
     public static final int TYPE_EXTERNAL = 3;
+    private String CSRFToken;
     private static final Logger logger = Logger.getLogger(UserItem.class.getName());
     /**
      * Integer to string mapping of expiration dates
@@ -626,5 +628,30 @@ public class UserItem implements Serializable {
     public boolean passwordIsOlderThan(int days) {
         long expiration = (long) days * 1000 * 60 * 60 * 24;
         return (this.datePasswordChange.getTime() + expiration) < System.currentTimeMillis();
+    }
+
+    /**
+     * Initialize CSRF token. This is performed on successful login.
+     */
+    public void setCSRFToken() {
+        this.CSRFToken = Helpers.getRandomString();
+    }
+
+    /**
+     * Retrieve CSRF token for insertion in web form
+     */
+    public String getCSRFToken() {
+        return this.CSRFToken;
+    }
+
+    /**
+     * Verify that the provided CSRF token is the same as the provided one
+     * @param token
+     */
+    public boolean isValidCSRFToken(String token) {
+        if (this.CSRFToken == null) {
+            return false;
+        }
+        return (this.CSRFToken.equals(token));
     }
 }

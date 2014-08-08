@@ -21,8 +21,12 @@ package nu.kelvin.jfileshare.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.security.SecureRandom;
 
 public class Helpers {
+
+    public static final String vocabulary = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-";
+    static SecureRandom rnd = new SecureRandom();
 
     /**
      * Helps out to format date into readable format
@@ -48,5 +52,24 @@ public class Helpers {
         field = field.replaceAll("<", "&lt;");
         field = field.replaceAll(">", "&gt;");
         return field;
+    }
+
+    /**
+     * Generate a nice random url-friendly string
+     * @param length generated string length
+     */
+    public static String getRandomString(int length) {
+        StringBuilder sb = new StringBuilder( length );
+        for (int i=0; i<length; i++) {
+            sb.append( vocabulary.charAt( rnd.nextInt( vocabulary.length() ) ) );
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Generate a random url-friendly string 32 bytes long
+     */
+    public static String getRandomString() {
+        return getRandomString(32);
     }
 }

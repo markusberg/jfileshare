@@ -129,8 +129,9 @@ public class PasswordResetServlet extends HttpServlet {
             try {
                 InternetAddress emailRecipient = new InternetAddress(user.getEmail());
                 emailRecipient.validate();
-                String key = Sha512Crypt.Sha512_crypt(user.getEmail(), null, 0);
-                key = key.substring(key.length() - 50, key.length());
+                String key = Helpers.getRandomString();
+                logger.log(Level.INFO, "Initiating pw reset. key: {0}", key);
+
                 if (SendResetInstructions(emailRecipient, key, conf)
                         && StoreRecoveryKey(username, user.getEmail(), key)) {
                     if (user.getUid() == null) {
@@ -204,8 +205,12 @@ public class PasswordResetServlet extends HttpServlet {
     private boolean SendResetInstructions(InternetAddress emailRecipient, String key, Conf conf) {
         Properties props = System.getProperties();
         props.put("mail.smtp.host", conf.getSmtpServer());
-        props.put("mail.smtp.port", conf.getSmtpServerPort());
+        props.put("mail.smtp.port", ((Integer) conf.getSmtpServerPort()).toString());
+        props.put("mail.smtp.reportsuccess", "true");
+
         Session session = Session.getInstance(props, null);
+
+
 
         try {
             MimeMessage msg = new MimeMessage(session);
@@ -308,7 +313,6 @@ public class PasswordResetServlet extends HttpServlet {
      * @return
      */
     private TreeMap<String, String> retrieveUserInfo(String key) {
-        // FIXME: if the key contains double-slashes, the lookup fails
         Connection dbConn = null;
         TreeMap<String, String> UserInfo = new TreeMap<String, String>();
         try {

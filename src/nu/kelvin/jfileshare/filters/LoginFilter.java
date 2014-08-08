@@ -133,6 +133,7 @@ public class LoginFilter implements Filter {
                         // resp.sendRedirect(urlPattern);
 
                         user.saveLastLogin(ds, req.getRemoteAddr());
+                        user.setCSRFToken();
                         session.setAttribute("user", user);
                         chain.doFilter(request, response);
                     }
