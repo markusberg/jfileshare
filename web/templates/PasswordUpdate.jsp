@@ -31,15 +31,15 @@
 
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
-        <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern")%>" method="post">
+        <form action="<%= request.getContextPath()%><%= request.getAttribute("urlPattern") == null ? "/user/view" : request.getAttribute("urlPattern")%>" method="post" autocomplete="off">
             <table>
                 <tr>
                     <th>Password: </th>
-                    <td><input type="password" class="textentry" name="password1" value="" id="focusme" /></td>
+                    <td><input type="password" class="textentry" name="password1" id="focusme" /></td>
                 </tr>
                 <tr>
                     <th>Verify password: </th>
-                    <td><input type="password" class="textentry" name="password2" value="" /></td>
+                    <td><input type="password" class="textentry" name="password2" /></td>
                 </tr>
 
                 <tr><td>&nbsp;</td></tr>

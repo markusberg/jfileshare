@@ -28,8 +28,10 @@
 
         <%
                     Conf conf = (Conf) getServletContext().getAttribute("conf");
+                    UserItem currentUser = (UserItem) session.getAttribute("user");
         %>
         <form action="<%= request.getContextPath()%>/admin" method="post">
+            <input type="hidden" name="CSRFToken" value="<%=currentUser.getCSRFToken()%>" />
             <table>
                 <tr>
                     <td><h3>Branding</h3></td>

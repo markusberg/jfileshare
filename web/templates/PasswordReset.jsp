@@ -36,7 +36,7 @@
                     String username = (String) request.getAttribute("username");
                     if (username != null) {
         %>
-        <form action="<%= request.getContextPath()%>/passwordreset/<%=request.getAttribute("key")%>" method="post">
+        <form action="<%= request.getContextPath()%>/passwordreset/<%=request.getAttribute("key")%>" method="post" autocomplete="off">
             <p>Reset password for user <strong><%=username%></strong>:</p>
             <table>
                 <tr>

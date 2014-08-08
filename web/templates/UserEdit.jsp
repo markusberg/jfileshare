@@ -33,6 +33,7 @@
         %>
 
         <form action="<%= request.getContextPath()%>/user/edit/<%=user.getUid()%>" method="post">
+            <input type="hidden" name="CSRFToken" value="<%=currentUser.getCSRFToken()%>" />
             <table id="singleentry">
                 <tr>
                     <th>Userid: </th><td><%= user.getUid()%></td>

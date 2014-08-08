@@ -27,11 +27,13 @@
     <body>
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <%
+            UserItem currentUser = (UserItem) session.getAttribute("user");
             if (request.getAttribute("user") != null) {
                 UserItem user = (UserItem) request.getAttribute("user");
         %>
         <h2>Confirm deletion</h2>
         <form action="<%= request.getContextPath()%>/user/delete/<%= user.getUid()%>" method="post">
+            <input type="hidden" name="CSRFToken" value="<%=currentUser.getCSRFToken()%>" />
             <table id="singleentry">
                 <tr>
                     <th>Userid: </th><td><%=user.getUid()%></td>

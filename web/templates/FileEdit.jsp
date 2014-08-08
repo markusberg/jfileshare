@@ -17,6 +17,7 @@
 <%@page import="nu.kelvin.jfileshare.objects.Conf"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="nu.kelvin.jfileshare.objects.FileItem"%>
+<%@page import="nu.kelvin.jfileshare.objects.UserItem"%>
 <html>
     <head>
         <title>Edit file</title>
@@ -31,6 +32,8 @@
                     }
                     </script>
                      */
+
+                    UserItem currentUser = (UserItem) session.getAttribute("user");
         %>
     </head>
 
@@ -42,6 +45,7 @@
                         FileItem file = (FileItem) request.getAttribute("file");
         %>
         <form action="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>" method="post">
+            <input type="hidden" name="CSRFToken" value="<%=currentUser.getCSRFToken()%>" />
             <table id="singleentry">
                 <tr>
                     <th>Filename: </th>

@@ -29,11 +29,14 @@
         <%@include file="/WEB-INF/jspf/MessageBoxes.jspf"%>
         <p>Please ensure that all fields are filled out correctly</p>
 
-        <form action="<%= request.getContextPath()%>/user/add" method="post">
             <%
                         UserItem user = (UserItem) request.getAttribute("user");
+                        UserItem currentUser = (UserItem) session.getAttribute("user");
+                        Conf conf = (Conf) getServletContext().getAttribute("conf");
             %>
 
+        <form action="<%= request.getContextPath()%>/user/add" method="post" autocomplete="off">
+            <input type="hidden" name="CSRFToken" value="<%=currentUser.getCSRFToken()%>" />
             <table id="singleentry">
                 <tr>
                     <th>Username:</th>
@@ -83,8 +86,6 @@
                     </td>
                 </tr>
                 <%
-                            UserItem currentUser = (UserItem) session.getAttribute("user");
-                            Conf conf = (Conf) getServletContext().getAttribute("conf");
                             if (currentUser.isAdmin()) {
                 %>
                 <tr>
