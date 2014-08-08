@@ -106,10 +106,10 @@ public class PasswordResetServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        Conf conf = (Conf) getServletContext().getAttribute("conf");
+        ServletContext app = getServletContext();
+        Conf conf = (Conf) app.getAttribute("conf");
         if ("PasswordResetRequest".equals(req.getParameter("action"))) {
             String username = req.getParameter("username");
-            ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
 
             UserItem user = new UserItem();
@@ -149,7 +149,6 @@ public class PasswordResetServlet extends HttpServlet {
 
             disp.forward(req, resp);
         } else if ("PasswordReset".equals(req.getParameter("action"))) {
-            ServletContext app = getServletContext();
             RequestDispatcher disp = app.getRequestDispatcher("/templates/PasswordReset.jsp");
             TreeMap<String,String> UserInfo = this.retrieveUserInfo(req.getPathInfo());
 

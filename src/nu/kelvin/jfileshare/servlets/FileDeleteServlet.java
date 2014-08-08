@@ -77,18 +77,23 @@ public class FileDeleteServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         ServletContext app = getServletContext();
         RequestDispatcher disp;
+
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            // CSRF token is missing, we can just fail spectacularly here
+            return;
+        }
 
         String PathInfo = req.getPathInfo().substring(1);
         int iFid = Integer.parseInt(PathInfo);
         try {
             FileItem file = new FileItem();
             file.fetch(ds, iFid);
-            UserItem currentUser = (UserItem) session.getAttribute("user");
 
             if (currentUser.hasEditAccessTo(file)) {
-                Conf conf = (Conf) getServletContext().getAttribute("conf");
+                Conf conf = (Conf) app.getAttribute("conf");
                 if (file.delete(ds, conf.getPathStore(), req.getRemoteAddr())) {
                     // FIXME: this is ugly. Should be ajax instead.
                     UserItem user = null;

@@ -80,7 +80,7 @@ public class UserAddServlet extends HttpServlet {
             disp = app.getRequestDispatcher("/templates/AccessDenied.jsp");
         } else {
             // Set the default values for a new user
-            Conf conf = (Conf) getServletContext().getAttribute("conf");
+            Conf conf = (Conf) app.getAttribute("conf");
             UserItem user = new UserItem();
             user.setDaysUntilExpiration(conf.getDaysUserExpiration());
             req.setAttribute("user", user);
@@ -92,7 +92,6 @@ public class UserAddServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         if ("login".equals(req.getParameter("action"))) {
             doGet(req, resp);
             return;
@@ -100,6 +99,11 @@ public class UserAddServlet extends HttpServlet {
 
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            doGet(req, resp);
+            return;
+        }
+
         RequestDispatcher disp;
         ServletContext app = getServletContext();
         Conf conf = (Conf) app.getAttribute("conf");

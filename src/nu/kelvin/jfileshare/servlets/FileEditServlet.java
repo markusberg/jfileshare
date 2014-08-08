@@ -81,9 +81,9 @@ public class FileEditServlet extends HttpServlet {
             file.fetch(ds, fid);
 
             HttpSession session = req.getSession();
-            UserItem User = (UserItem) session.getAttribute("user");
+            UserItem currentUser = (UserItem) session.getAttribute("user");
 
-            if (User.hasEditAccessTo(file)) {
+            if (currentUser.hasEditAccessTo(file)) {
                 req.setAttribute("file", file);
                 req.setAttribute("tab", "Edit file");
                 disp = app.getRequestDispatcher("/templates/FileEdit.jsp");
@@ -110,7 +110,15 @@ public class FileEditServlet extends HttpServlet {
             doGet(req, resp);
             return;
         }
+        HttpSession session = req.getSession();
+        UserItem currentUser = (UserItem) session.getAttribute("user");
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            doGet(req, resp);
+            return;
+        }
+
         ServletContext app = getServletContext();
+        Conf conf = (Conf) app.getAttribute("conf");
         RequestDispatcher disp;
 
         int fid = Integer.parseInt(req.getPathInfo().substring(1));
@@ -119,11 +127,8 @@ public class FileEditServlet extends HttpServlet {
             FileItem file = new FileItem();
             file.fetch(ds, fid);
 
-            HttpSession session = req.getSession();
-            UserItem user = (UserItem) session.getAttribute("user");
-            Conf conf = (Conf) getServletContext().getAttribute("conf");
 
-            if (user.hasEditAccessTo(file)) {
+            if (currentUser.hasEditAccessTo(file)) {
                 req.setAttribute("tab", "Edit file");
                 req.setAttribute("message", "Your changes to this file have been saved");
                 if (req.getParameter("bEnabled") != null

@@ -115,6 +115,11 @@ public class UserEditServlet extends HttpServlet {
 
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            doGet(req, resp);
+            return;
+        }
+
         Integer uid = Integer.parseInt(req.getPathInfo().substring(1));
         try {
             UserItem user = new UserItem();

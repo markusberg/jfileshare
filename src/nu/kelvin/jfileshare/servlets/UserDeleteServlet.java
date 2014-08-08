@@ -116,6 +116,10 @@ public class UserDeleteServlet extends HttpServlet {
 
         HttpSession session = req.getSession();
         UserItem currentUser = (UserItem) session.getAttribute("user");
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            doGet(req, resp);
+            return;
+        }
         Integer iUid = Integer.parseInt(req.getPathInfo().substring(1));
         try {
             UserItem user = new UserItem();

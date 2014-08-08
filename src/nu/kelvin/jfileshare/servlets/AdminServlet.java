@@ -71,10 +71,10 @@ public class AdminServlet extends HttpServlet {
         ServletContext app = getServletContext();
         RequestDispatcher disp;
         HttpSession session = req.getSession();
-        UserItem User = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         Conf conf = (Conf) app.getAttribute("conf");
 
-        if (User.isAdmin()) {
+        if (currentUser.isAdmin()) {
             req.setAttribute("conf", conf);
             disp = app.getRequestDispatcher("/templates/Admin.jsp");
         } else {
@@ -95,10 +95,14 @@ public class AdminServlet extends HttpServlet {
         ServletContext app = getServletContext();
         RequestDispatcher disp;
         HttpSession session = req.getSession();
-        UserItem user = (UserItem) session.getAttribute("user");
+        UserItem currentUser = (UserItem) session.getAttribute("user");
         Conf conf = (Conf) app.getAttribute("conf");
+        if (!currentUser.isValidCSRFToken(req.getParameter("CSRFToken"))) {
+            doGet(req, resp);
+            return;
+        }
 
-        if (user.isAdmin()) {
+        if (currentUser.isAdmin()) {
             disp = app.getRequestDispatcher("/templates/Admin.jsp");
 
             // FIXME: No sanity checking on the user input
