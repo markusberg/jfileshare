@@ -40,8 +40,8 @@
                 <input type="text" class="textentry" name="emailRecipient" id="email_<%= file.getFid()%>"/>
                 <input type="submit" name="submit" value="Notify" /></form>
         </td>
-        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" class=\"icon\" alt="edit" title="Edit this file" /></a></td>
-        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/logviewer.png" class=\"icon\" alt="logviewer" title="View the download logs of this file" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/edit/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" class="icon" alt="edit" title="Edit this file" /></a></td>
+        <td><a href="<%= request.getContextPath()%>/file/log/<%= file.getFid()%>"><img src="<%= request.getContextPath()%>/images/logviewer.png" class="icon" alt="logviewer" title="View the download logs of this file" /></a></td>
         <td>
             <form id="delete-<%= file.getFid()%>" action="<%= request.getContextPath()%>/file/delete/<%= file.getFid()%>" method="post">
             <input type="hidden" name="CSRFToken" value="<%= currentUser.getCSRFToken()%>" />
