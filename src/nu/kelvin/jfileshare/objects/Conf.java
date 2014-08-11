@@ -56,7 +56,7 @@ public class Conf {
     private int smtpServerPort = 25;
     private InternetAddress smtpSender;
     private String urlPrefix;
-    private static final String VERSION = "1.9";
+    private static final String VERSION = "1.10";
     private static final Logger logger =
             Logger.getLogger(Conf.class.getName());
 
