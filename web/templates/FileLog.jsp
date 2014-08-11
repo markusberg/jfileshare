@@ -36,7 +36,7 @@
                         if (!downloadLogs.isEmpty()) {
                             boolean even = false;
         %>
-        <p>The file <strong>"<%= file.getName()%>"</strong> has been downloaded <%=downloadLogs.size()%> <%=downloadLogs.size() == 1 ? "time" : "times"%>.</p>
+        <p>The file <strong>"<%= Helpers.htmlSafe(file.getName())%>"</strong> has been downloaded <%=downloadLogs.size()%> <%=downloadLogs.size() == 1 ? "time" : "times"%>.</p>
         <table id="files">
             <tr>
                 <th>Time</th><th>IP</th>
