@@ -1,6 +1,7 @@
 <%@ page import="nu.kelvin.jfileshare.objects.Conf"%>
 <%@ page import="nu.kelvin.jfileshare.objects.UserItem" %>
 <%@ page import="nu.kelvin.jfileshare.utils.Tab" %>
+<%@ page import="nu.kelvin.jfileshare.utils.Helpers" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="/WEB-INF/sitemesh-page.tld" prefix="page"%>
@@ -121,9 +122,9 @@
                             for (Tab tab : tablist) {
                                 if (tab.isEnabled()) {
                                     if (tab.isSelected()) {
-                                        out.print("<li><div id=\"tabSelected\">" + tab.getTitle() + "</div></li>\n");
+                                        out.print("<li><div id=\"tabSelected\">" + Helpers.htmlSafe(tab.getTitle()) + "</div></li>\n");
                                     } else {
-                                        out.print("<li><a href=\"" + request.getContextPath() + tab.getLink() + "\">" + tab.getTitle() + "</a></li>\n");
+                                        out.print("<li><a href=\"" + request.getContextPath() + tab.getLink() + "\">" + Helpers.htmlSafe(tab.getTitle()) + "</a></li>\n");
                                     }
                                 }
                             }
