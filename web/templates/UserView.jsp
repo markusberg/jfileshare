@@ -93,7 +93,7 @@
         <table>
             <tr>
                 <th>Username:</th>
-                <td><%= user.getUsername()%>
+                <td><%= Helpers.htmlSafe(user.getUsername())%>
                     ( <a href="<%= request.getContextPath()%>/user/edit/<%= user.getUid()%>"><img src="<%= request.getContextPath()%>/images/edit.png" alt="edit" title="Edit User" /> Edit User</a> )
                 </td>
             </tr>
@@ -124,7 +124,7 @@
         <%                                }
                                 if (!currentUser.isExternal()) {
         %>
-        <h2>Users administered by <%= user.getUsername()%></h2>
+        <h2>Users administered by <%= Helpers.htmlSafe(user.getUsername())%></h2>
         <%
                                             ArrayList<UserItem> users = (ArrayList<UserItem>) request.getAttribute("users");
                                             if (users.isEmpty()) {

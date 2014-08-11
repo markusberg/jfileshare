@@ -48,7 +48,7 @@
                         <input type="text" class="textentry" name="username" value="<%= Helpers.htmlSafe(user.getUsername())%>" />
                         <%
                                     } else {
-                                        out.print(user.getUsername());
+                                        out.print(Helpers.htmlSafe(user.getUsername()));
                                     }
                         %>
                     </td>
