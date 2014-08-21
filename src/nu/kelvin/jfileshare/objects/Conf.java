@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.13
+ * @version     1.15
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -56,7 +56,7 @@ public class Conf {
     private int smtpServerPort = 25;
     private InternetAddress smtpSender;
     private String urlPrefix;
-    private static final String VERSION = "1.14";
+    private static final String VERSION = "1.15";
     private static final Logger logger =
             Logger.getLogger(Conf.class.getName());
 

@@ -60,8 +60,8 @@ public class SetCachingPolicyFilter implements Filter {
             resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
             resp.setDateHeader("Expires", -1);
             resp.setDateHeader("Last-Modified", System.currentTimeMillis() - 1000 * 60 * 30);
-            // } else {
-            // logger.log(Level.INFO, "Excluding this request from caching policy: {0}", pathRequest);
+        // } else {
+        // logger.log(Level.INFO, "Excluding this request from caching policy: {0}", pathRequest);
         }
 
         chain.doFilter(request, response);
