@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -52,6 +53,7 @@ public class VacuumCleaner extends HttpServlet {
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
     private long VACUUM_INTERVAL = 1000 * 60;
+    // private long VACUUM_INTERVAL = 1000;
     private Timer timer = null;
 
     @Override
@@ -92,6 +94,7 @@ public class VacuumCleaner extends HttpServlet {
      */
     private void vacuum() {
         // logger.info("Running scheduled vacuum of database");
+        Connection dbConn = null;
         Conf conf = (Conf) getServletContext().getAttribute("conf");
         if (conf == null) {
             conf = new Conf(ds);
@@ -117,7 +120,7 @@ public class VacuumCleaner extends HttpServlet {
 
         // Delete password requests older than 2 days
         try {
-            Connection dbConn = ds.getConnection();
+            dbConn = ds.getConnection();
             Statement st = dbConn.createStatement();
             int i = st.executeUpdate("DELETE FROM PasswordReset where dateRequest < ( now() - INTERVAL 2 DAY )");
 
@@ -127,12 +130,39 @@ public class VacuumCleaner extends HttpServlet {
             st.close();
             dbConn.close();
         } catch (SQLException e) {
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+
+        // Auto-expiration of files that haven't been downloaded or edited
+        if (conf.getMonthsFileAutoExpiration() != 0) {
+            // logger.log(Level.INFO, "Running tests for auto-expiration");
+            ArrayList<FileItem> files2 = FileItem.fetchFilesForAutoExpiration(ds, conf.getMonthsFileAutoExpiration());
+            for (FileItem file : files2) {
+                logger.log(Level.INFO, "Activating auto-expiration on file " + file.getName() + " (fid:" + file.getFid() + ")");
+                long millis = (long) conf.getDaysFileExpiration() * 1000 * 60 * 60 * 24;
+                file.setDateExpiration(new Timestamp(System.currentTimeMillis() + millis));
+                file.update(ds, "vacuum");
+
+                try {
+                    UserItem owner = new UserItem();
+                    owner.fetch(ds, file.getUid());
+                    logger.log(Level.INFO, "Sending email notification to {0} about this auto-expiration", owner.getEmail());
+                } catch (Exception e) {
+                    logger.log(Level.INFO, "Unable to find user to notify about auto-expiration. {0}", e.toString());
+                }
+            }
         }
 
         // Clean out old log entries
         // except upload/download logs where the files still exist on the server
         try {
-            Connection dbConn = ds.getConnection();
+            dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("DELETE FROM Logs WHERE `date` < ( now() - INTERVAL ? DAY ) AND fid NOT IN (SELECT fid FROM FileItems)");
             st.setInt(1, conf.getDaysLogRetention());
             st.setString(2, "download");
@@ -146,6 +176,14 @@ public class VacuumCleaner extends HttpServlet {
             st.close();
             dbConn.close();
         } catch (SQLException e) {
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                }
+            }
         }
     }
 }
+

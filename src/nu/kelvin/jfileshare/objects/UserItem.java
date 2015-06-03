@@ -593,7 +593,7 @@ public class UserItem implements Serializable {
         if (this.isAdmin()) {
             logger.log(Level.INFO, "Administrator access to edit file {0}", file.getFid());
             return true;
-        } else if (file.getOwnerUid().equals(this.getUid())) {
+        } else if (file.getUid().equals(this.getUid())) {
             logger.log(Level.INFO, "Owner access to edit file {0}", file.getFid());
             return true;
         }

@@ -162,7 +162,7 @@ public class FileReceiverServlet extends HttpServlet {
                         // This is the file you're looking for
                         file.setName(item.getName());
                         file.setType(item.getContentType() == null ? "application/octet-stream" : item.getContentType());
-                        file.setOwnerUid(currentUser.getUid());
+                        file.setUid(currentUser.getUid());
 
                         try {
                             filestream = new FileOutputStream(tempFile);

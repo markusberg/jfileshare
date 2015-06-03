@@ -97,12 +97,12 @@ public class FileDeleteServlet extends HttpServlet {
                 if (file.delete(ds, conf.getPathStore(), req.getRemoteAddr())) {
                     // FIXME: this is ugly. Should be ajax instead.
                     UserItem user = null;
-                    if (currentUser.getUid().equals(file.getOwnerUid())) {
+                    if (currentUser.getUid().equals(file.getUid())) {
                         user = currentUser;
                     } else {
                         try {
                             user = new UserItem();
-                            user.fetch(ds, file.getOwnerUid());
+                            user.fetch(ds, file.getUid());
                         } catch (NoSuchUserException ignored) {
                         } catch (SQLException ignored) {
                         }

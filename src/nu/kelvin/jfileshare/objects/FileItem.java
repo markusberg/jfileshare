@@ -50,7 +50,7 @@ public class FileItem implements Serializable {
     private String pwHash;
     private Timestamp dateCreation;
     private Timestamp dateExpiration;
-    private Integer ownerUid;
+    private Integer uid;
     private String ownerUsername;
     private String ownerEmail;
     private boolean allowTinyUrl = false;
@@ -72,7 +72,7 @@ public class FileItem implements Serializable {
             ResultSet rs = st.executeQuery();
             if (rs.first()) {
                 this.populate(rs);
-                setOwnerUid(rs.getInt("UserItems.uid"));
+                setUid(rs.getInt("UserItems.uid"));
                 setOwnerUsername(rs.getString("UserItems.username"));
                 setOwnerEmail(rs.getString("UserItems.email"));
             } else {
@@ -103,6 +103,7 @@ public class FileItem implements Serializable {
         setSize(rs.getLong("FileItems.size"));
         setMd5sum(rs.getString("FileItems.md5sum"));
         setEnabled(rs.getBoolean("FileItems.enabled"));
+        setUid(rs.getInt("FileItems.uid"));
         setAllowTinyUrl(rs.getBoolean("FileItems.allowTinyUrl"));
         setDownloads(rs.getInt("FileItems.downloads"));
         if (rs.wasNull()) {
@@ -116,6 +117,29 @@ public class FileItem implements Serializable {
             setDateExpiration(null);
         }
 
+    }
+
+    /***
+     * Retrieve a list of files ready for autoexpiration
+     */
+    public static ArrayList<FileItem> fetchFilesForAutoExpiration(DataSource ds, int months) {
+        ArrayList<FileItem> files = new ArrayList<FileItem>();
+        try {
+            Connection dbConn = ds.getConnection();
+            PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where dateExpiration is NULL and fid in (select fid from (select fid,max(`date`) as lastDate from Logs where fid is not null group by fid) as lastDlTable where lastDate < (now() - interval ? month))");
+            st.setInt(1, months);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                FileItem file = new FileItem();
+                file.populate(rs);
+                files.add(file);
+            }
+            st.close();
+            dbConn.close();
+        } catch (SQLException e) {
+            logger.warning(e.toString());
+        }
+        return files;
     }
 
     public static ArrayList<FileItem> fetchExpired(DataSource ds) {
@@ -137,20 +161,20 @@ public class FileItem implements Serializable {
         return files;
     }
 
-    public static ArrayList<FileItem> fetchOwnedBy(DataSource ds, int uidOwner) {
+    public static ArrayList<FileItem> fetchOwnedBy(DataSource ds, int uid) {
         ArrayList<FileItem> files = new ArrayList<FileItem>();
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
             PreparedStatement st = dbConn.prepareStatement("select FileItems.* from FileItems where FileItems.uid=? order by FileItems.name ASC;");
-            st.setInt(1, uidOwner);
+            st.setInt(1, uid);
             st.execute();
             ResultSet rs = st.getResultSet();
 
             while (rs.next()) {
                 FileItem file = new FileItem();
                 file.populate(rs);
-                file.setOwnerUid(uidOwner);
+                file.setUid(uid);
                 files.add(file);
             }
             st.close();
@@ -263,12 +287,12 @@ public class FileItem implements Serializable {
         this.dateExpiration = dateExpiration;
     }
 
-    public void setOwnerUid(Integer ownerUid) {
-        this.ownerUid = ownerUid;
+    public void setUid(Integer uid) {
+        this.uid = uid;
     }
 
-    public Integer getOwnerUid() {
-        return this.ownerUid;
+    public Integer getUid() {
+        return this.uid;
     }
 
     public void setOwnerUsername(String ownerUsername) {
@@ -332,7 +356,7 @@ public class FileItem implements Serializable {
             } else {
                 st.setTimestamp(7, this.dateExpiration);
             }
-            st.setInt(8, this.ownerUid);
+            st.setInt(8, this.uid);
             st.setBoolean(9, this.enabled);
             st.setBoolean(10, this.allowTinyUrl);
             st.executeUpdate();
@@ -343,7 +367,7 @@ public class FileItem implements Serializable {
 
             st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,?,'upload',?)");
             st.setString(1, ipAddress);
-            st.setInt(2, this.ownerUid);
+            st.setInt(2, this.uid);
             st.setInt(3, this.fid);
             st.setString(4, Long.toString(this.size));
             st.executeUpdate();
