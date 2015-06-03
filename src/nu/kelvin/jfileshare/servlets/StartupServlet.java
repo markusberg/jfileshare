@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.8
+ * @version     1.16
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -65,6 +65,7 @@ public class StartupServlet extends HttpServlet {
         dbUpdate2();
         dbUpdate3();
         dbUpdate4();
+        dbUpdate5();
     }
 
     private void TableInit() {
@@ -187,6 +188,56 @@ public class StartupServlet extends HttpServlet {
                 logger.warning("Unable to roll back.");
                 logger.warning(eRollback.toString());
             }
+        }
+    }
+
+
+
+    private int getDbVersion(Connection dbConn) throws SQLException, Exception {
+        PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
+        st.execute();
+        ResultSet rs = st.getResultSet();
+        if (rs.first()) {
+            return (Integer.parseInt(rs.getString("Conf.value")));
+        }
+        throw new Exception("Unable to find db version");
+    }
+
+
+    /***
+     * Update log table to store uid and fid in separate columns
+     * This will allow for more detailed logs in the future
+     */
+    private void dbUpdate5() {
+        Connection dbConn = null;
+        try {
+            dbConn = datasource.getConnection();
+            if (getDbVersion(dbConn) < 5) {
+
+                alterDatabase(dbConn, "ALTER TABLE `Logs` CHANGE `id` `uid` int(10) NULL default NULL");
+                alterDatabase(dbConn, "ALTER TABLE `Logs` ADD `fid` int(10) NULL DEFAULT NULL AFTER `uid`");
+                alterDatabase(dbConn, "UPDATE `Logs` SET `fid`=`uid` where `action` in ('file edit', 'file delete', 'download', 'upload')");
+                alterDatabase(dbConn, "UPDATE `Logs` SET `uid`=null where `action` in ('file edit', 'file delete', 'download', 'upload')");
+                alterDatabase(dbConn, "INSERT INTO `Logs` (`date`, `uid`, `fid`, `action`, `payload`) SELECT `dateCreation`, `uid`, `fid`, 'upload', `name` from `FileItems`");
+                alterDatabase(dbConn, "update Conf set `value`='5' where `key`='dbVersion'");
+                logger.info("Database format updated to level 5");
+            } else {
+                logger.info("Database is already at level 5 or higher");
+            }
+
+        } catch (SQLException e) {
+            logger.warning("SQLException: " + e.toString());
+        } catch (Exception e) {
+            logger.warning("Exception: " + e.toString());
+        } finally {
+            if (dbConn != null) {
+                try {
+                    dbConn.close();
+                } catch (SQLException e) {
+                    logger.warning("SQLException: " + e.toString());
+                }
+            }
+
         }
     }
 

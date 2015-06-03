@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.16
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -336,7 +336,7 @@ public class UserItem implements Serializable {
                 this.uid = rs.getInt(1);
             }
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'create user',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,null,'create user',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.uid);
             st.setString(3, this.username + " (" + this.uid.toString() + ")");
@@ -372,7 +372,7 @@ public class UserItem implements Serializable {
             st.setInt(7, this.uid);
             st.executeUpdate();
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'user edit',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,null,'user edit',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.uid);
             st.setString(3, this.username);
@@ -418,7 +418,7 @@ public class UserItem implements Serializable {
             st.setInt(1, this.uid);
             st.executeUpdate();
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'user delete',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,null,'user delete',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.uid);
             st.setString(3, this.username);
@@ -466,7 +466,7 @@ public class UserItem implements Serializable {
             ps.setInt(1, this.uid);
             ps.executeUpdate();
 
-            ps = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'login',?)");
+            ps = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,null,'login',?)");
             ps.setString(1, ipAddress);
             ps.setInt(2, this.uid);
             ps.setString(3, this.username);

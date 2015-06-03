@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.16
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -341,10 +341,11 @@ public class FileItem implements Serializable {
                 this.fid = rs.getInt(1);
             }
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'upload',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,?,'upload',?)");
             st.setString(1, ipAddress);
-            st.setInt(2, this.fid);
-            st.setString(3, Long.toString(this.size));
+            st.setInt(2, this.ownerUid);
+            st.setInt(3, this.fid);
+            st.setString(4, Long.toString(this.size));
             st.executeUpdate();
 
             st.close();
@@ -391,7 +392,7 @@ public class FileItem implements Serializable {
             st.setInt(7, this.fid);
             st.executeUpdate();
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'file edit',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,null,?,'file edit',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.fid);
             st.setString(3, this.name);
@@ -430,7 +431,7 @@ public class FileItem implements Serializable {
             st.setInt(1, this.fid);
             st.executeUpdate();
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'file delete',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,null,?,'file delete',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.fid);
             st.setString(3, this.name);
@@ -460,7 +461,7 @@ public class FileItem implements Serializable {
             st.setInt(1, this.fid);
             st.executeUpdate();
 
-            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,?,'download',?)");
+            st = dbConn.prepareStatement("INSERT INTO Logs VALUES(now(),?,null,?,'download',?)");
             st.setString(1, ipAddress);
             st.setInt(2, this.fid);
             st.setString(3, Long.toString(this.size));
