@@ -50,6 +50,7 @@ public class Conf {
     private int dbVersion;
     private boolean debug;
     private long fileSizeMax;
+    private int monthsFileAutoExpiration;
     private String pathStore;
     private String pathTemp;
     private String smtpServer = "localhost";
@@ -76,6 +77,7 @@ public class Conf {
             setDaysPasswordExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysPasswordExpiration")));
             setDaysUserExpiration(Integer.parseInt(fetchValueFromDatabase(st, "daysUserExpiration")));
             setFileSizeMax(Long.parseLong(fetchValueFromDatabase(st, "fileSizeMax")));
+            setMonthsFileAutoExpiration(Integer.parseInt(fetchValueFromDatabase(st, "monthsFileAutoExpiration")));
             setPathStore(fetchValueFromDatabase(st, "pathStore"));
             setPathTemp(fetchValueFromDatabase(st, "pathTemp"));
             setSmtpServer(fetchValueFromDatabase(st, "smtpServer"));
@@ -184,6 +186,14 @@ public class Conf {
         this.fileSizeMax = fileSizeMax;
     }
 
+    public int getMonthsFileAutoExpiration() {
+        return monthsFileAutoExpiration;
+    }
+
+    public void setMonthsFileAutoExpiration(int monthsFileAutoExpiration) {
+        this.monthsFileAutoExpiration = monthsFileAutoExpiration;
+    }
+
     public String getPathStore() {
         return this.pathStore;
     }
@@ -245,6 +255,7 @@ public class Conf {
             commitKeyValuePair(st, "daysUserExpiration", Integer.toString(daysUserExpiration));
             commitKeyValuePair(st, "debug", debug ? "true" : "false");
             commitKeyValuePair(st, "fileSizeMax", Long.toString(fileSizeMax));
+            commitKeyValuePair(st, "monthsFileAutoExpiration", Integer.toString(monthsFileAutoExpiration));
             commitKeyValuePair(st, "pathStore", pathStore);
             commitKeyValuePair(st, "pathTemp", pathTemp);
             commitKeyValuePair(st, "smtpServer", smtpServer);

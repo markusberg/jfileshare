@@ -219,6 +219,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "UPDATE `Logs` SET `fid`=`uid` where `action` in ('file edit', 'file delete', 'download', 'upload')");
                 alterDatabase(dbConn, "UPDATE `Logs` SET `uid`=null where `action` in ('file edit', 'file delete', 'download', 'upload')");
                 alterDatabase(dbConn, "INSERT INTO `Logs` (`date`, `uid`, `fid`, `action`, `payload`) SELECT `dateCreation`, `uid`, `fid`, 'upload', `name` from `FileItems`");
+                alterDatabase(dbConn, "INSERT INTO Conf (`key`,`value`) VALUES ('monthsFileAutoExpiration', '0')");
                 alterDatabase(dbConn, "update Conf set `value`='5' where `key`='dbVersion'");
                 logger.info("Database format updated to level 5");
             } else {

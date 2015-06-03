@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.16
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -40,11 +40,6 @@ import javax.servlet.RequestDispatcher;
 
 import javax.sql.DataSource;
 
-/**
- * @author  Markus Berg <markus.berg@sectra.se>
- * @version 2010-05-30
- * @since   1.5
- */
 public class AdminServlet extends HttpServlet {
     static final long serialVersionUID = 1L;
 
@@ -119,6 +114,14 @@ public class AdminServlet extends HttpServlet {
                 daysFileExpiration = 0;
             }
             conf.setDaysFileExpiration(daysFileExpiration);
+            int monthsFileAutoExpiration;
+            try {
+                monthsFileAutoExpiration = Integer.parseInt(req.getParameter("monthsFileAutoExpiration"));
+            } catch (NumberFormatException e) {
+                monthsFileAutoExpiration = 0;
+            }
+            conf.setMonthsFileAutoExpiration(monthsFileAutoExpiration);
+
             conf.setSmtpServer(req.getParameter("smtpServer"));
 
             int smtpServerPort;

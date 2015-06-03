@@ -103,6 +103,11 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>File auto-expiration after: </th>
+                    <td><input type="text" class="intentry" name="monthsFileAutoExpiration" value="<%= conf.getMonthsFileAutoExpiration() == 0 ? "" : conf.getMonthsFileAutoExpiration()%>" /> months</td>
+                    <td><span class="note">A file which hasn't been downloaded or modified in this many months will have its expiration flag automatically set, and an email will be sent to its owner informing about this. Leave blank to disable file auto-expiration</span></td>
+                </tr>
+                <tr>
                     <td colspan="2"><h3>Mail server settings</h3></td>
                 </tr>
                 <tr>
