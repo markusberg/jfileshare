@@ -51,7 +51,7 @@ public class VacuumCleaner extends HttpServlet {
     private DataSource ds;
     private static final Logger logger =
             Logger.getLogger(VacuumCleaner.class.getName());
-    private long VACUUM_INTERVAL = 1000 * 60 * 10;
+    private long VACUUM_INTERVAL = 1000 * 60;
     private Timer timer = null;
 
     @Override
@@ -133,7 +133,7 @@ public class VacuumCleaner extends HttpServlet {
         // except upload/download logs where the files still exist on the server
         try {
             Connection dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("DELETE FROM Logs WHERE `date` < ( now() - INTERVAL ? DAY ) AND (`action` NOT IN (?, ?, ?) OR id NOT IN (SELECT fid FROM FileItems))");
+            PreparedStatement st = dbConn.prepareStatement("DELETE FROM Logs WHERE `date` < ( now() - INTERVAL ? DAY ) AND fid NOT IN (SELECT fid FROM FileItems)");
             st.setInt(1, conf.getDaysLogRetention());
             st.setString(2, "download");
             st.setString(3, "upload");
