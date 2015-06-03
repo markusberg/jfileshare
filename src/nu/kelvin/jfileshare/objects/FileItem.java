@@ -533,7 +533,7 @@ public class FileItem implements Serializable {
         Connection dbConn = null;
         try {
             dbConn = ds.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("SELECT date, ipAddress FROM Logs WHERE `id`=? AND `action`='download' order by `date` DESC");
+            PreparedStatement st = dbConn.prepareStatement("SELECT date, ipAddress FROM Logs WHERE `fid`=? AND `action`='download' order by `date` DESC");
             st.setInt(1, this.fid);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
