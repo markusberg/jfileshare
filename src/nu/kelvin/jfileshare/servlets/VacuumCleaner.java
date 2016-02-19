@@ -14,13 +14,14 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.7
+ * @version     1.16
  * @since       2012-03-14
  */
 package nu.kelvin.jfileshare.servlets;
 
 import nu.kelvin.jfileshare.objects.Conf;
 import nu.kelvin.jfileshare.objects.FileItem;
+import nu.kelvin.jfileshare.objects.NoSuchUserException;
 import nu.kelvin.jfileshare.objects.UserItem;
 
 import java.sql.Connection;
@@ -31,10 +32,22 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -139,7 +152,7 @@ public class VacuumCleaner extends HttpServlet {
             }
         }
 
-        // Auto-expiration of files that haven't been downloaded or edited
+        // Auto-expiration of files that haven't been downloaded or edited for a while
         if (conf.getMonthsFileAutoExpiration() != 0) {
             // logger.log(Level.INFO, "Running tests for auto-expiration");
             ArrayList<FileItem> files2 = FileItem.fetchFilesForAutoExpiration(ds, conf.getMonthsFileAutoExpiration());
@@ -150,9 +163,9 @@ public class VacuumCleaner extends HttpServlet {
                 file.update(ds, "vacuum");
 
                 try {
-                    UserItem owner = new UserItem();
-                    owner.fetch(ds, file.getUid());
-                    logger.log(Level.INFO, "Sending email notification to {0} about this auto-expiration", owner.getEmail());
+                    SendAutoExpirationInformation(file, conf);
+                } catch (MessagingException e) {
+                    logger.log(Level.WARNING, "Unable to send notification email: {0}", e.toString());
                 } catch (Exception e) {
                     logger.log(Level.INFO, "Unable to find user to notify about auto-expiration. {0}", e.toString());
                 }
@@ -185,5 +198,81 @@ public class VacuumCleaner extends HttpServlet {
             }
         }
     }
+
+    private void SendAutoExpirationInformation(FileItem file, Conf conf)
+        throws MessagingException, NoSuchUserException, SQLException {
+        UserItem owner = new UserItem();
+        owner.fetch(ds, file.getUid());
+        logger.log(Level.INFO, "Sending email notification to {0} about this auto-expiration", owner.getEmail());
+
+        Properties props = System.getProperties();
+        props.put("mail.smtp.host", conf.getSmtpServer());
+        props.put("mail.smtp.port", ((Integer) conf.getSmtpServerPort()).toString());
+        props.put("mail.smtp.reportsuccess", "true");
+
+        Session session = Session.getInstance(props, null);
+
+        MimeMessage msg = new MimeMessage(session);
+        // msg.setSender();
+        
+        InternetAddress emailRecipient = new InternetAddress(owner.getEmail());
+
+        msg.setRecipient(Message.RecipientType.TO, emailRecipient);
+        msg.setFrom(conf.getSmtpSender());
+        msg.setSentDate(new Date());
+
+        msg.setSubject("File auto-expiration");
+
+        MimeMultipart mp = new MimeMultipart();
+        mp.setSubType("alternative");
+
+        String urlFileView = conf.getBaseUrl() + "/file/view/" + file.getFid() + "?md5=" + file.getMd5sum();
+        String urlFileEdit = conf.getBaseUrl() + "/file/edit/" + file.getFid();
+        String urlFileLog = conf.getBaseUrl() + "/file/log/" + file.getFid();
+
+        String txtBody = 
+            "This is an automated message from the " + conf.getBrandingOrg() + " jfileshare system.\n\n"
+            + "The following file in your account: \n"
+            + file.getName() + " (" + FileItem.humanReadable(file.getSize()) + ")\n"
+            + "hasn't been downloaded or edited in more than " + conf.getMonthsFileAutoExpiration() + " months.\n"
+            + "It has therefore been marked for automatic deletion in " + conf.getDaysFileExpiration() + " days.\n"
+            + "\n"
+            + "If you don't want this file to be deleted, you need to reenable its \"permanent\" status from the web interface:\n"
+            + urlFileEdit + "\n"
+            + "\n"
+            + "The download logs for this file are available here:\n"
+            + urlFileLog + "\n"
+            + "--\n"
+            + "Best regards\n"
+            + "The " + conf.getBrandingOrg() + " jfileshare system";
+        MimeBodyPart mbp1 = new MimeBodyPart();
+        mbp1.setText(txtBody);
+
+        String htmlBody = 
+            "<p>This is an automated message from the " + conf.getBrandingOrg() + " jfileshare system.</p>\n"
+            + "<p>The following file in your account:<br />"
+            + "<a href=\"" + urlFileView + "\">" + file.getName() + "</a> (" + FileItem.humanReadable(file.getSize()) + ")</br>\n"
+            + "hasn't been downloaded or edited in more than " + conf.getMonthsFileAutoExpiration() + " months. \n"
+            + "It has therefore been marked for automatic deletion in " + conf.getDaysFileExpiration() + " days.</p>\n"
+            + "\n"
+            + "<p>If you don't want this file to be deleted, you need to reenable its \"permanent\" status from the web interface:<br />\n"
+            + "<a href=\"" + urlFileEdit + "\">" + urlFileEdit + "</a></p>\n"
+            + "\n"
+            + "<p>The download logs for this file are available here:<br />\n"
+            + "<a href=\"" + urlFileLog + "\">" + urlFileLog + "</a></p>\n"
+            + "<hr />\n"
+            + "<p>Best regards<br />\n"
+            + "The " + conf.getBrandingOrg() + " jfileshare system</p>\n";
+        MimeBodyPart mbp2 = new MimeBodyPart();
+        mbp2.setContent(htmlBody, "text/html");
+
+        mp.addBodyPart(mbp1);
+        mp.addBodyPart(mbp2);
+        msg.setContent(mp);
+
+        Transport.send(msg);
+
+    }
+
 }
 
