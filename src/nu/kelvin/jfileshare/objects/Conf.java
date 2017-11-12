@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.16
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -57,7 +57,7 @@ public class Conf {
     private int smtpServerPort = 25;
     private InternetAddress smtpSender;
     private String urlPrefix;
-    private static final String VERSION = "1.16";
+    private static final String VERSION = "1.17";
     private static final Logger logger =
             Logger.getLogger(Conf.class.getName());
 
@@ -290,7 +290,7 @@ public class Conf {
 
     /**
      * Figure out the absolute path to the server in order to construct proper links
-     * @param req
+     * @param req Request object
      */
     public void setUrlPrefix(ServletRequest req) {
         String httpScheme = req.getScheme();

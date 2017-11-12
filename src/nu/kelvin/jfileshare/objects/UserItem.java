@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.16
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -187,11 +187,11 @@ public class UserItem implements Serializable {
 
     /***
      * Set the hashed password based on provided plaintext password
-     * 
+     *
      * This method is only ever called when the password is set or changed
      * therefore, datePasswordChange is also updated when this method is called
-     * 
-     * @param pwPlainText
+     *
+     * @param pwPlainText Plaintext password
      */
     public void setPwPlainText(String pwPlainText) {
         this.pwHash = Sha512Crypt.Sha512_crypt(pwPlainText, null, 0);
@@ -442,7 +442,7 @@ public class UserItem implements Serializable {
 
     /**
      * Number of days until the user is deleted
-     * @param days
+     * @param days Number of days
      */
     public void setDaysUntilExpiration(int days) {
         long millis = (long) days * 1000 * 60 * 60 * 24;
@@ -542,8 +542,8 @@ public class UserItem implements Serializable {
 
     /**
      * Validate that the password lives up to complexity requirements
-     * @param pw1
-     * @param pw2
+     * @param pw1 First password entry
+     * @param pw2 Second password entry
      * @return ArrayList of errors encountered
      */
     public ArrayList<String> validatePassword(String pw1, String pw2) {
@@ -569,7 +569,7 @@ public class UserItem implements Serializable {
 
     /**
      * Validate that the provided email address looks correct
-     * @param emailAddress
+     * @param emailAddress Email address
      * @return ArrayList of errors encountered
      */
     public ArrayList<String> validateEmailAddress(String emailAddress) {
@@ -586,7 +586,7 @@ public class UserItem implements Serializable {
 
     /**
      * Does the user enjoy edit rights to the specified file
-     * @param file
+     * @param file The fileitem being queried
      * @return True if the user has access to the provided file
      */
     public boolean hasEditAccessTo(FileItem file) {
@@ -603,7 +603,7 @@ public class UserItem implements Serializable {
 
     /**
      * Does the user enjoy edit rights to the specified user
-     * @param user
+     * @param user The Useritem being queried
      * @return True if the user has access to the provided user
      */
     public boolean hasEditAccessTo(UserItem user) {
@@ -639,6 +639,7 @@ public class UserItem implements Serializable {
 
     /**
      * Retrieve CSRF token for insertion in web form
+     * @return Current csrf token
      */
     public String getCSRFToken() {
         return this.CSRFToken;
@@ -646,7 +647,8 @@ public class UserItem implements Serializable {
 
     /**
      * Verify that the provided CSRF token is the same as the provided one
-     * @param token
+     * @param token The CSRF token to be verified
+     * @return Is the token valid
      */
     public boolean isValidCSRFToken(String token) {
         if (this.CSRFToken == null) {

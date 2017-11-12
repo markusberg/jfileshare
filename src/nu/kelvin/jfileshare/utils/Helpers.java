@@ -13,8 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @author      Markus Berg  <markus.berg @ sectra.se>
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.utils;
@@ -57,6 +57,7 @@ public class Helpers {
     /**
      * Generate a nice random url-friendly string
      * @param length generated string length
+     * @return Random string
      */
     public static String getRandomString(int length) {
         StringBuilder sb = new StringBuilder( length );
@@ -68,6 +69,7 @@ public class Helpers {
 
     /**
      * Generate a random url-friendly string 32 bytes long
+     * @return Random string
      */
     public static String getRandomString() {
         return getRandomString(32);

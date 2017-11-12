@@ -13,8 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @author      Markus Berg  <markus.berg @ sectra.se>
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -26,7 +26,6 @@ import nu.kelvin.jfileshare.objects.UserItem;
 
 import java.io.IOException;
 import java.sql.SQLException;
-// import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -43,11 +42,6 @@ import javax.servlet.RequestDispatcher;
 
 import javax.sql.DataSource;
 
-/**
- * @author  Markus Berg <markus.berg@sectra.se>
- * @version 2010-05-30
- * @since   1.5
- */
 public class FileEditServlet extends HttpServlet {
     static final long serialVersionUID = 1L;
 

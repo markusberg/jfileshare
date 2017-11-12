@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.6
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -27,8 +27,6 @@ import nu.kelvin.jfileshare.objects.NoSuchUserException;
 import nu.kelvin.jfileshare.utils.Helpers;
 
 import java.io.IOException;
-// import java.util.logging.Level;
-// import java.util.logging.Logger;
 import java.sql.SQLException;
 
 import javax.naming.Context;
@@ -48,11 +46,6 @@ import javax.servlet.ServletException;
 
 import javax.sql.DataSource;
 
-/**
- * @author  Markus Berg <markus.berg@sectra.se>
- * @version 2010-05-30
- * @since   1.5
- */
 public class FileDeleteServlet extends HttpServlet {
     static final long serialVersionUID = 1L;
 

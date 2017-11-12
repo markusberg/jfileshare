@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.16
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.objects;
@@ -121,6 +121,9 @@ public class FileItem implements Serializable {
 
     /***
      * Retrieve a list of files ready for autoexpiration
+     * @param ds Datasource object
+     * @param months Number of months
+     * @return ArrayList of fileitems
      */
     public static ArrayList<FileItem> fetchFilesForAutoExpiration(DataSource ds, int months) {
         ArrayList<FileItem> files = new ArrayList<FileItem>();
@@ -194,7 +197,7 @@ public class FileItem implements Serializable {
 
     /**
      * Number of days that files are kept by default
-     * @param iDays
+     * @param iDays Number of days
      */
     public void setDaysToKeep(int iDays) {
         long millis = (long) iDays * 1000 * 60 * 60 * 24;
@@ -440,8 +443,9 @@ public class FileItem implements Serializable {
 
     /**
      * Delete the file from the database and from disk
-     * @param ds
-     * @param pathFileStore
+     * @param ds The datasource to use
+     * @param pathFileStore Path to the filestore
+     * @param ipAddress The ip address performing the request
      * @return Were any errors encountered during the delete operation?
      */
     public boolean delete(DataSource ds, String pathFileStore, String ipAddress) {

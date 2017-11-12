@@ -26,7 +26,7 @@ and the specification and a sample C language implementation is at
 
 http://www.akkadia.org/drepper/SHA-crypt.txt
 
-This Java Port is  
+This Java Port is
 
 Copyright (c) 2008 The University of Texas at Austin.
 
@@ -43,9 +43,6 @@ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE.
 
  */
-package nu.kelvin.jfileshare.utils;
-
-import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
 class
@@ -76,7 +73,12 @@ Sha512Crypt
  *
  * http://people.redhat.com/drepper/SHA-crypt.txt
  */
-public final class Sha512Crypt {
+
+package nu.kelvin.jfileshare.utils;
+
+import java.security.MessageDigest;
+
+ public final class Sha512Crypt {
 
     static private final String sha512_salt_prefix = "$6$";
     static private final String sha512_rounds_prefix = "rounds=";
@@ -99,7 +101,7 @@ public final class Sha512Crypt {
      * This method generates a Sha512 crypted password hash from a plaintext
      * password and a salt.
      *
-     * The resulting string will be in the form '$6$<rounds=n>$<salt>$<hashed mess>'
+     * The resulting string will be in the form '$6$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;'
      *
      * @param keyStr Plaintext password
      *
@@ -315,6 +317,7 @@ public final class Sha512Crypt {
      *
      * @param plaintextPass The plaintext password text to test.
      * @param sha512CryptText The hash text we're testing against.
+     * @return Is the password valid
      * We'll extract the salt and the round count from this String.
      */
     static public final boolean verifyPassword(String plaintextPass, String sha512CryptText) {

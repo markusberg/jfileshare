@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  * @author      Markus Berg <markus.berg @ sectra.se>
- * @version     1.16
+ * @version     1.17
  * @since       2011-09-21
  */
 package nu.kelvin.jfileshare.servlets;
@@ -22,6 +22,7 @@ package nu.kelvin.jfileshare.servlets;
 // import com.sectra.jfileshare.objects.Conf;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -70,14 +71,20 @@ public class StartupServlet extends HttpServlet {
 
     private void TableInit() {
         Connection dbConn = null;
+        DatabaseMetaData meta;
+        ResultSet tables;
         try {
             dbConn = datasource.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("show tables like 'UserItems'");
-            st.execute();
-            logger.info("Tables exist");
+            meta = dbConn.getMetaData();
+            tables = meta.getTables(null, null, "UserItems", null);
+            if (tables.next()) {
+                logger.info("Tables exist");
+            } else {
+                logger.info("Database tables not found");
+                createTables(dbConn);
+            }
         } catch (SQLException e) {
-            logger.info("Database tables not found");
-            createTables(dbConn);
+            logger.info("SQL Server error");
         } finally {
             if (dbConn != null) {
                 try {
@@ -275,7 +282,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "update Logs set Logs.payload=(select size from FileItems where fid=Logs.id) where `action`='download'");
                 alterDatabase(dbConn, "insert into Conf values('daysLogRetention', '7')");
                 alterDatabase(dbConn, "update Conf set `value`='4' where `key`='dbVersion'");
-            } else { 
+            } else {
                 logger.info("Database is already at level 4 or higher");
             }
         } catch (SQLException ignored) {
@@ -469,7 +476,7 @@ public class StartupServlet extends HttpServlet {
                 alterDatabase(dbConn, "drop table UserTypeItems");
                 alterDatabase(dbConn, "drop table test");
 
-                // Fix character encodings 
+                // Fix character encodings
                 alterDatabase(dbConn, "alter database jfileshare character set=utf8");
                 alterDatabase(dbConn, "alter table DownloadLogs CONVERT TO CHARACTER SET utf8");
                 alterDatabase(dbConn, "alter table UserItems CONVERT TO CHARACTER SET utf8");
