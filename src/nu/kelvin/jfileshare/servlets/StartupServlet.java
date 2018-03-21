@@ -105,11 +105,14 @@ public class StartupServlet extends HttpServlet {
                     + "`value` varchar(128) NOT NULL, "
                     + "PRIMARY KEY (`key`)) "
                     + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
-            alterDatabase(dbConn, "insert into Conf values('daysLogRetention', '7')");
-            alterDatabase(dbConn, "update Conf set `value`='4' where `key`='dbVersion'");
+
             PreparedStatement st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
+            commitKeyValuePair(st, "daysLogRetention", "7");
+            commitKeyValuePair(st, "dbVersion", "5");
             commitKeyValuePair(st, "daysFileExpiration", "14");
             commitKeyValuePair(st, "daysUserExpiration", "60");
+            commitKeyValuePair(st, "daysPasswordExpiration", "0");
+            commitKeyValuePair(st, "monthsFileAutoExpiration", "0");
             commitKeyValuePair(st, "fileSizeMax", "10485760");
             commitKeyValuePair(st, "pathStore", "/jfileshare/store");
             commitKeyValuePair(st, "pathTemp", "/jfileshare/temp");
@@ -165,7 +168,8 @@ public class StartupServlet extends HttpServlet {
             alterDatabase(dbConn, "CREATE TABLE `Logs` ( "
                     + "`date` timestamp NOT NULL default CURRENT_TIMESTAMP, "
                     + "`ipAddress` varchar(39) NOT NULL default '0.0.0.0', "
-                    + "`id` int(10) NOT NULL, "
+                    + "`uid` int(10) NULL default NULL, "
+                    + "`fid` int(10) NULL default NULL, "
                     + "`action` varchar(32) NOT NULL, "
                     + "`payload` varchar(256) NOT NULL "
                     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8");
@@ -253,10 +257,7 @@ public class StartupServlet extends HttpServlet {
         Connection dbConn = null;
         try {
             dbConn = datasource.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
-            st.execute();
-            ResultSet rs = st.getResultSet();
-            if (rs.first() && Integer.parseInt(rs.getString("Conf.value")) < 4) {
+            if (getDbVersion(dbConn) < 4) {
                 logger.info("Need to update database to db level 4");
                 logger.info("Fixing the uid column of UserItems table");
                 alterDatabase(dbConn, "alter table UserItems CHANGE COLUMN `uid` "
@@ -287,6 +288,8 @@ public class StartupServlet extends HttpServlet {
             }
         } catch (SQLException ignored) {
             logger.info(ignored.toString());
+        } catch (Exception e) {
+            logger.warning("Exception: " + e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -302,10 +305,7 @@ public class StartupServlet extends HttpServlet {
         Connection dbConn = null;
         try {
             dbConn = datasource.getConnection();
-            PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
-            st.execute();
-            ResultSet rs = st.getResultSet();
-            if (rs.first() && Integer.parseInt(rs.getString("Conf.value")) < 3) {
+            if (getDbVersion(dbConn) < 3) {
                 logger.info("Need to update database to db level 3");
                 // Add column to hold the date of the last password change
                 alterDatabase(dbConn, "alter table UserItems ADD COLUMN datePasswordChange "
@@ -324,6 +324,8 @@ public class StartupServlet extends HttpServlet {
             }
         } catch (SQLException ignored) {
             logger.info(ignored.toString());
+        } catch (Exception e) {
+            logger.warning("Exception: " + e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -366,6 +368,8 @@ public class StartupServlet extends HttpServlet {
             }
         } catch (SQLException ignored) {
             logger.info(ignored.toString());
+        } catch (Exception e) {
+            logger.warning("Exception: " + e.toString());
         } finally {
             if (dbConn != null) {
                 try {
@@ -403,6 +407,8 @@ public class StartupServlet extends HttpServlet {
             commitKeyValuePair(st, "dbVersion", "2");
         } catch (SQLException e) {
             logger.severe(e.toString());
+        } catch (Exception e) {
+            logger.warning("Exception: " + e.toString());
         } finally {
             if (dbConn != null) {
                 try {
