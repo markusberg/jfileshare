@@ -42,6 +42,8 @@ import javax.servlet.ServletException;
 
 import javax.sql.DataSource;
 
+import nu.kelvin.jfileshare.objects.UserItem;
+
 public class StartupServlet extends HttpServlet {
     static final long serialVersionUID = 1L;
 
@@ -82,6 +84,8 @@ public class StartupServlet extends HttpServlet {
             } else {
                 logger.info("Database tables not found");
                 createTables(dbConn);
+                populateConfTable(dbConn);
+                createAdminUser();
             }
         } catch (SQLException e) {
             logger.info("SQL Server error");
@@ -105,24 +109,6 @@ public class StartupServlet extends HttpServlet {
                     + "`value` varchar(128) NOT NULL, "
                     + "PRIMARY KEY (`key`)) "
                     + "ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-            PreparedStatement st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
-            commitKeyValuePair(st, "daysLogRetention", "7");
-            commitKeyValuePair(st, "dbVersion", "5");
-            commitKeyValuePair(st, "daysFileExpiration", "14");
-            commitKeyValuePair(st, "daysUserExpiration", "60");
-            commitKeyValuePair(st, "daysPasswordExpiration", "0");
-            commitKeyValuePair(st, "monthsFileAutoExpiration", "0");
-            commitKeyValuePair(st, "fileSizeMax", "10485760");
-            commitKeyValuePair(st, "pathStore", "/jfileshare/store");
-            commitKeyValuePair(st, "pathTemp", "/jfileshare/temp");
-            commitKeyValuePair(st, "smtpServer", "localhost");
-            commitKeyValuePair(st, "smtpServerPort", "25");
-            commitKeyValuePair(st, "smtpSender", "noreply@example.com");
-            commitKeyValuePair(st, "brandingOrg", "jfileshare");
-            commitKeyValuePair(st, "brandingDomain", "example.com");
-            commitKeyValuePair(st, "brandingLogo", "");
-            commitKeyValuePair(st, "debug", "false");
 
             // Create UserItems table
             logger.info("Creating UserItems table");
@@ -190,6 +176,7 @@ public class StartupServlet extends HttpServlet {
             // Commit transaction
             logger.info("Committing transaction");
             dbConn.commit();
+            dbConn.setAutoCommit(true);
         } catch (SQLException e) {
             try {
                 dbConn.rollback();
@@ -202,7 +189,47 @@ public class StartupServlet extends HttpServlet {
         }
     }
 
+    private void populateConfTable(Connection dbConn) throws SQLException {
+        logger.info("Seeding conf table with default values");
+        PreparedStatement st = dbConn.prepareStatement("insert into Conf (`value`, `key`) values(?,?)");
+        commitKeyValuePair(st, "dbVersion", "5");
 
+        commitKeyValuePair(st, "brandingOrg", "jfileshare");
+        commitKeyValuePair(st, "brandingDomain", "example.com");
+        commitKeyValuePair(st, "brandingLogo", "");
+        commitKeyValuePair(st, "daysFileExpiration", "14");
+        commitKeyValuePair(st, "daysLogRetention", "7");
+        commitKeyValuePair(st, "daysPasswordExpiration", "0");
+        commitKeyValuePair(st, "daysUserExpiration", "60");
+        commitKeyValuePair(st, "debug", "false");
+        commitKeyValuePair(st, "fileSizeMax", "10485760");
+        commitKeyValuePair(st, "monthsFileAutoExpiration", "0");
+        commitKeyValuePair(st, "pathStore", "/jfileshare/store");
+        commitKeyValuePair(st, "pathTemp", "/jfileshare/temp");
+        commitKeyValuePair(st, "smtpServer", "localhost");
+        commitKeyValuePair(st, "smtpServerPort", "25");
+        commitKeyValuePair(st, "smtpSender", "noreply@example.com");
+    }
+
+    private void createAdminUser() {
+        String password = generatePassword(12);
+        logger.info("Creating administrator user with password: " + password);
+        UserItem adminUser = new UserItem();
+        adminUser.setUsername("administrator");
+        adminUser.setUserType(1);
+        adminUser.setPwPlainText(password);
+        adminUser.create(datasource, "127.0.0.1");
+    }
+
+    private String generatePassword(Integer length) {
+        String dictionary = "abcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder builder = new StringBuilder();
+        while (length-- != 0) {
+            int character = (int)(Math.random() * dictionary.length());
+            builder.append(dictionary.charAt(character));
+        }
+        return builder.toString();
+    }
 
     private int getDbVersion(Connection dbConn) throws SQLException, Exception {
         PreparedStatement st = dbConn.prepareStatement("select `value` from Conf where `key`='dbVersion'");
